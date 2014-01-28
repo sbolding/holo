@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D3AD5809-E284-4F7E-86F7-618F81A1BDCA}</ProjectGuid>
+    <RootNamespace>holo</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AverageCosineData.h" />
+    <ClInclude Include="Controller.h" />
+    <ClInclude Include="DirichletBC1D.h" />
+    <ClInclude Include="Dof.h" />
+    <ClInclude Include="Element.h" />
+    <ClInclude Include="Element1D.h" />
+    <ClInclude Include="ElementTally.h" />
+    <ClInclude Include="FaceTally.h" />
+    <ClInclude Include="GlobalConstants.h" />
+    <ClInclude Include="HoSolver.h" />
+    <ClInclude Include="LoData1D.h" />
+    <ClInclude Include="LoSolver.h" />
+    <ClInclude Include="LoSolver1D.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialConstant.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="Node1D.h" />
+    <ClInclude Include="numMatrix.h" />
+    <ClInclude Include="numMatrixFull.h" />
+    <ClInclude Include="numVector.h" />
+    <ClInclude Include="oneDMesh.h" />
+    <ClInclude Include="Particle1D.h" />
+    <ClInclude Include="RNG.h" />
+    <ClInclude Include="Source.h" />
+    <ClInclude Include="SourceConstant.h" />
+    <ClInclude Include="Tally.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DirichletBC1D.cpp" />
+    <ClCompile Include="Dof.cpp" />
+    <ClCompile Include="Element.cpp" />
+    <ClCompile Include="Element1D.cpp" />
+    <ClCompile Include="ElementTally.cpp" />
+    <ClCompile Include="FaceTally.cpp" />
+    <ClCompile Include="HoSolver.cpp" />
+    <ClCompile Include="LoData1D.cpp" />
+    <ClCompile Include="LoSolver.cpp" />
+    <ClCompile Include="LoSolver1D.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MaterialConstant.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Node1D.cpp" />
+    <ClCompile Include="numMatrix.cpp" />
+    <ClCompile Include="numMatrixFull.cpp" />
+    <ClCompile Include="numVector.cpp" />
+    <ClCompile Include="Particle1D.cpp" />
+    <ClCompile Include="RNG.cpp" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="SourceConstant.cpp" />
+    <ClCompile Include="Tally.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
