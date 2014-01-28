@@ -23,10 +23,11 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source) :
 {
 	_mesh = mesh;
 	_n_histories = n_histories;
-	_particle = new Particle1D();
+	_particle = new Particle1D(mesh, &_rng);
 	_external_source = new SourceConstant(ext_source); //For constant source initializaiton
 	_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
 	_element_tallies.resize(mesh->getNumElems());
+	
 
 }
 
@@ -37,10 +38,11 @@ void HoSolver::solveSystem()
 	//loop over the number of histories
 	for (int hist=1; hist <= _n_histories; hist++) 
 	{
-
-
-
-
+		_external_source->sampleSource(_particle, _mesh);
+		//sample the source distribution
+		//Stream teh particle across a cell
+		//Determine interactions etcs
+		//Once particle leaves the cell, tally the events appropriately
 	}
 
 	

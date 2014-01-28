@@ -13,6 +13,13 @@
 #include "Particle1D.h"
 #include <iostream>
 
+Particle1D::Particle1D(Mesh* mesh, RNG* rng)
+{
+	_rng = rng;
+	_mesh = mesh;
+	_position = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
+}
+
 //Sample a path length in cm
 double Particle1D::samplePathLength()
 {
@@ -59,5 +66,11 @@ void Particle1D::sampleCollision()
 		exit(1);
 	}
 
+}
+
+//return random numbers for use by source or whoever needs one
+double Particle1D::getRandNum()
+{
+	return _rng->rand_num();
 }
 

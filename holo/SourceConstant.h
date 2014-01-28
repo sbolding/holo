@@ -13,8 +13,7 @@ private:
 public:
 
 	SourceConstant(double value); //Constant source value initializer
-	virtual void sampleSource();  //overwrite sample source function
-
+	virtual void sampleSource(Particle1D * p, Mesh* mesh);  //overwrite sample source function.  Sample is done to particle p
 
 };
 

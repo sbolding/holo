@@ -44,7 +44,13 @@ protected:
 
 public:
 
+	//constructors
+	Particle1D(Mesh* mesh, RNG* rng); //Standard constructor, pass a pointer for rng to make sure you dont resample random numbers
+
+	//public functions
 	void streamThroughCell();
+	double getRandNum();
+
 
 };
 
