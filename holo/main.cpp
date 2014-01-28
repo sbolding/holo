@@ -14,7 +14,7 @@ int main()
 	HoSolver* ho_solver;
 
 	//open output file
-	ofstream lo_out_file("Z:/TAMU_Research/HOLO/ExcelSheetResults/lo_order_initial_results/lo_results.txt", std::ofstream::out);
+	ofstream lo_out_file("./lo_results.txt", std::ofstream::out);
 	if (!lo_out_file)
 	{
 		std::cerr << "Can't open file" << endl;

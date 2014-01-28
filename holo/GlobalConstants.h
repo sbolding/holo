@@ -2,11 +2,20 @@
 #ifndef _GLOBALCONSTANT_H
 #define _GLOBALCONSTANT_H
 
+#include <string>
+
 namespace GlobalConstants
 {
 	const long double PI = 3.141592653589793238L;
 	//const long double FOUR_PI = 4.0L * PI;
 	const long double FOUR_PI = 2.0L;
+}
+
+namespace HoMethods
+{
+	const unsigned int HOLO_ECMC = 0;
+	const unsigned int HOLO_STANDARD_MC = 1;
+	const unsigned int STANDARD_MC = 2;
 }
 
 namespace EquationMaps1D

@@ -16,6 +16,7 @@
 #include <string>
 #include "Mesh.h"
 #include "RNG.h"
+#include "GlobalConstants.h"
 
 class Particle1D
 {
@@ -30,7 +31,7 @@ protected:
 	double _scat_ratio;
 	double _sigma_abs;
 	double _sigma_scat;
-	std::string _method;
+	unsigned int _method;
 	int _current_element;
 	RNG* _rng;
 
@@ -39,6 +40,7 @@ protected:
 	double samplePathLengthMFP();
 	void sampleCollision();
 	void updatePosition(double path_length);
+	void scoreTallies();
 
 public:
 

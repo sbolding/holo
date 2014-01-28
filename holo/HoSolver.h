@@ -30,7 +30,7 @@ protected:
 	std::vector<FaceTally> _face_tallies;  //vector of all the face tallies, indexed using connectivity array
 	int _n_histories;	//number of histories
 	std::vector<ElementTally> _element_tallies; //vector of all the volume tallies, indexed using connectivity array
-	std::string _solver_mode;  //TODO either "holo-traditional", "classic", or "holo-ecmc"
+	std::string _solver_mode;  //TODO either "holo-scat", "mc", or "holo-ecmc"
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
 	Source* _external_source; //external source
 	Source* _scattering_source; //the in scattering source
