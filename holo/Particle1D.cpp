@@ -11,15 +11,26 @@
 
 
 #include "Particle1D.h"
+#include <iostream>
 
+//Sample a path length in cm
 double Particle1D::samplePathLength()
 {
-	return 0;
+	return -1.*log(_rng->rand_num())*_mfp_tot;
 }
 
+//Sample a path length in units of number of MFP, useful for streaming through many cells
+double Particle1D::samplePathLengthMFP()
+{
+	return -1.*log(_rng->rand_num());
+}
+
+//Update the particle position based on a path length that has been sampled
 void Particle1D::updatePosition(double path_length)
 {
-
+	std::cerr << "Need to check and make sure mu has not already been resampled" << std::endl;
+	exit(1);
+	_position += path_length*_mu; 
 }
 
 void Particle1D::streamThroughCell()

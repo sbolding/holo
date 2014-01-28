@@ -13,19 +13,37 @@
 #if !defined(_PARTICLE1D_H)
 #define _PARTICLE1D_H
 
+#include <string>
+#include "Mesh.h"
+#include "RNG.h"
 
 class Particle1D
 {
 protected:
 
+	Mesh* _mesh;
 	double _position;
 	double _mu;
+	double _weight;
+	double _sigma_tot;
+	double _mfp_tot;
+	double _scat_ratio;
+	double _sigma_abs;
+	double _sigma_scat;
+	std::string _method;
 	int _current_element;
+	RNG* _rng;
+
+	//protected methods
 	double samplePathLength();
+	double samplePathLengthMFP();
+	void sampleCollision();
 	void updatePosition(double path_length);
 
 public:
+
 	void streamThroughCell();
+
 };
 
 #endif  //_PARTICLE1D_H

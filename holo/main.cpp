@@ -42,6 +42,8 @@ int main()
 	ho_solver->solveSystem();
 
 	//temporary return
+	system("pause");
+
 	return 0;
 
 	//Assemble and solve the system
