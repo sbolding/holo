@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Lo Files">
+      <UniqueIdentifier>{305cbaaf-5b25-4223-854f-d29da2add776}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shared Files">
+      <UniqueIdentifier>{e3a9bd40-914d-43bc-b4de-509fa7ef9aef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Ho Files">
+      <UniqueIdentifier>{a3619751-0852-44f5-a629-85865bb56fab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AverageCosineData.h">
@@ -98,74 +107,74 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Tally.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SourceConstant.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RNG.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Particle1D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="numVector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="numMatrixFull.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="numMatrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Node1D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialConstant.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoSolver1D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoData1D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HoSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FaceTally.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ElementTally.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Element1D.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Dof.cpp">
+      <Filter>Source Files\Lo Files</Filter>
     </ClCompile>
     <ClCompile Include="Element.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Lo Files</Filter>
     </ClCompile>
-    <ClCompile Include="Dof.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Element1D.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ElementTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HoSolver.cpp">
+      <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="DirichletBC1D.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoData1D.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoSolver.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoSolver1D.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialConstant.cpp">
+      <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceConstant.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RNG.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle1D.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="numVector.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="numMatrix.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="numMatrixFull.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node1D.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -14,7 +14,7 @@
 
 void FaceTally::incrementScore()
 {
-//
+
 }
 
 FaceTally::FaceTally() : Tally()
