@@ -11,6 +11,7 @@
 
 
 #include "HoSolver.h"
+#include "GlobalConstants.h"
 
 HoSolver::HoSolver()
 {
@@ -18,14 +19,16 @@ HoSolver::HoSolver()
 	exit(1);
 }
 
-HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source) :
+HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method) :
 	_rng()
 {
 	_mesh = mesh;
 	_n_histories = n_histories;
 	_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
 	_element_tallies.resize(mesh->getNumElems());  
-	_particle = new Particle1D(mesh, &_rng);
+	_solver_mode_str = method;
+	_solver_mode_int = HoMethods::method_map.at(method);
+	_particle = new Particle1D(mesh, &_rng, method);
 
 	
 

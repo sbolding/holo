@@ -62,6 +62,7 @@ public:
 	virtual void getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 		std::vector<double> &locations) const; //This is for scalar flux based on alpha closure, shouldnt be used except verification
 	virtual void printLDScalarFluxValues(std::ostream &out) const; //Print out the LD scalar flux and nodes
+	virtual std::vector<double> getElementDimensions() const; //For 1D, return the width of the element
 };
 
 #endif  //_ELEMENT1D_H

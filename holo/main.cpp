@@ -26,7 +26,8 @@ int main()
 	int dimension = 1;
 	double width = 5;
 	double ext_source = 2;
-	int num_elems = 35;
+	int num_elems = 10;
+	string solver_mode = "standard-mc";
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.5, 0.6);
 
@@ -39,7 +40,7 @@ int main()
 	int n_histories = 10;
 
 	//Solve the low order system
-	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source);
+	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);
 	ho_solver->solveSystem();
 
 	//temporary return

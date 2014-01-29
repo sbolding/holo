@@ -30,14 +30,15 @@ protected:
 	std::vector<FaceTally> _face_tallies;  //vector of all the face tallies, indexed using connectivity array
 	int _n_histories;	//number of histories
 	std::vector<ElementTally> _element_tallies; //vector of all the volume tallies, indexed using connectivity array
-	std::string _solver_mode;  //TODO either "holo-scat", "mc", or "holo-ecmc"
+	std::string _solver_mode_str;  ////either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
+	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
 	RNG _rng; //random number generator
 	
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
-	HoSolver(Mesh* _mesh, int n_histories, double ext_source); //For a constant external source
+	HoSolver(Mesh* _mesh, int n_histories, double ext_source, string solver_mode); //For a constant external source
 	void solveSystem(); //run the high order problem
 
 };

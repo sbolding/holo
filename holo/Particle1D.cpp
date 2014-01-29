@@ -9,60 +9,83 @@
 //
 //
 
-
 #include "Particle1D.h"
 #include <iostream>
 
-Particle1D::Particle1D(Mesh* mesh, RNG* rng)
+Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
 {
 	_rng = rng;
 	_mesh = mesh;
-	_position = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
+	_position_mfp = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
+	_n_elements = _mesh->getNumElems();
+	_current_element = 0;	   //particle needs to be somewhere to initialize material properties
+	updateElementProperties(); //intiialize to the material properties of the 0-th element, will likely change once sampling occurs, but must initialize
+	_method = HoMethods::method_map.at(method_str);
+	
 }
 
 //Sample a path length in cm
-double Particle1D::samplePathLength()
+inline double Particle1D::samplePathLength()
 {
 	return -1.*log(_rng->rand_num())*_mfp_tot;
 }
 
 //Sample a path length in units of number of MFP, useful for streaming through many cells
-double Particle1D::samplePathLengthMFP()
+inline double Particle1D::samplePathLengthMFP()
 {
 	return -1.*log(_rng->rand_num());
 }
 
+
 //Update the particle position based on a path length that has been sampled, make sure hasnt streamed out of cell
-void Particle1D::updatePosition(double path_length)
+void Particle1D::streamAcrossGeometry(double path_length_mfp)
 {
-	std::cerr << "Need to check and make sure mu has not already been resampled" << std::endl;
-	exit(1);
-	
-	
+	//determine horizontal displacement
+	double displacement_mfp = path_length_mfp*_mu;
+	double new_position_mfp = displacement_mfp +_position_mfp;
 
-	_position += path_length*_mu; 
+	//determine if the particle has left the cell, or not
+	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
+	{
+		//TODO update volume tallies
+		//Particle has left the cell, need to do stuff
+		displacement_mfp -= (_element_width_mfp - _position_mfp);
+		leaveElement(); //move to the next element
+		new_position_mfp = _position_mfp + displacement_mfp;
+	}
+	//within the current cell
+	//Update volume tallies
+	scoreTallies();
+	_position_mfp = new_position_mfp;
+	
 }
 
-void Particle1D::streamThroughCell()
-{
-	
 
-}
 
 //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on the mode
 void Particle1D::sampleCollision()
 {
-	switch (_method)
+	if (_method == HoMethods::HOLO_ECMC) //then a pure absorber problem, end the history
 	{
-	case HoMethods::HOLO_ECMC:
-		//then a pure absorber problem
-		//tally the scores, and end the history
-	case HoMethods::HOLO_STANDARD_MC:
-		//usual MC sample scattering event, angle, and new direction
-	case HoMethods::STANDARD_MC:
-		//usual MC sample scattering even, angle, and new direction
-		_mu += _rng->rand_num() * 2;
-	default:
+		terminateHistory();
+	}
+	else if ((_method == HoMethods::HOLO_STANDARD_MC) || (_method == HoMethods::STANDARD_MC)) //usual MC sample which event, sample new direction if scattering
+	{
+		//determine if a scattering event
+		if (_rng->rand_num() < _scat_ratio)
+		{
+			double mu_scat = sampleAngleIsotropic();
+			//use angle addition to get the new scattered cosine
+			_mu = _mu*mu_scat + sqrt(1. - mu_scat*mu_scat)*sqrt(1. - _mu*_mu);
+		}
+		else //Non scattering event
+		{
+			//TODO, if there were something besides absorption possible you would put it here
+			terminateHistory();
+		}
+	}
+	else	
+	{
 		std::cerr << "Input an incorrect mode of operation\n";
 		exit(1);
 	}
@@ -75,25 +98,135 @@ void Particle1D::sampleCollision()
 
 
 //Given the source strength on the two end points (left first), sample from it
-void Particle1D::sampleLinDiscontSource(std::vector<double>)
+void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 {
+	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
 
+	if (abs(nodal_values[0] - nodal_values[1]) < 1.E-10) //then constant source, sampling is uniform across the cell
+	{
+		std::cout << "Probably should change how this check works in sampling source for constant across cell" << std::endl;
+		_position_mfp = _rng->rand_num()*_element_width_mfp;
+	}
+	else //need to sample from lin discontinuous source //THIS ROUTINE WORKS
+	{
+		double left_hat, right_hat; //Normalized nodal values, such that CDF is normalized
+		left_hat = 2.0*nodal_values[0] / (nodal_values[1] + nodal_values[0]);
+		right_hat = 2.0 - left_hat;
+		//use direct inversion of CDF to sample position
+		_position_mfp = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
+		_position_mfp /= (right_hat - left_hat);
+		_position_mfp *= _element_width_mfp; //convert to mfp
+	}
 }
 
-void Particle1D::sampleSource()
+void Particle1D::sampleSourceParticle()
 {
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
 	//for now just assume a constant source
+	//TODO
+	//choose the element you are in
+	int elem;
+	elem = (int)(_rng->rand_num()*_n_elements);
+	_current_element = elem;
+	cout << "Current element " << _current_element << endl;
+	//Get the position of origin
+	sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues());
+	//debug stuff
+	_weight = 1.0;
 
+	//Assume isotropic source distribution
+	_mu = sampleAngleIsotropic();
+
+	//Update particle properties for the new cell
+	updateElementProperties();
+}
+
+inline double Particle1D::sampleAngleIsotropic()
+{
+	return _rng->rand_num()*2.0 - 1.;
+}
+
+void Particle1D::leaveElement()
+{
+	//Contribute to tallies
+	scoreTallies(); //Only need to do this for the surface tally of interest
+	//Contribute to tallies, determine which element you are entering
+	if ( (_mu >= 0.0) && (_current_element < _n_elements) ) //stream to the cell to the right
+	{
+		_current_element++; //move to the right one cell	
+		updateElementProperties();
+		_position_mfp = 0.0; //at the left edge of the new cell
+		
+	}
+	else if( (_mu < 0.0) && (_current_element > 0) ) //stream to the cell to the left
+	{
+		_current_element--;
+		updateElementProperties();
+		_position_mfp = _element_width_mfp; //particle is at right edge of the new cell
+	}
+	else //particle has left the volume
+	{
+		terminateHistory();
+	}
 }
 
 
+void Particle1D::runHistory()
+{
+	cout << "starting history...\n" << endl;
+	//start history
+	sampleSourceParticle();
 
+	double path_length_mfp;
 
+	while (true) //stream the particle until it is absorbed or leaks
+	{
+		path_length_mfp = samplePathLengthMFP();
+		streamAcrossGeometry(path_length_mfp);
+		sampleCollision();
+	}
+
+}
 
 //return random numbers for use by source or whoever needs one
 double Particle1D::getRandNum()
 {
 	return _rng->rand_num();
+}
+
+//for when particle has entered a new cell need to update the properties to the current cell
+void Particle1D::updateElementProperties()
+{
+	Element* element = _mesh->getElement(_current_element);
+	if (element->getMaterialID() == _element_mat_ID)
+	{
+		return; //no need to update
+	}
+	else
+	{
+		MaterialConstant mat;
+		mat = element->getMaterial();
+
+		//Set the material data
+		_sigma_tot = mat.getSigmaT();
+		_mfp_tot = 1. / _sigma_tot;
+		_sigma_scat = mat.getSigmaS();
+		_scat_ratio = _sigma_scat/_sigma_tot;
+		_sigma_abs = mat.getSigmaA();
+		_element_width_mfp = _mfp_tot*element->getElementDimensions()[0];
+		_element_mat_ID = element->getMaterialID();
+	}
+
+}
+
+void Particle1D::scoreTallies()
+{
+	//Will probably need to get passed a pathlength
+
+}
+
+void Particle1D::terminateHistory()
+{
+	//not sure what to do here
 }
 

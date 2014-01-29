@@ -3,6 +3,7 @@
 #define _GLOBALCONSTANT_H
 
 #include <string>
+#include <map>
 
 namespace GlobalConstants
 {
@@ -13,9 +14,14 @@ namespace GlobalConstants
 
 namespace HoMethods
 {
-	const unsigned int HOLO_ECMC = 0;
-	const unsigned int HOLO_STANDARD_MC = 1;
-	const unsigned int STANDARD_MC = 2;
+	const unsigned int HOLO_ECMC = 1;
+	const unsigned int HOLO_STANDARD_MC = 2;
+	const unsigned int STANDARD_MC = 3;
+
+	//map these methods to their ints
+	//either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
+	const std::map<std::string, int> method_map = { { "holo-ecmc", HOLO_ECMC }, { "holo-standard-mc", HOLO_STANDARD_MC },
+											  {"standard-mc", STANDARD_MC} };
 }
 
 namespace EquationMaps1D
@@ -40,5 +46,4 @@ namespace EquationMaps1D
 	//EQN_MAP[2] refers to < . >_L^- term
 	//EQN_MAP[3] refers to < . >_R^- term
 }
-
 #endif

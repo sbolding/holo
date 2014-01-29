@@ -287,6 +287,13 @@ void Element1D::getScalarFluxLinDisc(std::vector<double> &scalar_flux_values, st
 	getScalarFluxValues(2.0, scalar_flux_values, locations);  //For lin dis. alpha = 2
 }
 
+std::vector<double> Element1D::getElementDimensions() const
+{
+	std::vector<double> dimensions;
+	dimensions.push_back(_h);
+	return dimensions;
+}
+
 void Element1D::getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 	std::vector<double> &locations) const //This is for scalar flux based on alpha closure, shouldnt be used except verification
 {

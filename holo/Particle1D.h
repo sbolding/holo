@@ -16,6 +16,8 @@
 #include <string>
 #include "Mesh.h"
 #include "RNG.h"
+#include "FaceTally.h"
+#include "ElementTally.h"
 #include "GlobalConstants.h"
 
 class Particle1D
@@ -23,20 +25,29 @@ class Particle1D
 protected:
 
 	Mesh* _mesh;
-	double _position;
+
+	//general particle properties
+	double _position_mfp;
 	double _mu;
 	double _weight;
+
+	//material properties for the current element
 	double _sigma_tot;
 	double _mfp_tot;
 	double _scat_ratio;
 	double _sigma_abs;
 	double _sigma_scat;
 	unsigned int _method;
-	int _current_element;
-	RNG* _rng;
+	double _element_width_mfp; //to ray trace easily
+
+	//data for tracking across elements
+	int _current_element;	//which element are you in
+	size_t _n_elements;		//for sampling which element a particle is born in
+	int _element_mat_ID;  //the material ID of the current element
+	RNG* _rng;			
+
 	//tally arrays
 	std::vector<FaceTally>* _face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	int _n_histories;	//number of histories
 	std::vector<ElementTally>* _element_tallies; //vector of all the volume tallies, indexed using connectivity array
 
 	//protected methods
@@ -44,24 +55,28 @@ protected:
 	//Streaming and collision methods
 	double samplePathLength();
 	double samplePathLengthMFP();
+	double sampleAngleIsotropic();
 	void sampleCollision();
-	void updatePosition(double path_length);
+	void streamAcrossGeometry(double path_length);
+	void updateElementProperties();
+	void leaveElement();	//Called when leaving an element and moving into next geometrical region
+	void terminateHistory(); //kill particle, do other appropriate things
 	//tallies
 	void scoreTallies();
 	//Sampling the source methods
-	void sampleSource();
+	void sampleSourceParticle();
 	void sampleLinDiscontSource(std::vector<double>);
 	void sampleConstExtSource();
 	void sampleDirichletBCSource();
-
+	
 public:
 
 	//constructors
-	Particle1D(Mesh* mesh, RNG* rng); //Standard constructor, pass a pointer for rng to make sure you dont resample random numbers
-
+	Particle1D(Mesh* mesh, RNG* rng, string method_str); //Standard constructor, pass a pointer for rng to make sure you dont resample random numbers, method_str is which method to use from HoSolver
+	
 	//public functions
-	void streamThroughCell();
 	double getRandNum();
+	void runHistory();
 
 
 };
