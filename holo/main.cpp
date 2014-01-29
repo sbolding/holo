@@ -4,6 +4,7 @@
 #include "LoSolver1D.h"
 #include "HoSolver.h"
 #include <fstream>
+#include "RNG.h"
 
 using namespace std;
 

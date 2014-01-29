@@ -45,6 +45,7 @@ void Particle1D::updatePosition(double path_length)
 
 void Particle1D::streamThroughCell()
 {
+	
 
 }
 
@@ -68,17 +69,30 @@ void Particle1D::sampleCollision()
 
 }
 
-void Particle1D::runHistory()
-{
-	sampleSourceParticle();
 
-	//Stream teh particle across a cell
-	//Determine interactions etcs
-	//Once particle leaves the cell, tally the events appropriately
+
+
+
+
+//Given the source strength on the two end points (left first), sample from it
+void Particle1D::sampleLinDiscontSource(std::vector<double>)
+{
+
 }
 
+void Particle1D::sampleSource()
+{
+	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
+	//for now just assume a constant source
+
+}
+
+
+
+
+
 //return random numbers for use by source or whoever needs one
-double Particle1D::getRandNum() const
+double Particle1D::getRandNum()
 {
 	return _rng->rand_num();
 }

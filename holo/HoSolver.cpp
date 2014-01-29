@@ -23,10 +23,10 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source) :
 {
 	_mesh = mesh;
 	_n_histories = n_histories;
-	_particle = new Particle1D(mesh, &_rng);
-	_external_source = new SourceConstant(ext_source); //For constant source initializaiton
 	_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
-	_element_tallies.resize(mesh->getNumElems());
+	_element_tallies.resize(mesh->getNumElems());  
+	_particle = new Particle1D(mesh, &_rng);
+
 	
 
 }

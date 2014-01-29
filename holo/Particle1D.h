@@ -16,8 +16,6 @@
 #include <string>
 #include "Mesh.h"
 #include "RNG.h"
-#include "FaceTally.h"
-#include "ElementTally.h"
 #include "GlobalConstants.h"
 
 class Particle1D
@@ -25,11 +23,6 @@ class Particle1D
 protected:
 
 	Mesh* _mesh;
-	
-	//Tally stuff
-	std::vector<FaceTally>* _face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<ElementTally>* _element_tallies; //vector of all the volume tallies, indexed using connectivity array
-
 	double _position;
 	double _mu;
 	double _weight;
@@ -41,15 +34,25 @@ protected:
 	unsigned int _method;
 	int _current_element;
 	RNG* _rng;
+	//tally arrays
+	std::vector<FaceTally>* _face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	int _n_histories;	//number of histories
+	std::vector<ElementTally>* _element_tallies; //vector of all the volume tallies, indexed using connectivity array
 
 	//protected methods
+	//---------------------------------------------
+	//Streaming and collision methods
 	double samplePathLength();
 	double samplePathLengthMFP();
-	void sampleSourceParticle();
 	void sampleCollision();
 	void updatePosition(double path_length);
+	//tallies
 	void scoreTallies();
-	void streamThroughCell();
+	//Sampling the source methods
+	void sampleSource();
+	void sampleLinDiscontSource(std::vector<double>);
+	void sampleConstExtSource();
+	void sampleDirichletBCSource();
 
 public:
 
@@ -57,9 +60,8 @@ public:
 	Particle1D(Mesh* mesh, RNG* rng); //Standard constructor, pass a pointer for rng to make sure you dont resample random numbers
 
 	//public functions
-
-	void runHistory();
-	double getRandNum() const;
+	void streamThroughCell();
+	double getRandNum();
 
 
 };
