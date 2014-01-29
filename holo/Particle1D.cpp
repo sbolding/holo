@@ -68,6 +68,15 @@ void Particle1D::sampleCollision()
 
 }
 
+void Particle1D::runHistory()
+{
+	sampleSourceParticle();
+
+	//Stream teh particle across a cell
+	//Determine interactions etcs
+	//Once particle leaves the cell, tally the events appropriately
+}
+
 //return random numbers for use by source or whoever needs one
 double Particle1D::getRandNum() const
 {

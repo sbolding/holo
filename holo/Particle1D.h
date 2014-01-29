@@ -16,6 +16,8 @@
 #include <string>
 #include "Mesh.h"
 #include "RNG.h"
+#include "FaceTally.h"
+#include "ElementTally.h"
 #include "GlobalConstants.h"
 
 class Particle1D
@@ -43,9 +45,11 @@ protected:
 	//protected methods
 	double samplePathLength();
 	double samplePathLengthMFP();
+	void sampleSourceParticle();
 	void sampleCollision();
 	void updatePosition(double path_length);
 	void scoreTallies();
+	void streamThroughCell();
 
 public:
 
@@ -53,11 +57,9 @@ public:
 	Particle1D(Mesh* mesh, RNG* rng); //Standard constructor, pass a pointer for rng to make sure you dont resample random numbers
 
 	//public functions
-	void streamThroughCell();
+
+	void runHistory();
 	double getRandNum() const;
-	void setPosition(double new_position); //For source sampling, force where particle is within a cell
-	void setWeight(double weight);  //Basically just for initializing the source
-	void 
 
 
 };

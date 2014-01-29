@@ -38,11 +38,7 @@ void HoSolver::solveSystem()
 	//loop over the number of histories
 	for (int hist=1; hist <= _n_histories; hist++) 
 	{
-		_external_source->sampleSource(_particle, _mesh);
-		//sample the source distribution
-		//Stream teh particle across a cell
-		//Determine interactions etcs
-		//Once particle leaves the cell, tally the events appropriately
+		_particle->runHistory();
 	}
 
 	
