@@ -11,6 +11,7 @@
 
 #include "Particle1D.h"
 #include <iostream>
+#include "Controller.h"
 
 Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
 {
@@ -21,7 +22,14 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
 	_current_element = 0;	   //particle needs to be somewhere to initialize material properties
 	updateElementProperties(); //intiialize to the material properties of the 0-th element, will likely change once sampling occurs, but must initialize
 	_method = HoMethods::method_map.at(method_str);
-	
+	_is_dead = true;
+
+	if (HoController::PARTICLE_BALANCE)
+	{
+		_n_abs = 0;
+		_n_leak = 0;
+		_n_scat = 0;
+	}
 }
 
 //Sample a path length in cm
@@ -38,8 +46,11 @@ inline double Particle1D::samplePathLengthMFP()
 
 
 //Update the particle position based on a path length that has been sampled, make sure hasnt streamed out of cell
-void Particle1D::streamAcrossGeometry(double path_length_mfp)
+void Particle1D::streamAcrossGeometry()
 {
+	//sample a pathlength
+	double path_length_mfp = samplePathLengthMFP();
+
 	//determine horizontal displacement
 	double displacement_mfp = path_length_mfp*_mu;
 	double new_position_mfp = displacement_mfp +_position_mfp;
@@ -47,15 +58,26 @@ void Particle1D::streamAcrossGeometry(double path_length_mfp)
 	//determine if the particle has left the cell, or not
 	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
 	{
-		//TODO update volume tallies
-		//Particle has left the cell, need to do stuff
-		displacement_mfp -= (_element_width_mfp - _position_mfp);
+		scoreElementTally(); //TODO, this doesnt actually work yet
+		//Determine the number of mean free paths remaining to stream
+		if (_mu >= 0.0) //streaming to the right
+		{
+			displacement_mfp += (_position_mfp - _element_width_mfp);
+		}
+		else //streaming to the left
+		{
+			displacement_mfp += _position_mfp;
+		}
 		leaveElement(); //move to the next element
+		if (_is_dead)
+		{
+			break;
+		}
 		new_position_mfp = _position_mfp + displacement_mfp;
 	}
 	//within the current cell
-	//Update volume tallies
-	scoreTallies();
+	//Score volumetric tally
+	scoreElementTally();
 	_position_mfp = new_position_mfp;
 	
 }
@@ -68,20 +90,32 @@ void Particle1D::sampleCollision()
 	if (_method == HoMethods::HOLO_ECMC) //then a pure absorber problem, end the history
 	{
 		terminateHistory();
+		if (HoController::PARTICLE_BALANCE)
+		{
+			_n_abs++;
+		}
 	}
 	else if ((_method == HoMethods::HOLO_STANDARD_MC) || (_method == HoMethods::STANDARD_MC)) //usual MC sample which event, sample new direction if scattering
 	{
 		//determine if a scattering event
 		if (_rng->rand_num() < _scat_ratio)
 		{
+			if (HoController::PARTICLE_BALANCE)
+			{
+				_n_scat++;
+			}
 			double mu_scat = sampleAngleIsotropic();
 			//use angle addition to get the new scattered cosine
-			_mu = _mu*mu_scat + sqrt(1. - mu_scat*mu_scat)*sqrt(1. - _mu*_mu);
+			_mu = _mu*mu_scat - sqrt(1. - mu_scat*mu_scat)*sqrt(1. - _mu*_mu);
 		}
 		else //Non scattering event
 		{
 			//TODO, if there were something besides absorption possible you would put it here
 			terminateHistory();
+			if (HoController::PARTICLE_BALANCE) //debug stuff
+			{
+				_n_abs++;
+			}
 		}
 	}
 	else	
@@ -129,10 +163,10 @@ void Particle1D::sampleSourceParticle()
 	elem = (int)(_rng->rand_num()*_n_elements);
 	_current_element = elem;
 	cout << "Current element " << _current_element << endl;
-	//Get the position of origin
+	//Get the position of particle's point of origin
 	sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues());
-	//debug stuff
 	_weight = 1.0;
+	_is_dead = false;
 
 	//Assume isotropic source distribution
 	_mu = sampleAngleIsotropic();
@@ -164,8 +198,12 @@ void Particle1D::leaveElement()
 		updateElementProperties();
 		_position_mfp = _element_width_mfp; //particle is at right edge of the new cell
 	}
-	else //particle has left the volume
+	else //particle has left the problem domain
 	{
+		if (HoController::PARTICLE_BALANCE)
+		{
+			_n_leak++;
+		}
 		terminateHistory();
 	}
 }
@@ -173,23 +211,28 @@ void Particle1D::leaveElement()
 
 void Particle1D::runHistory()
 {
-	cout << "starting history...\n" << endl;
+	cout << "starting history..." << endl;
 	//start history
 	sampleSourceParticle();
 
-	double path_length_mfp;
-
 	while (true) //stream the particle until it is absorbed or leaks
 	{
-		path_length_mfp = samplePathLengthMFP();
-		streamAcrossGeometry(path_length_mfp);
+		streamAcrossGeometry();
+		if (_is_dead)
+		{
+			break;
+		}
 		sampleCollision();
+		if (_is_dead)
+		{
+			break;
+		}
 	}
 
 }
 
 //return random numbers for use by source or whoever needs one
-double Particle1D::getRandNum()
+inline double Particle1D::getRandNum()
 {
 	return _rng->rand_num();
 }
@@ -225,8 +268,30 @@ void Particle1D::scoreTallies()
 
 }
 
-void Particle1D::terminateHistory()
+inline void Particle1D::scoreElementTally()
 {
-	//not sure what to do here
+	//Score Element tally
 }
 
+inline void Particle1D::scoreFaceTally()
+{
+	//Score Element tally
+}
+
+inline void Particle1D::terminateHistory()
+{
+	//TODO may need to do other stuff here
+	_is_dead = true;
+}
+
+void Particle1D::printParticleBalance(int n_hist)
+{
+	cout << "---------------------------------------------------\n"
+		<< "               Particle balance\n"
+		<< "---------------------------------------------------\n\n"
+		<< "	 Number Created: " << n_hist << endl
+		<< "	Number Absorbed: " << _n_abs << endl
+		<< "      Number Leaked: " << _n_leak << endl
+		<< "    Number Scatters: " << _n_scat << endl;
+		
+}

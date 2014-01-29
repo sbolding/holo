@@ -21,6 +21,7 @@
 #include "Source.h"
 #include "SourceConstant.h"
 #include "RNG.h"
+#include "Controller.h"
 
 class HoSolver
 {

@@ -31,6 +31,11 @@ protected:
 	double _mu;
 	double _weight;
 
+	//debugging properties, generally won't be used
+	int _n_scat;
+	int _n_abs;
+	int _n_leak;
+
 	//material properties for the current element
 	double _sigma_tot;
 	double _mfp_tot;
@@ -44,6 +49,7 @@ protected:
 	int _current_element;	//which element are you in
 	size_t _n_elements;		//for sampling which element a particle is born in
 	int _element_mat_ID;  //the material ID of the current element
+	bool _is_dead;		 //for terminating particle history
 	RNG* _rng;			
 
 	//tally arrays
@@ -55,13 +61,16 @@ protected:
 	//Streaming and collision methods
 	double samplePathLength();
 	double samplePathLengthMFP();
-	double sampleAngleIsotropic();
+	double sampleAngleIsotropic();	//returns a cosine sampled from uniform distribution
 	void sampleCollision();
-	void streamAcrossGeometry(double path_length);
+	void streamAcrossGeometry();  //Most tallies get called in this routine
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
+
 	//tallies
+	void scoreFaceTally();
+	void scoreElementTally();
 	void scoreTallies();
 	//Sampling the source methods
 	void sampleSourceParticle();
@@ -77,6 +86,7 @@ public:
 	//public functions
 	double getRandNum();
 	void runHistory();
+	void printParticleBalance(int n_histories);
 
 
 };

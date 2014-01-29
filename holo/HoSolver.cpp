@@ -29,9 +29,6 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 	_solver_mode_str = method;
 	_solver_mode_int = HoMethods::method_map.at(method);
 	_particle = new Particle1D(mesh, &_rng, method);
-
-	
-
 }
 
 void HoSolver::solveSystem()
@@ -44,7 +41,10 @@ void HoSolver::solveSystem()
 		_particle->runHistory();
 	}
 
-	
 
-	
+	if (HoController::PARTICLE_BALANCE) //for debugging
+	{
+		_particle->printParticleBalance(_n_histories);
+	}
+		
 }

@@ -13,4 +13,9 @@ namespace LoController
 	const bool WRITE_SOLUTION = true;
 }
 
+namespace HoController
+{
+	const bool PARTICLE_BALANCE = true;
+}
+
 #endif
