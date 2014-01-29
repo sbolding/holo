@@ -10,7 +10,7 @@ private:
 	
 public:
 	Source();
-	virtual void sampleSource(Particle1D *p, Mesh * mesh) = 0;
+	virtual void sampleSource() = 0;
 
 };
 

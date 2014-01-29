@@ -11,10 +11,8 @@ SourceConstant::SourceConstant(double value) : Source()
 	_value = value;
 }
 
-void SourceConstant::sampleSource(Particle1D * particle, Mesh* mesh)
+void SourceConstant::sampleSource()
 {
-	//For a constant source just need to sample which cell it is 
-	part
-
-
+	//For a constant source just need to sample which cell it is in
+	int cell;
 }

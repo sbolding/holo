@@ -23,6 +23,11 @@ class Particle1D
 protected:
 
 	Mesh* _mesh;
+	
+	//Tally stuff
+	std::vector<FaceTally>* _face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	std::vector<ElementTally>* _element_tallies; //vector of all the volume tallies, indexed using connectivity array
+
 	double _position;
 	double _mu;
 	double _weight;
@@ -49,7 +54,10 @@ public:
 
 	//public functions
 	void streamThroughCell();
-	double getRandNum();
+	double getRandNum() const;
+	void setPosition(double new_position); //For source sampling, force where particle is within a cell
+	void setWeight(double weight);  //Basically just for initializing the source
+	void 
 
 
 };

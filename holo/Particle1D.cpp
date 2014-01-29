@@ -69,7 +69,7 @@ void Particle1D::sampleCollision()
 }
 
 //return random numbers for use by source or whoever needs one
-double Particle1D::getRandNum()
+double Particle1D::getRandNum() const
 {
 	return _rng->rand_num();
 }
