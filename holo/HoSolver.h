@@ -32,8 +32,6 @@ protected:
 	std::vector<ElementTally> _element_tallies; //vector of all the volume tallies, indexed using connectivity array
 	std::string _solver_mode;  //TODO either "holo-scat", "mc", or "holo-ecmc"
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
-	Source* _external_source; //external source
-	Source* _scattering_source; //the in scattering source
 	RNG _rng; //random number generator
 	
 public:

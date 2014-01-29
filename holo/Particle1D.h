@@ -34,13 +34,25 @@ protected:
 	unsigned int _method;
 	int _current_element;
 	RNG* _rng;
+	//tally arrays
+	std::vector<FaceTally>* _face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	int _n_histories;	//number of histories
+	std::vector<ElementTally>* _element_tallies; //vector of all the volume tallies, indexed using connectivity array
 
 	//protected methods
+	//---------------------------------------------
+	//Streaming and collision methods
 	double samplePathLength();
 	double samplePathLengthMFP();
 	void sampleCollision();
 	void updatePosition(double path_length);
+	//tallies
 	void scoreTallies();
+	//Sampling the source methods
+	void sampleSource();
+	void sampleLinDiscontSource(std::vector<double>);
+	void sampleConstExtSource();
+	void sampleDirichletBCSource();
 
 public:
 
