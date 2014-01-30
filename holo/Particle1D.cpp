@@ -190,7 +190,7 @@ void Particle1D::leaveElement()
 	//Contribute to tallies
 	scoreTallies(); //Only need to do this for the surface tally of interest
 	//Contribute to tallies, determine which element you are entering
-	if ( (_mu >= 0.0) && (_current_element < _n_elements) ) //stream to the cell to the right
+	if ( (_mu >= 0.0) && (_current_element < (_n_elements-1)) ) //stream to the cell to the right
 	{
 		_current_element++; //move to the right one cell	
 		updateElementProperties();
@@ -205,6 +205,7 @@ void Particle1D::leaveElement()
 	}
 	else //particle has left the problem domain
 	{
+		cout << "I have leaked from element " << _current_element << endl;
 		if (HoController::PARTICLE_BALANCE)
 		{
 			_n_leak++;

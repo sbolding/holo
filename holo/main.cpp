@@ -26,7 +26,7 @@ int main()
 	int dimension = 1;
 	double width = 5;
 	double ext_source = 2;
-	int num_elems = 1;
+	int num_elems = 10;
 	string solver_mode = "standard-mc";
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.5, 0.6);
