@@ -68,6 +68,7 @@ protected:
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
+	void initializeHistory(); //Initialize weight, etc., that is done for all sources
 
 	//tallies
 	void scoreFaceTally();

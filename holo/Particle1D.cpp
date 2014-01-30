@@ -133,9 +133,6 @@ void Particle1D::sampleCollision()
 
 
 
-
-
-
 //Given the source strength on the two end points (left first), sample from it
 void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 {
@@ -170,14 +167,20 @@ void Particle1D::sampleSourceParticle()
 	cout << "Current element " << _current_element << endl;
 	//Get the position of particle's point of origin
 	sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues());
-	_weight = 1.0;
-	_is_dead = false;
+	initializeHistory();
 
 	//Assume isotropic source distribution
 	_mu = sampleAngleIsotropic();
 
 	//Update particle properties for the new cell
 	updateElementProperties();
+}
+
+//May not need this function if doesn't do more later
+inline void Particle1D::initializeHistory()
+{
+	_weight = 1.0;
+	_is_dead = false;
 }
 
 inline double Particle1D::sampleAngleIsotropic()
@@ -299,6 +302,5 @@ void Particle1D::printParticleBalance(int n_hist)
 		<< "	Number Absorbed: " << _n_abs << endl
 		<< "      Number Leaked: " << _n_leak << endl
 		<< "    Number Scatters: " << _n_scat << endl
-		<< "  Number Terminated: " << _n_terminations << endl;
-		
+		<< "  Number Terminated: " << _n_terminations << endl;	
 }
