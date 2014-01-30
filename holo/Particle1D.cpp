@@ -29,6 +29,7 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
 		_n_abs = 0;
 		_n_leak = 0;
 		_n_scat = 0;
+		_n_terminations=0;
 	}
 }
 
@@ -87,6 +88,10 @@ void Particle1D::streamAcrossGeometry()
 //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on the mode
 void Particle1D::sampleCollision()
 {
+	if (_is_dead)
+	{
+		return;
+	}
 	if (_method == HoMethods::HOLO_ECMC) //then a pure absorber problem, end the history
 	{
 		terminateHistory();
@@ -218,10 +223,6 @@ void Particle1D::runHistory()
 	while (true) //stream the particle until it is absorbed or leaks
 	{
 		streamAcrossGeometry();
-		if (_is_dead)
-		{
-			break;
-		}
 		sampleCollision();
 		if (_is_dead)
 		{
@@ -281,6 +282,10 @@ inline void Particle1D::scoreFaceTally()
 inline void Particle1D::terminateHistory()
 {
 	//TODO may need to do other stuff here
+	if (HoController::PARTICLE_BALANCE)
+	{
+		_n_terminations++;
+	}
 	_is_dead = true;
 }
 
@@ -292,6 +297,7 @@ void Particle1D::printParticleBalance(int n_hist)
 		<< "	 Number Created: " << n_hist << endl
 		<< "	Number Absorbed: " << _n_abs << endl
 		<< "      Number Leaked: " << _n_leak << endl
-		<< "    Number Scatters: " << _n_scat << endl;
+		<< "    Number Scatters: " << _n_scat << endl
+		<< "  Number Terminated: " << _n_terminations << endl;
 		
 }

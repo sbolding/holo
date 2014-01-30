@@ -35,6 +35,7 @@ protected:
 	int _n_scat;
 	int _n_abs;
 	int _n_leak;
+	int _n_terminations; //how many times was terminateHistory() called?
 
 	//material properties for the current element
 	double _sigma_tot;
