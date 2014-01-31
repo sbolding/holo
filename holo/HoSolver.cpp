@@ -24,11 +24,28 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 {
 	_mesh = mesh;
 	_n_histories = n_histories;
-	_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
-	_element_tallies.resize(mesh->getNumElems());  
+	_current_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
+	_current_element_tallies.resize(mesh->getNumElems());  
+	_flux_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
+	_flux_element_tallies.resize(mesh->getNumElems());
 	_solver_mode_str = method;
 	_solver_mode_int = HoMethods::method_map.at(method);
 	_particle = new Particle1D(mesh, &_rng, method);
+
+	//initialize all tallies
+	for (int face = 0; face < _current_face_tallies.size(); ++face)
+	{
+		_flux_face_tallies[face] = new FluxFaceTally(2);
+		_current_face_tallies[face] = new CurrentFaceTally(2);
+	}
+	for (int elem = 0; elem < _current_element_tallies.size(); ++elem)
+	{
+		_flux_element_tallies[elem] = new FluxElementTally(2,2);
+		_current_element_tallies[elem] = new CurrentElementTally(2,2));
+
+	}
+
+
 }
 
 void HoSolver::solveSystem()

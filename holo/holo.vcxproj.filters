@@ -22,88 +22,109 @@
     <Filter Include="Source Files\Ho Files">
       <UniqueIdentifier>{a3619751-0852-44f5-a629-85865bb56fab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Ho Files">
+      <UniqueIdentifier>{7cdab5a2-3436-425d-bace-b4876ad9d937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Lo Files">
+      <UniqueIdentifier>{9b4c7a31-67b6-4147-a3b7-7e86fb44fbe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shared Files">
+      <UniqueIdentifier>{d128337d-c115-412b-9954-77c6cfc52029}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AverageCosineData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Controller.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AverageCosineData.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CurrentFaceTally.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CurrentElementTally.h">
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
     <ClInclude Include="DirichletBC1D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
     <ClInclude Include="Dof.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Element.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Lo Files</Filter>
     </ClInclude>
     <ClInclude Include="Element1D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Element.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FluxFaceTally.h">
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
     <ClInclude Include="ElementTally.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
     <ClInclude Include="FaceTally.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FluxElementTally.h">
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobalConstants.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
     <ClInclude Include="HoSolver.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
     <ClInclude Include="LoData1D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Lo Files</Filter>
     </ClInclude>
     <ClInclude Include="LoSolver.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Lo Files</Filter>
     </ClInclude>
     <ClInclude Include="LoSolver1D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Lo Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialConstant.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Node1D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="numMatrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="numMatrixFull.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="numVector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="oneDMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Particle1D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RNG.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SourceConstant.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
     <ClInclude Include="Tally.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceConstant.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RNG.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Node1D.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="numVector.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="numMatrix.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="numMatrixFull.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oneDMesh.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle1D.h">
+      <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +196,18 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CurrentElementTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CurrentFaceTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FluxElementTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FluxFaceTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

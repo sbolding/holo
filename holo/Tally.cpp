@@ -12,18 +12,27 @@
 
 #include "Tally.h"
 
-double Tally::getScore(int _n_histories)
+double Tally::getScore(int n_histories)
 {
 	return 0;
 }
 
-Tally::Tally(int _n_angle_bins, int _n_spatial_moment_bins)
+Tally::Tally(int n_angle_bins, int n_spatial_moment_bins)
 {
+	//set all tally bins to zero
+	_bin_sums.resize(n_angle_bins);
+	_bin_sums_sq.resize(n_angle_bins);
+	for (int i = 0; i < n_angle_bins; ++i)
+	{
+		_bin_sums[i].assign(n_spatial_moment_bins, 0.);
+		_bin_sums_sq[i].assign(n_spatial_moment_bins, 0.);
+	}
 
+	
 }
 
 Tally::Tally()
 {
-
+	//Default constructor
 }
 

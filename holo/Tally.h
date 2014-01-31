@@ -7,24 +7,26 @@
 //  @ Date : 1/27/2014
 //  @ Author : Simon R Bolding
 //
+// For now tallies assume that they have equal sized bins in angle.  If this changes
+// then need to change that
+// 
 //
+
 #if !defined(_TALLY_H)
 #define _TALLY_H
 
-#include<vector>
-
+#include <vector>
+#include <iostream>
+#include <math.h>
 
 
 class Tally
 {
-
-
 protected:
 	std::vector<std::vector<double>> _bin_sums;
 	std::vector<std::vector<double>> _bin_sums_sq;
 public:
 	double getScore(int _n_histories);
-	virtual void incrementScore() = 0;
 	Tally(int _n_angle_bins, int _n_spatial_moment_bins);
 	Tally();
 };

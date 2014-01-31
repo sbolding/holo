@@ -12,12 +12,7 @@
 
 #include "FaceTally.h"
 
-void FaceTally::incrementScore()
-{
-
-}
-
-FaceTally::FaceTally() : Tally()
+FaceTally::FaceTally(int n_angular_bins) : Tally(n_angular_bins, 1)
 {
 
 }

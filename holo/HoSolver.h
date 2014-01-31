@@ -16,6 +16,10 @@
 #include "Mesh.h"
 #include <vector>
 #include "FaceTally.h"
+#include "CurrentElementTally.h"
+#include "CurrentFaceTally.h"
+#include "FluxElementTally.h"
+#include "FluxFaceTally.h"
 #include "ElementTally.h"
 #include "Particle1D.h"
 #include "Source.h"
@@ -28,9 +32,14 @@ class HoSolver
 protected:
 
 	Mesh* _mesh;	//pointer to the mesh to be use
-	std::vector<FaceTally> _face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	//Tallies
+	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face current tallies, indexed using connectivity array
+	std::vector<CurrentElementTally*> _current_element_tallies; //vector of element current tallies 
+	std::vector<FluxElementTally*> _flux_element_tallies; //vector of all the flux volume tallies, indexed using connectivity array
+	std::vector<FluxFaceTally*> _flux_face_tallies; //vector of all the flux face tallies
+
+	//other problem parameters
 	int _n_histories;	//number of histories
-	std::vector<ElementTally> _element_tallies; //vector of all the volume tallies, indexed using connectivity array
 	std::string _solver_mode_str;  ////either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
 	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.

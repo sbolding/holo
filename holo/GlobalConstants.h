@@ -12,6 +12,12 @@ namespace GlobalConstants
 	const long double FOUR_PI = 2.0L;
 }
 
+namespace HoConstants
+{
+	const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
+	const double COSINE_SUBSTITUTE_VALUE = 0.5*COSINE_CUTOFF; //half of the cutoff value by default
+}
+
 namespace HoMethods
 {
 	const unsigned int HOLO_ECMC = 1;
