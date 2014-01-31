@@ -26,7 +26,7 @@ void FluxFaceTally::incrementScore(double weight, double normal_cosine,
 		double value;
 		if (abs(normal_cosine) >= COSINE_CUTOFF)
 		{
-			value = weight / (normal_cosine*area); 	
+			value = weight / (abs(normal_cosine)*area); 	
 		}
 		else //need to use cosien fixup to prevent very high scores
 		{
