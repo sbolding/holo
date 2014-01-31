@@ -11,7 +11,7 @@
 // basis function xi.  Thus the normalized_position is the distance from the left edge
 // of a cell, i.e.: normalized_position = _position/_element_width;
 //
-// The path length and the volume need to be passed in in terms of centimeters for now
+// The path length and the volume need to be passed in units of cm.
 
 
 #if !defined(_ELEMENTTALLY_H)

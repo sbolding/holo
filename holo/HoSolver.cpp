@@ -41,8 +41,7 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 	for (int elem = 0; elem < _current_element_tallies.size(); ++elem)
 	{
 		_flux_element_tallies[elem] = new FluxElementTally(2,2);
-		_current_element_tallies[elem] = new CurrentElementTally(2,2));
-
+		_current_element_tallies[elem] = new CurrentElementTally(2,2);
 	}
 
 

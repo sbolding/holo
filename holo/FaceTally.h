@@ -27,8 +27,7 @@ private:
 	FaceTally(); //Never used default constructor
 
 public:
-	void incrementScore(double weight, double normal_cosine, double surface_area) = 0; //Pure virtual, it must be implemented by current or flux tally
-	virtual void calculateScore(double weight, normal_cosine, double surface_area) = 0;
+	virtual void incrementScore(double weight, double normal_cosine, double surface_area) = 0; //Pure virtual, it must be implemented by current or flux tally
 	FaceTally(int n_angular_bins);
 };
 
