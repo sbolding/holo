@@ -30,7 +30,6 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 	_flux_element_tallies.resize(mesh->getNumElems());
 	_solver_mode_str = method;
 	_solver_mode_int = HoMethods::method_map.at(method);
-	_particle = new Particle1D(mesh, &_rng, method);
 
 	//initialize all tallies
 	for (int face = 0; face < _current_face_tallies.size(); ++face)
@@ -44,7 +43,9 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 		_current_element_tallies[elem] = new CurrentElementTally(2,2);
 	}
 
-
+	//initialize particle class
+	_particle = new Particle1D(mesh, &_rng, method, _current_face_tallies,
+		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);
 }
 
 void HoSolver::solveSystem()

@@ -23,6 +23,7 @@ class ElementTally : public Tally
 {
 private:
 	ElementTally(); //should never be called
+	ElementTally(const ElementTally & element_tally); //should never be called
 
 public:
 	virtual void incrementScore(double weight, double path_length, double normal_cosine, 

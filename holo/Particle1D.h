@@ -18,6 +18,10 @@
 #include "RNG.h"
 #include "FaceTally.h"
 #include "ElementTally.h"
+#include "CurrentElementTally.h"
+#include "CurrentFaceTally.h"
+#include "FluxElementTally.h"
+#include "FluxFaceTally.h"
 #include "GlobalConstants.h"
 
 class Particle1D
@@ -54,10 +58,10 @@ protected:
 	RNG* _rng;			
 
 	//tally arrays
-	std::vector<FaceTally*>* _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<ElementTally*>* _current_element_tallies; //vector of all the volume tallies, indexed using connectivity array
-	std::vector<FaceTally*>* _flux_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<ElementTally*>* _flux_element_tallies; //vector of all the volume tallies, indexed using connectivity array
+	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	std::vector<CurrentElementTally*> _current_element_tallies; //vector of all the volume tallies, indexed using connectivity array
+	std::vector<FluxFaceTally*> _flux_face_tallies;  //vector of all the face tallies, indexed using connectivity array
+	std::vector<FluxElementTally*> _flux_element_tallies; //vector of all the volume tallies, indexed using connectivity array
 
 	//protected methods
 	//---------------------------------------------
@@ -74,8 +78,7 @@ protected:
 
 	//tallies
 	void scoreFaceTally();
-	void scoreElementTally();
-	void scoreTallies();
+	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 	//Sampling the source methods
 	void sampleSourceParticle();
 	void sampleLinDiscontSource(std::vector<double>);
@@ -86,10 +89,10 @@ public:
 
 	//constructors
 	Particle1D(Mesh* mesh, RNG* rng, string method_str,
-		std::vector<FaceTally*>* current_face_tallies,
-		std::vector<ElementTally*>* current_element_tallies,
-		std::vector<FaceTally*>* flux_face_tallies,
-		std::vector<ElementTally*>* _flux_element_tallies
+		std::vector<CurrentFaceTally*>& current_face_tallies,
+		std::vector<CurrentElementTally*>& current_element_tallies,
+		std::vector<FluxFaceTally*>& flux_face_tallies,
+		std::vector<FluxElementTally*>& _flux_element_tallies
 	); //Standard constructor, pass a pointer for rng to make sure 
 	//you dont resample random numbers, method_str is which method
 	//to use from HoSolver, all the tallies are currently passed in seperately

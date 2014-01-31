@@ -14,10 +14,10 @@
 #include "Controller.h"
 
 Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
-	std::vector<FaceTally*>* current_face_tallies,
-	std::vector<ElementTally*>* current_element_tallies,
-	std::vector<FaceTally*>* flux_face_tallies,
-	std::vector<ElementTally*>* _flux_element_tallies
+	std::vector<CurrentFaceTally*>& current_face_tallies,
+	std::vector<CurrentElementTally*>& current_element_tallies,
+	std::vector<FluxFaceTally*>& flux_face_tallies,
+	std::vector<FluxElementTally*>& flux_element_tallies
 	)
 {
 	_rng = rng;
@@ -41,7 +41,7 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	_current_face_tallies = current_face_tallies;
 	_current_element_tallies = current_element_tallies;
 	_flux_face_tallies = flux_face_tallies;
-	_current_face_tallies = current_face_tallies;
+	_flux_element_tallies = flux_element_tallies;
 }
 
 //Sample a path length in cm
@@ -70,26 +70,32 @@ void Particle1D::streamAcrossGeometry()
 	//determine if the particle has left the cell, or not
 	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
 	{
-		scoreElementTally(); //TODO, this doesnt actually work yet
+		double path_start = _position_mfp;
+		double path_end;
+
 		//Determine the number of mean free paths remaining to stream
 		if (_mu >= 0.0) //streaming to the right
 		{
 			displacement_mfp += (_position_mfp - _element_width_mfp);
+			path_end = _element_width_mfp; //leaves to the right
 		}
 		else //streaming to the left
 		{
 			displacement_mfp += _position_mfp;
+			path_end = 0.0; //leaves to the left
 		}
+		scoreElementTally(path_start, path_end);
 		leaveElement(); //move to the next element
-		if (_is_dead)
+
+		if (_is_dead) //then particle has leaked, do not score anything else
 		{
-			break;
+			return;
 		}
 		new_position_mfp = _position_mfp + displacement_mfp;
 	}
-	//within the current cell
-	//Score volumetric tally
-	scoreElementTally();
+
+	//Now position is within the current cell
+	scoreElementTally(_position_mfp, new_position_mfp); 
 	_position_mfp = new_position_mfp;
 	
 }
@@ -159,7 +165,7 @@ void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 		double left_hat, right_hat; //Normalized nodal values, such that CDF is normalized
 		left_hat = 2.0*nodal_values[0] / (nodal_values[1] + nodal_values[0]);
 		right_hat = 2.0 - left_hat;
-		//use direct inversion of CDF to sample position
+		//use direct inversion of CDF to sample position, based on quadratic formula
 		_position_mfp = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
 		_position_mfp /= (right_hat - left_hat);
 		_position_mfp *= _element_width_mfp; //convert to mfp
@@ -201,8 +207,7 @@ inline double Particle1D::sampleAngleIsotropic()
 
 void Particle1D::leaveElement()
 {
-	//Contribute to tallies
-	scoreTallies(); //Only need to do this for the surface tally of interest
+	scoreFaceTally(); //Score the surface tally, based on the current face
 	//Contribute to tallies, determine which element you are entering
 	if ( (_mu >= 0.0) && (_current_element < (_n_elements-1)) ) //stream to the cell to the right
 	{
@@ -219,7 +224,7 @@ void Particle1D::leaveElement()
 	}
 	else //particle has left the problem domain
 	{
-		cout << "I have leaked from element " << _current_element << endl;
+		//cout << "I have leaked from element " << _current_element << endl;
 		if (HoController::PARTICLE_BALANCE)
 		{
 			_n_leak++;
@@ -278,20 +283,38 @@ void Particle1D::updateElementProperties()
 
 }
 
-void Particle1D::scoreTallies()
+void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 {
-	//Will probably need to get passed a pathlength
-
-}
-
-inline void Particle1D::scoreElementTally()
-{
-	//Score Element tally
+	//Score Element tally, need to convert path_length and volume
+	//to cm, rather than mfp
+	//int _elem_id = _current_element;
+	double path_length_cm = abs(path_start_mfp - path_end_mfp)*_mfp_tot/_mu;
+	double volume_cm = _element_width_mfp*_mfp_tot;//*1.0cm*1.0cm = h_x(cm^3)
+	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
+	
+	//increment tallies
+	_current_element_tallies[_current_element]->incrementScore(_weight,
+		path_length_cm, _mu, volume_cm, normalized_position); 
+	_flux_element_tallies[_current_element]->incrementScore(_weight,
+		path_length_cm, _mu, volume_cm, normalized_position);
 }
 
 inline void Particle1D::scoreFaceTally()
 {
-	//Score Element tally
+	//The face tally is scored before you have left the cell, so everything is
+	//based on the cell you are leaving, not the cell you are entering
+
+	//determine face based on direction
+	int face_id = 0; //Leaving to the left
+	if (_mu >= 0.0) //Leaving to the right
+	{
+		face_id = 1;
+	}
+
+	//increment the correct tallies
+	int face_index = _mesh->getFaceIndex(_current_element,face_id);
+	_current_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0); //for one-d, per cm sq
+	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
 }
 
 inline void Particle1D::terminateHistory()
