@@ -41,7 +41,7 @@ protected:
 	std::vector<Node *> _nodes; //Pointers to node objects
 	std::vector<DirichletBC1D *> _dirichlet_bcs; //Pointers to bc's;
     int _dim;					      //dimension of the problem
-    std::vector<std::vector<int>> _connectivity_array; 
+    std::vector<std::vector<int>> _connectivity_array; //first index is element, second is face of element
 	std::vector<MaterialConstant *> _mat_list;
 
 public:
@@ -62,6 +62,7 @@ public:
 	std::vector<Element* >* getElements(void);		//WARNING returns a pointer to elements, you can change it outside of class
 	std::vector < DirichletBC1D *> getDirichletBCs(void);
 	Element* getElement(int element_id) const;
+	int getFaceIndex(int element_id, int face_id) const; //get a face index using the connectivity array for tallying, face_id is 0 for left 1 for right, etc.
 
 	//Setting functions
 	void setExternalSource(double) const;

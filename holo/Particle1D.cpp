@@ -13,7 +13,12 @@
 #include <iostream>
 #include "Controller.h"
 
-Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
+Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
+	std::vector<FaceTally*>* current_face_tallies,
+	std::vector<ElementTally*>* current_element_tallies,
+	std::vector<FaceTally*>* flux_face_tallies,
+	std::vector<ElementTally*>* _flux_element_tallies
+	)
 {
 	_rng = rng;
 	_mesh = mesh;
@@ -31,6 +36,12 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str)
 		_n_scat = 0;
 		_n_terminations=0;
 	}
+
+	//store the tallies correctly
+	_current_face_tallies = current_face_tallies;
+	_current_element_tallies = current_element_tallies;
+	_flux_face_tallies = flux_face_tallies;
+	_current_face_tallies = current_face_tallies;
 }
 
 //Sample a path length in cm
