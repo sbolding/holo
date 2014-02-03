@@ -23,11 +23,15 @@
 class Tally
 {
 protected:
-	std::vector<std::vector<double>> _bin_sums;
+	std::vector<std::vector<double>> _bin_sums;    //rows are angular bins, columns are spatial moments (if applicable)
 	std::vector<std::vector<double>> _bin_sums_sq;
+
 public:
-	double getScore(int _n_histories);
-	Tally(int _n_angle_bins, int _n_spatial_moment_bins);
+	double getScore(int n_histories, int angular_bin, int spatial_moment) const; 
+	double getScore(int n_histories, int angular_bin) const; //For use by tallies that do not have multiple spatila moments
+	std::vector<std::vector<double>> getScores(int n_histories) const;	//return all the scores
+	double getVariance(int n_histories);
+	Tally(int n_angle_bins, int n_spatial_moment_bins);
 	Tally();
 };
 

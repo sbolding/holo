@@ -12,9 +12,44 @@
 
 #include "Tally.h"
 
-double Tally::getScore(int n_histories)
+double Tally::getScore(int n_histories, int angular_bin, int spatial_moment) const
 {
-	return 0;
+	if (spatial_moment >= _bin_sums[0].size() || angular_bin >= _bin_sums.size())
+	{
+		std::cerr << "Trying to access tally member that is not available\n";
+		exit(1);
+	}
+
+	return _bin_sums[angular_bin][spatial_moment] / (float)n_histories;
+}
+
+//For this function it is assumed that there is only the 0th spatial moment (for face tallies)
+double Tally::getScore(int n_histories, int angular_bin) const
+{
+	if (angular_bin >= _bin_sums.size())
+	{
+		std::cerr << "Trying to access tally member that is not available\n";
+		exit(1);
+	}
+
+	return _bin_sums[angular_bin][0];
+}
+
+std::vector<std::vector<double>> Tally::getScores(int n_histories) const
+{
+	std::vector<std::vector<double>> scores;
+	std::vector<double> temp;
+	for (int i = 0; i < _bin_sums.size(); ++i)
+	{
+		temp.clear();
+		for (int j = 0; j < _bin_sums[i].size(); ++j)
+		{
+			temp.push_back(getScore(n_histories,i,j));
+		}
+		scores.push_back(temp);
+	}
+
+	return scores;
 }
 
 Tally::Tally(int n_angle_bins, int n_spatial_moment_bins)

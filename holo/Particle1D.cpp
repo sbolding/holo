@@ -109,7 +109,7 @@ void Particle1D::sampleCollision()
 	{
 		return;
 	}
-	if (_method == HoMethods::HOLO_ECMC) //then a pure absorber problem, end the history
+	if ( (_method == HoMethods::HOLO_ECMC) || (_method == HoMethods::HOLO_STANDARD_MC) ) //then a pure absorber problem, end the history
 	{
 		terminateHistory();
 		if (HoController::PARTICLE_BALANCE)
@@ -155,9 +155,9 @@ void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 {
 	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
 
-	if (abs(nodal_values[0] - nodal_values[1]) < 1.E-10) //then constant source, sampling is uniform across the cell
+	//If this routine is too slow, do a soft check to see if they are different first, then do the check below
+	if (abs(nodal_values[0] - nodal_values[1])/nodal_values[0] < 1.E-10) //then effectively a constant source, sampling is uniform across the cell
 	{
-		std::cout << "Probably should change how this check works in sampling source for constant across cell" << std::endl;
 		_position_mfp = _rng->rand_num()*_element_width_mfp;
 	}
 	else //need to sample from lin discontinuous source //THIS ROUTINE WORKS
@@ -181,7 +181,7 @@ void Particle1D::sampleSourceParticle()
 	int elem;
 	elem = (int)(_rng->rand_num()*_n_elements);
 	_current_element = elem;
-	cout << "Current element " << _current_element << endl;
+	//cout << "Current element " << _current_element << endl;
 	//Get the position of particle's point of origin
 	sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues());
 	initializeHistory();
@@ -236,7 +236,7 @@ void Particle1D::leaveElement()
 
 void Particle1D::runHistory()
 {
-	cout << "starting history..." << endl;
+	//cout << "starting history..." << endl;
 	//start history
 	sampleSourceParticle();
 
@@ -262,6 +262,7 @@ inline double Particle1D::getRandNum()
 void Particle1D::updateElementProperties()
 {
 	Element* element = _mesh->getElement(_current_element);
+	_element_width_mfp = _mfp_tot*element->getElementDimensions()[0]; //always need to update the width in general
 	if (element->getMaterialID() == _element_mat_ID)
 	{
 		return; //no need to update
@@ -272,12 +273,19 @@ void Particle1D::updateElementProperties()
 		mat = element->getMaterial();
 
 		//Set the material data
+		/*if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem, maybe?
+		{
+			_sigma_tot = mat.getSigmaA();
+		}
+		else
+		{
+			_sigma_tot = mat.getSigmaT();
+		}*/
 		_sigma_tot = mat.getSigmaT();
 		_mfp_tot = 1. / _sigma_tot;
 		_sigma_scat = mat.getSigmaS();
 		_scat_ratio = _sigma_scat/_sigma_tot;
 		_sigma_abs = mat.getSigmaA();
-		_element_width_mfp = _mfp_tot*element->getElementDimensions()[0];
 		_element_mat_ID = element->getMaterialID();
 	}
 
@@ -288,7 +296,7 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
 	//int _elem_id = _current_element;
-	double path_length_cm = abs(path_start_mfp - path_end_mfp)*_mfp_tot/_mu;
+	double path_length_cm = abs((path_start_mfp - path_end_mfp)*_mfp_tot/_mu);
 	double volume_cm = _element_width_mfp*_mfp_tot;//*1.0cm*1.0cm = h_x(cm^3)
 	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
 	

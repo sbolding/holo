@@ -51,6 +51,11 @@ public:
 	HoSolver(Mesh* _mesh, int n_histories, double ext_source, string solver_mode); //For a constant external source
 	void solveSystem(); //run the high order problem
 
+	//reader, printer, and interface functions
+	void printFaceTally(int face_id, std::ostream &out) const;
+	void printElementTally(int element_id, std::ostream &out) const;
+	void printAllTallies(std::ostream &out) const;
+
 };
 
 #endif  //_HOSOLVER_H
