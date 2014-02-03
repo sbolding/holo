@@ -115,9 +115,24 @@ void HoSolver::printElementTally(int element_id, std::ostream &out) const
 
 	out << endl;
 
-	/*//temp debuggin
-	out << _current_element_tallies[element_id]->getScore(_n_histories, 1, 1) << endl;
-	out << _flux_element_tallies[element_id]->getScore(_n_histories, 1, 1) << endl;*/
+	//print out the errors
+	out << "Std. Dev.:             ";
+
+	//get the values then print them
+	values = _current_element_tallies[element_id]->getStdDevs(_n_histories);
+
+	for (int i = 0; i < values.size(); ++i)
+		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	out << "         ";
+
+	//get the values then print them
+	values = _flux_element_tallies[element_id]->getStdDevs(_n_histories);
+
+	for (int i = 0; i < values.size(); ++i)
+		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+
+	out << endl;
+
 }
 
 void HoSolver::printFaceTally(int face_id, std::ostream &out) const
@@ -146,7 +161,22 @@ void HoSolver::printFaceTally(int face_id, std::ostream &out) const
 
 	out << endl;
 
-	/*//temp debugging
-	out << _current_face_tallies[face_id]->getScore(_n_histories, 1) << endl;
-	out << _flux_face_tallies[face_id]->getScore(_n_histories, 1) << endl;*/
+	//Now print out the errors
+	out << "Std. Dev.:             ";
+
+	//get the values then print them
+	values = _current_face_tallies[face_id]->getStdDevs(_n_histories);
+
+	for (int i = 0; i < values.size(); ++i)
+		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	out << "         ";
+
+	//get the values then print them
+	values = _flux_face_tallies[face_id]->getStdDevs(_n_histories);
+
+	for (int i = 0; i < values.size(); ++i)
+		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+
+	out << endl;
+
 }

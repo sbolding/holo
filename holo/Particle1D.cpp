@@ -57,48 +57,6 @@ inline double Particle1D::samplePathLengthMFP()
 }
 
 
-//Update the particle position based on a path length that has been sampled, make sure hasnt streamed out of cell
-void Particle1D::streamAcrossGeometry()
-{
-	//sample a pathlength
-	double path_length_mfp = samplePathLengthMFP();
-
-	//determine horizontal displacement
-	double displacement_mfp = path_length_mfp*_mu;
-	double new_position_mfp = displacement_mfp +_position_mfp;
-
-	//determine if the particle has left the cell, or not
-	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
-	{
-		double path_start = _position_mfp;
-		double path_end;
-
-		//Determine the number of mean free paths remaining to stream
-		if (_mu >= 0.0) //streaming to the right
-		{
-			displacement_mfp += (_position_mfp - _element_width_mfp);
-			path_end = _element_width_mfp; //leaves to the right
-		}
-		else //streaming to the left
-		{
-			displacement_mfp += _position_mfp;
-			path_end = 0.0; //leaves to the left
-		}
-		scoreElementTally(path_start, path_end);
-		leaveElement(); //move to the next element
-
-		if (_is_dead) //then particle has leaked, do not score anything else
-		{
-			return;
-		}
-		new_position_mfp = _position_mfp + displacement_mfp;
-	}
-
-	//Now position is within the current cell
-	scoreElementTally(_position_mfp, new_position_mfp); 
-	_position_mfp = new_position_mfp;
-	
-}
 
 
 
@@ -117,7 +75,7 @@ void Particle1D::sampleCollision()
 			_n_abs++;
 		}
 	}
-	else if ((_method == HoMethods::HOLO_STANDARD_MC) || (_method == HoMethods::STANDARD_MC)) //usual MC sample which event, sample new direction if scattering
+	else if (_method == HoMethods::STANDARD_MC) //usual MC sample which event, sample new direction if scattering
 	{
 		//determine if a scattering event
 		if (_rng->rand_num() < _scat_ratio)
@@ -240,16 +198,56 @@ void Particle1D::runHistory()
 	//start history
 	sampleSourceParticle();
 
+	double path_length_mfp;  
+	double displacement_mfp;
+	double new_position_mfp;
+
 	while (true) //stream the particle until it is absorbed or leaks
 	{
-		streamAcrossGeometry();
+		//sample a pathlength
+		path_length_mfp = samplePathLengthMFP();
+
+		//determine horizontal displacement
+		displacement_mfp = path_length_mfp*_mu;
+		new_position_mfp = displacement_mfp + _position_mfp;
+
+		//determine if the particle has left the cell, or not
+		while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
+		{
+			//tally variables, corresponding to path across current cell
+			double path_start = _position_mfp; 
+			double path_end;
+
+			//Determine the number of mean free paths remaining to stream after entering new cell
+			if (_mu >= 0.0) //streaming to the right
+			{
+				displacement_mfp += (_position_mfp - _element_width_mfp);
+				path_end = _element_width_mfp; //leaves to the right
+			}
+			else //streaming to the left
+			{
+				displacement_mfp += _position_mfp;
+				path_end = 0.0; //leaves to the left
+			}
+			scoreElementTally(path_start, path_end);
+			leaveElement(); //move to the next element
+
+			if (_is_dead) //then particle has leaked, do not score anything else
+			{
+				return;
+			}
+			new_position_mfp = _position_mfp + displacement_mfp; //determine where the particle would be now
+		}
+
+		//Now position is within the current cell
+		scoreElementTally(_position_mfp, new_position_mfp);
+		_position_mfp = new_position_mfp;
 		sampleCollision();
 		if (_is_dead)
 		{
-			break;
+			return;
 		}
-	}
-
+	} //end of outer history while loop
 }
 
 //return random numbers for use by source or whoever needs one

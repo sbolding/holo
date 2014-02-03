@@ -10,7 +10,7 @@
 // For now tallies assume that they have equal sized bins in angle.  If this changes
 // then need to change that
 // 
-//
+// Note that tallies are all normalized to per source particle, i.e., per history.
 
 #if !defined(_TALLY_H)
 #define _TALLY_H
@@ -27,12 +27,18 @@ protected:
 	std::vector<std::vector<double>> _bin_sums_sq;
 
 public:
+	//constructors
+	Tally(int n_angle_bins, int n_spatial_moment_bins);
+	Tally();
+
+	//Get scores and variances, standard deviations are absolute
 	double getScore(int n_histories, int angular_bin, int spatial_moment) const; 
 	double getScore(int n_histories, int angular_bin) const; //For use by tallies that do not have multiple spatila moments
 	std::vector<std::vector<double>> getScores(int n_histories) const;	//return all the scores
-	double getVariance(int n_histories);
-	Tally(int n_angle_bins, int n_spatial_moment_bins);
-	Tally();
+	double getStdDev(int n_histories, int angular_bin, int spatial_moment) const; //return the absolute stnadard deviation
+	double getStdDev(int n_histories, int angular_bin) const; //return the absolute standard deviation
+	std::vector<std::vector<double>> getStdDevs(int n_histories) const;
+	
 };
 
 #endif  //_TALLY_H

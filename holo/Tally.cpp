@@ -7,7 +7,7 @@
 //  @ Date : 1/27/2014
 //  @ Author : Simon R Bolding
 //
-//
+
 
 
 #include "Tally.h"
@@ -32,25 +32,69 @@ double Tally::getScore(int n_histories, int angular_bin) const
 		exit(1);
 	}
 
-	return _bin_sums[angular_bin][0];
+	return _bin_sums[angular_bin][0] / (float)n_histories;
 }
 
 std::vector<std::vector<double>> Tally::getScores(int n_histories) const
 {
 	std::vector<std::vector<double>> scores;
-	std::vector<double> temp;
+	std::vector<double> temp_scores;
 	for (int i = 0; i < _bin_sums.size(); ++i)
 	{
-		temp.clear();
+		temp_scores.clear();
 		for (int j = 0; j < _bin_sums[i].size(); ++j)
 		{
-			temp.push_back(getScore(n_histories,i,j));
+			temp_scores.push_back(getScore(n_histories,i,j));
 		}
-		scores.push_back(temp);
+		scores.push_back(temp_scores);
 	}
 
 	return scores;
 }
+
+double Tally::getStdDev(int n_histories, int angular_bin, int spatial_moment) const
+{
+	if (spatial_moment >= _bin_sums[0].size() || angular_bin >= _bin_sums.size())
+	{
+		std::cerr << "Trying to access tally member that is not available\n";
+		exit(1);
+	}
+
+	double variance = (_bin_sums_sq[angular_bin][spatial_moment] / (float)n_histories) -
+		pow(getScore(n_histories, angular_bin, spatial_moment), 2);
+	variance /= (n_histories - 1);
+	
+	return pow(variance, 0.5);
+}
+
+double Tally::getStdDev(int n_histories, int angular_bin) const
+{
+	if (angular_bin >= _bin_sums.size())
+	{
+		std::cerr << "Trying to access tally member that is not available\n";
+		exit(1);
+	}
+
+	return getStdDev(n_histories, angular_bin, 0);
+}
+
+std::vector<std::vector<double>> Tally::getStdDevs(int n_histories) const
+{
+	std::vector<std::vector<double>> std_devs;
+	std::vector<double> temp_std_devs;
+	for (int i = 0; i < _bin_sums.size(); ++i)
+	{
+		temp_std_devs.clear();
+		for (int j = 0; j < _bin_sums[i].size(); ++j)
+		{
+			temp_std_devs.push_back(getStdDev(n_histories, i, j));
+		}
+		std_devs.push_back(temp_std_devs);
+	}
+
+	return std_devs;
+}
+
 
 Tally::Tally(int n_angle_bins, int n_spatial_moment_bins)
 {

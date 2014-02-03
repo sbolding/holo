@@ -30,6 +30,7 @@ void FluxFaceTally::incrementScore(double weight, double normal_cosine,
 		}
 		else //need to use cosien fixup to prevent very high scores
 		{
+			//std::cout << "Contribution to fixup cosine bin" << std::endl; //debug statement
 			value = weight / (area*COSINE_SUBSTITUTE_VALUE);
 		}
 		_bin_sums[angular_bin][0] += value;

@@ -25,7 +25,7 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 1;
-	double ext_source = 2;
+	double ext_source = 1;
 	int num_elems = 1;
 	string solver_mode = "standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
@@ -37,7 +37,7 @@ int main()
 	mesh_1D.print(cout);
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 10000;
+	int n_histories = 100000;
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);

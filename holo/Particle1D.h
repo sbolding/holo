@@ -70,7 +70,6 @@ protected:
 	double samplePathLengthMFP();
 	double sampleAngleIsotropic();	//returns a cosine sampled from uniform distribution
 	void sampleCollision();
-	void streamAcrossGeometry();  //Most tallies get called in this routine
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
