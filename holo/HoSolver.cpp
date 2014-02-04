@@ -32,12 +32,12 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 	_solver_mode_int = HoMethods::method_map.at(method);
 
 	//initialize all tallies
-	for (int face = 0; face < _current_face_tallies.size(); ++face)
+	for (size_t face = 0; face < _current_face_tallies.size(); ++face)
 	{
 		_flux_face_tallies[face] = new FluxFaceTally(2);
 		_current_face_tallies[face] = new CurrentFaceTally(2);
 	}
-	for (int elem = 0; elem < _current_element_tallies.size(); ++elem)
+	for (size_t elem = 0; elem < _current_element_tallies.size(); ++elem)
 	{
 		_flux_element_tallies[elem] = new FluxElementTally(2,2);
 		_current_element_tallies[elem] = new CurrentElementTally(2,2);
@@ -83,7 +83,7 @@ void HoSolver::printAllTallies(std::ostream& out) const
 		<< "             Face tallies\n"
 		<< "(ID) (Type) (+ dir. tally) (- dir. tally)\n"
 		<< "---------------------------------------------------------\n";
-	for (int face = 0; face < _current_face_tallies.size(); face++)
+	for (size_t face = 0; face < _current_face_tallies.size(); face++)
 	{
 		printFaceTally(face, out);
 	}
@@ -97,21 +97,21 @@ void HoSolver::printElementTally(int element_id, std::ostream &out) const
 	out.width(5);
 	out << element_id << " Current = ";
 	out.setf(ios::scientific);
-	out.precision(3);
+	out.precision(8);
 	out.width(12);
 	
 	//get the values then print them
 	values = _current_element_tallies[element_id]->getScores(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 	out << "  Flux = ";
 
 	//get the values then print them
 	values = _flux_element_tallies[element_id]->getScores(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 
 	out << endl;
 
@@ -121,15 +121,15 @@ void HoSolver::printElementTally(int element_id, std::ostream &out) const
 	//get the values then print them
 	values = _current_element_tallies[element_id]->getStdDevs(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 	out << "         ";
 
 	//get the values then print them
 	values = _flux_element_tallies[element_id]->getStdDevs(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 
 	out << endl;
 
@@ -143,21 +143,21 @@ void HoSolver::printFaceTally(int face_id, std::ostream &out) const
 	out.width(5);
 	out << face_id << " Current = ";
 	out.setf(ios::scientific);
-	out.precision(3);
+	out.precision(8);
 	out.width(12);
 
 	//get the values then print them
 	values = _current_face_tallies[face_id]->getScores(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 	out << "  Flux = ";
 
 	//get the values then print them
 	values = _flux_face_tallies[face_id]->getScores(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 
 	out << endl;
 
@@ -167,15 +167,15 @@ void HoSolver::printFaceTally(int face_id, std::ostream &out) const
 	//get the values then print them
 	values = _current_face_tallies[face_id]->getStdDevs(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 	out << "         ";
 
 	//get the values then print them
 	values = _flux_face_tallies[face_id]->getStdDevs(_n_histories);
 
-	for (int i = 0; i < values.size(); ++i)
-		for (int j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
+	for (size_t i = 0; i < values.size(); ++i)
+		for (size_t j = 0; j < values[i].size(); ++j) out << values[i][j] << " ";
 
 	out << endl;
 

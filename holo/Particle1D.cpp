@@ -269,22 +269,20 @@ void Particle1D::updateElementProperties()
 	{
 		MaterialConstant mat;
 		mat = element->getMaterial();
-
-		//Set the material data
-		/*if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem, maybe?
-		{
-			_sigma_tot = mat.getSigmaA();
-		}
-		else
-		{
-			_sigma_tot = mat.getSigmaT();
-		}*/
 		_sigma_tot = mat.getSigmaT();
 		_mfp_tot = 1. / _sigma_tot;
 		_sigma_scat = mat.getSigmaS();
-		_scat_ratio = _sigma_scat/_sigma_tot;
 		_sigma_abs = mat.getSigmaA();
 		_element_mat_ID = element->getMaterialID();
+		//Set the material data
+		if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem, maybe?
+		{
+			_scat_ratio = 0.0;
+		}
+		else
+		{
+			_scat_ratio = _sigma_scat / _sigma_tot;
+		}
 	}
 
 }

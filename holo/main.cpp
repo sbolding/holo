@@ -26,7 +26,7 @@ int main()
 	int dimension = 1;
 	double width = 1;
 	double ext_source = 1;
-	int num_elems = 1;
+	int num_elems = 10;
 	string solver_mode = "standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 1.0, 0.0);
@@ -37,7 +37,7 @@ int main()
 	mesh_1D.print(cout);
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 100000;
+	int n_histories = 25000000;
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);
