@@ -56,10 +56,6 @@ inline double Particle1D::samplePathLengthMFP()
 	return -1.*log(_rng->rand_num());
 }
 
-
-
-
-
 //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on the mode
 void Particle1D::sampleCollision()
 {
@@ -106,8 +102,6 @@ void Particle1D::sampleCollision()
 
 }
 
-
-
 //Given the source strength on the two end points (left first), sample from it
 void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 {
@@ -133,9 +127,30 @@ void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 void Particle1D::sampleSourceParticle()
 {
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
-	//for now just assume a constant source
-	//TODO
-	//choose the element you are in
+	//Store the entire source (ext + scattering) into the other one and compute its area.  With the area you can easily determine if sample
+	//is from isotropic source or if it is from 
+	
+	//Test aliasing function
+	std::vector<double> values;
+	std::vector<int> samples;
+	samples.assign(4, 0);
+	values.push_back(251);
+	values.push_back(150.6);
+	values.push_back(75.3);
+	values.push_back(25.1);
+
+	AliasSampler _alias_sampler(values);
+	size_t bin;
+	for (int i = 0; i < 500000000; ++i)
+	{
+		bin = _alias_sampler.sampleBin(_rng->rand_num(), _rng->rand_num());
+		samples[bin]++;
+	}
+	for (int j = 0; j < 4; ++j)
+		cout << "Samples: " << samples[j] / 500000000. << endl;
+
+	system("pause");
+	/**/
 	int elem;
 	elem = (int)(_rng->rand_num()*_n_elements);
 	_current_element = elem;

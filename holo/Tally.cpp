@@ -60,11 +60,11 @@ double Tally::getStdDev(int n_histories, int angular_bin, int spatial_moment) co
 		exit(1);
 	}
 
-	double variance = (_bin_sums_sq[angular_bin][spatial_moment] / (float)n_histories) -
-		pow(getScore(n_histories, angular_bin, spatial_moment), 2);
-	variance /= (n_histories - 1);
+	double variance = (_bin_sums_sq[angular_bin][spatial_moment]*(float)n_histories) -
+		_bin_sums[angular_bin][spatial_moment] * _bin_sums[angular_bin][spatial_moment];
+	variance /= (float)n_histories*n_histories*(n_histories - 1.);
 	
-	return pow(variance, 0.5);
+	return sqrt(variance);
 }
 
 double Tally::getStdDev(int n_histories, int angular_bin) const

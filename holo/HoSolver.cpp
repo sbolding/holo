@@ -55,6 +55,11 @@ void HoSolver::solveSystem()
 	//loop over the number of histories
 	for (int hist=1; hist <= _n_histories; hist++) 
 	{
+		if ((hist % (_n_histories / 10)) == 0)
+		{
+			std::cout << (int)(hist / (float)_n_histories * 100) << "% of "<<
+				_n_histories << " histories complete..." << std::endl;
+		}
 		_particle->runHistory();
 	}
 

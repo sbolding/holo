@@ -8,7 +8,7 @@
 #include<iomanip>
 
 
-const int INPUT_SEED = 73907;
+
 
 using namespace std;
 

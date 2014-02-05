@@ -23,6 +23,7 @@
 #include "FluxElementTally.h"
 #include "FluxFaceTally.h"
 #include "GlobalConstants.h"
+#include "AliasSampler.h"
 
 class Particle1D
 {

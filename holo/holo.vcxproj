@@ -64,6 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AliasSampler.h" />
     <ClInclude Include="AverageCosineData.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="CurrentElementTally.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="Tally.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AliasSampler.cpp" />
     <ClCompile Include="CurrentElementTally.cpp" />
     <ClCompile Include="CurrentFaceTally.cpp" />
     <ClCompile Include="DirichletBC1D.cpp" />

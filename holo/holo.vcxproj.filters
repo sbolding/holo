@@ -126,6 +126,9 @@
     <ClInclude Include="Particle1D.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="AliasSampler.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -207,6 +210,9 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="FluxFaceTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AliasSampler.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>
