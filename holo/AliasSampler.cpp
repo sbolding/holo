@@ -13,8 +13,9 @@ AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalize
 	} 
 
 	//create the list of probabilities
-	createAliasTable(bin_probabilities);
 	_n_bins = bin_probabilities.size();
+	createAliasTable(bin_probabilities);
+
 
 	
 
@@ -49,9 +50,8 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 	int n_small = lo_bins.size()-1; //these are just to save access time getting the size over and over
 	unsigned int i_small, i_big; //index in the actual array of the current big and small bin
 	int n_big = hi_bins.size()-1;
-	double p_big;
 
-	while (n_small >= 0) //n_small will change throughout this process
+	while (n_small >= 0)
 	{
 		i_small = lo_bins[n_small]; 		//figure out what the current bins are
 		i_big = hi_bins[n_big];
@@ -66,6 +66,10 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 		//Determine if the current hi_bin goes into the lo_bins
 		if (bin_probs[i_big] < p_avg)
 		{
+			if (n_big < 1) //don't get rid of the last one, this is special case because of roundoff error
+			{
+				break;
+			}
 			lo_bins.push_back(i_big); //move hi bin to lo bin
 			hi_bins.pop_back();	//delete hi bin
 			n_big--;
@@ -74,14 +78,9 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 		//else, do nothing, index is correct
 	}
 	//Any ho_bins that are left need to be initialized
-	for (int i = 0; i < n_big; i++)
+	for (int i = 0; i < (n_big+1); i++)
 	{
-		_alias_data[i].non_alias_probability = 2.0; //ensure other bin is never accessed
+		_alias_data[i].non_alias_probability = 1.0001; //ensure alias bin is never accessed
 	}
 }
 
-unsigned int AliasSampler::sampleBin(double random_number1, double random_number2)
-{
-	int bin = random_number1*_n_bins; //which bin are you in
-	return (random_number2 < _alias_data[bin].non_alias_probability ? bin : _alias_data[bin].alias_event); //Did you stay in that bin?
-}

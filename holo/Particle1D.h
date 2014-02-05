@@ -31,6 +31,9 @@ protected:
 
 	Mesh* _mesh;
 
+	//Sampling properties
+	AliasSampler* _alias_sampler;
+
 	//general particle properties
 	double _position_mfp;
 	double _mu;

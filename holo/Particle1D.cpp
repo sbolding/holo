@@ -130,27 +130,6 @@ void Particle1D::sampleSourceParticle()
 	//Store the entire source (ext + scattering) into the other one and compute its area.  With the area you can easily determine if sample
 	//is from isotropic source or if it is from 
 	
-	//Test aliasing function
-	std::vector<double> values;
-	std::vector<int> samples;
-	samples.assign(4, 0);
-	values.push_back(251);
-	values.push_back(150.6);
-	values.push_back(75.3);
-	values.push_back(25.1);
-
-	AliasSampler _alias_sampler(values);
-	size_t bin;
-	for (int i = 0; i < 500000000; ++i)
-	{
-		bin = _alias_sampler.sampleBin(_rng->rand_num(), _rng->rand_num());
-		samples[bin]++;
-	}
-	for (int j = 0; j < 4; ++j)
-		cout << "Samples: " << samples[j] / 500000000. << endl;
-
-	system("pause");
-	/**/
 	int elem;
 	elem = (int)(_rng->rand_num()*_n_elements);
 	_current_element = elem;
