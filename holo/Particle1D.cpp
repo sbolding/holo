@@ -169,6 +169,7 @@ void Particle1D::initializeSamplingSource()
 		//Create sampler with alias sampling, let it normalize, delete unneccessary data
 		_alias_sampler = new AliasSampler( (*_source_strength_per_cell), false);
 		_source_strength_per_cell->clear();
+		delete _source_strength_per_cell;
 	}
 	else
 	{
