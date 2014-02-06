@@ -74,10 +74,10 @@ protected:
 	//protected methods
 	//---------------------------------------------
 	//Streaming and collision methods
-	double samplePathLength();
-	double samplePathLengthMFP();
+	double samplePathLength();      //Sample a path length in cm
+	double samplePathLengthMFP();   //Sample a path length in units of number of MFP, useful for streaming through many cells
 	double sampleAngleIsotropic();	//returns a cosine sampled from uniform distribution
-	void sampleCollision();
+	void sampleCollision();  //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on solver method
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
@@ -92,7 +92,7 @@ protected:
 	void sampleLinDiscontSource(std::vector<double>); //method used to sample lin discontinuous sources
 	void sampleConstExtSource();	//Don't know if this is actually ever needed? probably not
 	void sampleDirichletBCSource();	//Not yet implemented TODO
-	void initializeSamplingSource(); //will create the external source vector, as well as initilize sampling routines
+	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines 
 	double getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume); //will need to change outside of 1D possibly
 
 	

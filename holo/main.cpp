@@ -25,11 +25,11 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 1;
-	double ext_source = 5.;
+	double ext_source = 1.;
 	int num_elems = 10;
-	string solver_mode = "holo-standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
+	string solver_mode = "standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 1.0, 0.25);
+	MaterialConstant mat(10, 1.0, 0.0);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -37,14 +37,14 @@ int main()
 	mesh_1D.print(cout);
 
 	//Assemble and solve the Lo system
-	lo_solver = new LoSolver1D(&mesh_1D);
+	/*lo_solver = new LoSolver1D(&mesh_1D);
 	lo_solver->solveSystem();
 
 	//Update lo order system to current solution
-	lo_solver->updateSystem();
+	lo_solver->updateSystem();*/
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 5000; //50000000
+	int n_histories = 50000000; //50000000
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);

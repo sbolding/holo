@@ -299,12 +299,12 @@ void Element1D::getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 	getScalarFluxValues(_lo_data->getSpatialClosureFactor(), scalar_flux_values, locations);
 }
 
-//This function returns the source based on the HO closure
+//This function returns the source based on the LD closure
 std::vector<double> Element1D::getScalarFluxNodalValues() const
 {
 	std::vector<double> flux_values;
 	std::vector<double> dummy_vector; //locations is value of nodes, not needed here
-	getScalarFluxHOClosure(flux_values, dummy_vector);
+	getScalarFluxLinDisc(flux_values, dummy_vector);
 	return flux_values;
 }
 

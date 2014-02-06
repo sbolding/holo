@@ -47,19 +47,16 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	initializeSamplingSource();
 }
 
-//Sample a path length in cm
 inline double Particle1D::samplePathLength()
 {
 	return -1.*log(_rng->rand_num())*_mfp_tot;
 }
 
-//Sample a path length in units of number of MFP, useful for streaming through many cells
 inline double Particle1D::samplePathLengthMFP()
 {
 	return -1.*log(_rng->rand_num());
 }
 
-//Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on the mode
 void Particle1D::sampleCollision()
 {
 	if (_is_dead)
@@ -105,7 +102,6 @@ void Particle1D::sampleCollision()
 
 }
 
-//Given the source strength on the two end points (left first), sample from it
 void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 {
 	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
@@ -127,7 +123,6 @@ void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 	}
 }
 
-//intialize variables related to sampling of sources
 void Particle1D::initializeSamplingSource()
 {
 	//get the area of the source, and the total external source nodal values
@@ -137,25 +132,32 @@ void Particle1D::initializeSamplingSource()
 	std::vector<Element*>::iterator it_el;  //element iterator
 	it_el = elements->begin();				//initialize iterator
 	double ext_source_el;					//magnitude of external source of curr element
-	double scat_source_el;					//magnitude of scattering source of curr element
+	std::vector<double> total_src_nodal_values_el; 
 
 	for (; it_el != elements->end(); it_el++)
 	{
 		//Initialize to the external source strength
 		try
 		{
-			ext_source_el = getTotalSourceMagnitude((*it_el)->getExtSourceNodalValues(), (*it_el)->getElementDimensions()[0]);
-			_source_strength_per_cell->push_back(ext_source_el);
-			_vol_src_total += ext_source_el;
-
-			//If necessary add in the scattering source value
+			total_src_nodal_values_el = (*it_el)->getExtSourceNodalValues(); //initialize to ext source values
 			if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 			{
-				//This should return 0 if everything hasn't been initialized yet
-				scat_source_el = getTotalSourceMagnitude((*it_el)->getScalarFluxNodalValues(), (*it_el)->getElementDimensions()[0]);
-				_source_strength_per_cell->back() += scat_source_el * (*it_el)->getMaterial().getSigmaS(); //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
-				_vol_src_total += scat_source_el * (*it_el)->getMaterial().getSigmaS();
+				double sigma_s_el = (*it_el)->getMaterial().getSigmaS();
+				std::vector<double> scat_src_nodal_values_el = (*it_el)->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
+				if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
+				{
+					std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
+					exit(0);
+				}
+				for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
+				{
+					total_src_nodal_values_el[node] += scat_src_nodal_values_el[node]* sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
+				}				
 			}
+			ext_source_el = getTotalSourceMagnitude(total_src_nodal_values_el, (*it_el)->getElementDimensions()[0]);
+			_total_src_nodal_values.push_back(total_src_nodal_values_el);
+			_source_strength_per_cell->push_back(ext_source_el);
+			_vol_src_total += ext_source_el;
 		}
 		catch (...)
 		{
@@ -176,6 +178,9 @@ void Particle1D::initializeSamplingSource()
 		std::cerr << "No other samplilng methods are implemented yet" << std::endl;
 		exit(1);
 	}
+
+	//Initially assume no BC source TODO
+	_BC_src_total = 0.0;
 }
 
 inline double Particle1D::getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume)
@@ -188,16 +193,20 @@ void Particle1D::sampleSourceParticle()
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
 	//Store the entire source (ext + scattering) into the other one and compute its area.  With the area you can easily determine if sample
 	//is from isotropic source or if it is from 
+	if (_rng->rand_num() < _vol_src_total / (_BC_src_total + _vol_src_total))
+	{
+		_current_element = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample direction
+		sampleLinDiscontSource(_total_src_nodal_values[_current_element]); //sample position TODO pull this out into MC utility class
+		//sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues()); //THIS MIGHT BE USEFUL IN A STANDARD MC CALC, but is essentially equivalent
+	}
+	else //Volumetric source
+	{
+		std::cerr << "Sampling of BC source is not yet implemented" << std::endl;
+		exit(1);
+	}
 	
-	int elem;
-	elem = (int)(_rng->rand_num()*_n_elements);
-	_current_element = elem;
-	//cout << "Current element " << _current_element << endl;
-	//Get the position of particle's point of origin
-	sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues());
-	initializeHistory();
-
-	//Assume isotropic source distribution
+	//Assume all sources have isotropic angular distribution TODO this will need to be updated for the case of boundary sources, just add over
+	//loaded function for sampleAngleIsotropic that takes a start and end range of angle to be allowed in and adjusts weight accordingly
 	_mu = sampleAngleIsotropic();
 
 	//Update particle properties for the new cell
@@ -246,8 +255,10 @@ void Particle1D::leaveElement()
 
 void Particle1D::runHistory()
 {
+	//TODO need to pull the streaming stuff out into its own function again so it will be easier to implement the derived classes
 	//cout << "starting history..." << endl;
 	//start history
+	initializeHistory(); //Reset the basic parameters
 	sampleSourceParticle();
 
 	double path_length_mfp;  
