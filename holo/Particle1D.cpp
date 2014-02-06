@@ -146,27 +146,29 @@ void Particle1D::initializeSamplingSource()
 		{
 			ext_source_el = getTotalSourceMagnitude((*it_el)->getExtSourceNodalValues(), (*it_el)->getElementDimensions()[0]);
 			_source_strength_per_cell->push_back(ext_source_el);
+			_vol_src_total += ext_source_el;
 
 			//If necessary add in the scattering source value
 			if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 			{
+				//This should return 0 if everything hasn't been initialized yet
 				scat_source_el = getTotalSourceMagnitude((*it_el)->getScalarFluxNodalValues(), (*it_el)->getElementDimensions()[0]);
-				_source_strength_per_cell->back() += scat_source_el;
+				_source_strength_per_cell->back() += scat_source_el * (*it_el)->getMaterial().getSigmaS(); //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
+				_vol_src_total += scat_source_el * (*it_el)->getMaterial().getSigmaS();
 			}
 		}
 		catch (...)
 		{
-			std::cerr << "The HoSolver was expecting the Lo System to already be solved, in Particle1D initialize" << std::endl;
+			std::cerr << "The HoSolver had trouble initialized because the Lo System was not properly initialized and not solved, in Particle1D" << std::endl;
 			exit(1);
 		}
 	}
-			
-
-
 
 	if (HoController::SAMPLING_METHOD == 1) //standard source sampling
 	{
-		//then the total source is based on the 
+		//Create sampler with alias sampling, let it normalize, delete unneccessary data
+		_alias_sampler = new AliasSampler( (*_source_strength_per_cell), false);
+		_source_strength_per_cell->clear();
 	}
 	else
 	{

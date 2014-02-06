@@ -1,12 +1,13 @@
 #include "AliasSampler.h"
+#include <vector>
+#include <numeric>
 
 AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalized)
 {
 	if (!normalized) //then normalize bin_probabilities
 	{
 		double sum = 0;
-		for (int i = 0; i < bin_probabilities.size(); ++i)
-			sum += bin_probabilities[i];
+		sum = std::accumulate(bin_probabilities.begin(), bin_probabilities.end(), 0.);
 		double inv_sum = 1. / sum; //invert sum for cheaper multiply
 		for (int i = 0; i < bin_probabilities.size(); ++i)
 			bin_probabilities[i] *= inv_sum;
@@ -15,11 +16,6 @@ AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalize
 	//create the list of probabilities
 	_n_bins = bin_probabilities.size();
 	createAliasTable(bin_probabilities);
-
-
-	
-
-
 }
 
 void AliasSampler::createAliasTable(std::vector<double> & bin_probs)

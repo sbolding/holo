@@ -29,12 +29,19 @@ int main()
 	int num_elems = 10;
 	string solver_mode = "holo-standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 1.0, 0.0);
+	MaterialConstant mat(10, 1.0, 0.25);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
+
+	//Assemble and solve the Lo system
+	lo_solver = new LoSolver1D(&mesh_1D);
+	lo_solver->solveSystem();
+
+	//Update lo order system to current solution
+	lo_solver->updateSystem();
 
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = 5000; //50000000
@@ -48,13 +55,6 @@ int main()
 	system("pause");
 
 	return 0;
-
-	//Assemble and solve the system
-	lo_solver = new LoSolver1D(&mesh_1D);
-	lo_solver->solveSystem();
-
-	//Update lo order system to current solution
-	lo_solver->updateSystem();
 
 	//Print scalar flux
 	mesh_1D.printLDScalarFluxValues(cout);

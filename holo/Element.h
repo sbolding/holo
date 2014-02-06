@@ -73,7 +73,7 @@ public:
 	virtual void getNegUpwinding(std::vector<double> &values, int &eqn, 
 		std::vector<int> &cols) const = 0;	//Will return upwinding terms in - dir, which row, and which cols
 	virtual void getScalarFluxLinDisc(std::vector<double> &scalar_flux_values,
-		std::vector<double> &locations) const = 0; //Returns scalar flux on faces using Linear Discontinuous approximation
+		std::vector<double> &locations) const = 0; //Returns scalar flux on faces using Linear Discontinuous approximation, locations is face coordinates
 	virtual void getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 		std::vector<double> &locations) const = 0; //This is for scalar flux based on alpha closure, shouldnt be used except verification
 	virtual void printLDScalarFluxValues(std::ostream &out) const = 0; //Print out the LD scalar flux and nodes
