@@ -50,7 +50,7 @@ public:
     Mesh(int dim, int number_elements, double width, MaterialConstant* material);   // pass in the number of elements as well as dimension
     Mesh(int dim, std::ifstream  input_file); //Constructor with a input file TODO not yet implemented
 
-	//Printing munctions
+	//Printing functions
 	void print(std::ostream &out) const;      //echo mesh parameters
 	void printLDScalarFluxValues(std::ostream &out) const; //print results of lo order flux LD values (phi_r and phi_l)
 

@@ -32,7 +32,11 @@ protected:
 	Mesh* _mesh;
 
 	//Sampling properties
-	AliasSampler* _alias_sampler;
+	AliasSampler* _alias_sampler; //pointer because it is dynamically allocated, may not be called if stratified sampling is used
+	std::vector<std::vector<double>> _total_src_nodal_values; //nodal values of external source + (possibly scattering source), depending on method
+	std::vector<double>* _source_strength_per_cell; // particle/sec for each cell, this will get deleted for certain sampling methods
+	double _vol_src_total; //The total volumetric source (p/sec)
+	double _BC_src_total; //The total BC source (p/sec)
 
 	//general particle properties
 	double _position_mfp;
@@ -82,11 +86,15 @@ protected:
 	//tallies
 	void scoreFaceTally();
 	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
+
 	//Sampling the source methods
-	void sampleSourceParticle();
-	void sampleLinDiscontSource(std::vector<double>);
-	void sampleConstExtSource();
-	void sampleDirichletBCSource();
+	void sampleSourceParticle();	//base method, called to create a source particle
+	void sampleLinDiscontSource(std::vector<double>); //method used to sample lin discontinuous sources
+	void sampleConstExtSource();	//Don't know if this is actually ever needed? probably not
+	void sampleDirichletBCSource();	//Not yet implemented TODO
+	void initializeSamplingSource(); //will create the external source vector, as well as initilize sampling routines
+	double getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume); //will need to change outside of 1D possibly
+
 	
 public:
 

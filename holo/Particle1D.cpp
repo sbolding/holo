@@ -42,6 +42,9 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	_current_element_tallies = current_element_tallies;
 	_flux_face_tallies = flux_face_tallies;
 	_flux_element_tallies = flux_element_tallies;
+
+	//Initialize the data needed for source sampling
+	initializeSamplingSource();
 }
 
 //Sample a path length in cm
@@ -124,6 +127,59 @@ void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
 	}
 }
 
+//intialize variables related to sampling of sources
+void Particle1D::initializeSamplingSource()
+{
+	//get the area of the source, and the total external source nodal values
+	std::vector<Element*>* elements;
+	elements = _mesh->getElements();
+	_source_strength_per_cell = new std::vector<double>();
+	std::vector<Element*>::iterator it_el;  //element iterator
+	it_el = elements->begin();				//initialize iterator
+	double ext_source_el;					//magnitude of external source of curr element
+	double scat_source_el;					//magnitude of scattering source of curr element
+
+	for (; it_el != elements->end(); it_el++)
+	{
+		//Initialize to the external source strength
+		try
+		{
+			ext_source_el = getTotalSourceMagnitude((*it_el)->getExtSourceNodalValues(), (*it_el)->getElementDimensions()[0]);
+			_source_strength_per_cell->push_back(ext_source_el);
+
+			//If necessary add in the scattering source value
+			if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //append scattering source
+			{
+				scat_source_el = getTotalSourceMagnitude((*it_el)->getScalarFluxNodalValues(), (*it_el)->getElementDimensions()[0]);
+				_source_strength_per_cell->back() += scat_source_el;
+			}
+		}
+		catch (...)
+		{
+			std::cerr << "The HoSolver was expecting the Lo System to already be solved, in Particle1D initialize" << std::endl;
+			exit(1);
+		}
+	}
+			
+
+
+
+	if (HoController::SAMPLING_METHOD == 1) //standard source sampling
+	{
+		//then the total source is based on the 
+	}
+	else
+	{
+		std::cerr << "No other samplilng methods are implemented yet" << std::endl;
+		exit(1);
+	}
+}
+
+inline double Particle1D::getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume)
+{
+	return 0.5*(nodal_values[0] + nodal_values[1])*element_volume;
+}
+
 void Particle1D::sampleSourceParticle()
 {
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
@@ -184,7 +240,6 @@ void Particle1D::leaveElement()
 		terminateHistory();
 	}
 }
-
 
 void Particle1D::runHistory()
 {

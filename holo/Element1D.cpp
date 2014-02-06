@@ -297,8 +297,16 @@ std::vector<double> Element1D::getElementDimensions() const
 void Element1D::getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 	std::vector<double> &locations) const //This is for scalar flux based on alpha closure, shouldnt be used except verification
 {
-	std::cout << "HO scalar flux values should only be called for code verification, in Element1D.cpp" << endl;
 	getScalarFluxValues(_lo_data->getSpatialClosureFactor(), scalar_flux_values, locations);
+}
+
+//This function returns the source based on the HO closure
+std::vector<double> Element1D::getScalarFluxNodalValues() const
+{
+	std::vector<double> flux_values;
+	std::vector<double> locations = { 0, 1 };
+	getScalarFluxHOClosure(flux_values, locations);
+	return flux_values;
 }
 
 void Element1D::printLDScalarFluxValues(std::ostream &out) const

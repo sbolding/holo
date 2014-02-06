@@ -25,9 +25,9 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 1;
-	double ext_source = 1;
+	double ext_source = 5.;
 	int num_elems = 10;
-	string solver_mode = "standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
+	string solver_mode = "holo-standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 1.0, 0.0);
 
