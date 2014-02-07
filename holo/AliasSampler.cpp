@@ -1,6 +1,7 @@
 #include "AliasSampler.h"
 #include <vector>
 #include <numeric>
+#include <limits>
 
 AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalized)
 {
@@ -27,6 +28,29 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 	double inv_p_avg = (float)_n_bins; // = 1/p_avg = _n_bins
 
 	_alias_data.resize(_n_bins); //initialize list
+
+	//Check that the probability is not already uniform, if so do special case
+	//This should be redundant, as the later algorithm should catch this case, but in cases of very high numbers of bins coudl be needed due to large roundoff
+	bool all_bins_equal = true;
+	double hundred_epsilon = 100. * std::numeric_limits<double>::epsilon();
+	for (int i = 0; i < bin_probs.size(); ++i)
+	{
+		if (abs(p_avg - bin_probs[i]) > hundred_epsilon)
+		{
+			all_bins_equal = false;
+		}
+	}
+
+	//Do case if all_bins_equal
+	if (all_bins_equal)
+	{
+		for (int i = 0; i < bin_probs.size(); ++i)
+		{
+			_alias_data[i].non_alias_probability = 1.0001;
+		}
+		return;
+	}
+
 
 	//Sort the bins, this could in theory have trouble if one is approx the average, but shouldnt since
 	//bins that are "at probability" go in to the higher bin
@@ -62,9 +86,16 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 		//Determine if the current hi_bin goes into the lo_bins
 		if (bin_probs[i_big] < p_avg)
 		{
-			if (n_big < 1) //don't get rid of the last one, this is special case because of roundoff error
+			if (n_big < 1 ) //don't get rid of the last one, this is special case because of roundoff error
 			{
-				break;
+				if (n_small < 0) //Still have more to initialize, again, because of roundoff
+				{
+					break;
+				}
+				else
+				{
+					continue;
+				}
 			}
 			lo_bins.push_back(i_big); //move hi bin to lo bin
 			hi_bins.pop_back();	//delete hi bin
@@ -78,5 +109,6 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 	{
 		_alias_data[i].non_alias_probability = 1.0001; //ensure alias bin is never accessed
 	}
+
 }
 

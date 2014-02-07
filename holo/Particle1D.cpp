@@ -211,6 +211,21 @@ void Particle1D::sampleSourceParticle()
 
 	//Update particle properties for the new cell
 	updateElementProperties();
+
+	//Test it out
+	std::vector<int> scores;
+	scores.assign(_n_elements, 0);
+	for (int i = 0; i < 500000; ++i)
+	{
+		_current_element = _alias_sampler->sampleBin(_rng->rand_num(),_rng->rand_num());
+		scores[_current_element] += 1;
+	}
+	for (int i = 0; i < _n_elements; ++i)
+	{
+		cout << "Score: " << scores[i] << endl;
+	}
+
+	system("pause");
 }
 
 //May not need this function if doesn't do more later
