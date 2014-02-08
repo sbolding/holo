@@ -32,8 +32,10 @@ public:
 	Tally();
 
 	//Get scores and variances, standard deviations are absolute
-	double getScore(int n_histories, int angular_bin, int spatial_moment) const; 
+	double getScore(int n_histories, int angular_bin, int spatial_moment) const;
 	double getScore(int n_histories, int angular_bin) const; //For use by tallies that do not have multiple spatila moments
+	double getScoreAngularIntegrated(int n_histories, int spatial_moment) const; //Gets the scalar flux score for certain spatial moment
+	double getScoreAngularIntegrated(int n_histories) const; //Gets the scalar flux score for certain  0th spatial moment (face tallies)
 	std::vector<std::vector<double>> getScores(int n_histories) const;	//return all the scores
 	double getStdDev(int n_histories, int angular_bin, int spatial_moment) const; //return the absolute stnadard deviation
 	double getStdDev(int n_histories, int angular_bin) const; //return the absolute standard deviation

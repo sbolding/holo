@@ -129,6 +129,9 @@
     <ClInclude Include="AliasSampler.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="DataTransfer.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -214,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="AliasSampler.cpp">
       <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataTransfer.cpp">
+      <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 #include "HoSolver.h"
 #include <fstream>
 #include "RNG.h"
+#include "DataTransfer.h"
 
 using namespace std;
 
@@ -24,12 +25,12 @@ int main()
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
-	double width = 1;
+	double width = 2.0;
 	double ext_source = 1.;
 	int num_elems = 10;
 	string solver_mode = "standard-mc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 1.0, 0.0);
+	MaterialConstant mat(10, 0.5, 0.0);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -44,13 +45,17 @@ int main()
 	lo_solver->updateSystem();*/
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 5000; //50000000
+	int n_histories = 5000000; //50000000
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);
 	ho_solver->solveSystem();
 	ho_solver->printAllTallies(cout);
 
+	//Transfer HO data to the LO system
+	DataTransfer data_transfer(ho_solver, &mesh_1D);
+	data_transfer.updateLoSystem();
+	
 	//temporary return
 	system("pause");
 

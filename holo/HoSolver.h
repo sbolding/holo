@@ -26,6 +26,7 @@
 #include "SourceConstant.h"
 #include "RNG.h"
 #include "Controller.h"
+#include "AverageCosineData.h"
 
 class HoSolver
 {
@@ -52,6 +53,7 @@ public:
 	void solveSystem(); //run the high order problem
 
 	//reader, printer, and interface functions
+	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;
 	void printFaceTally(int face_id, std::ostream &out) const;
 	void printElementTally(int element_id, std::ostream &out) const;
 	void printAllTallies(std::ostream &out) const;

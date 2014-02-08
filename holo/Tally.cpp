@@ -35,14 +35,41 @@ double Tally::getScore(int n_histories, int angular_bin) const
 	return _bin_sums[angular_bin][0] / (float)n_histories;
 }
 
+double Tally::getScoreAngularIntegrated(int n_histories, int spatial_moment) const
+{
+	if (spatial_moment >= _bin_sums[0].size())
+	{
+		std::cerr << "Trying to access tally member that is not available\n";
+		exit(1);
+	}
+	double sum = 0.;
+	for (int i = 0; i < _bin_sums.size(); ++i)
+	{
+		sum += _bin_sums[i][spatial_moment];
+	}
+		
+	return sum / (float)n_histories;
+}
+
+double Tally::getScoreAngularIntegrated(int n_histories) const
+{
+	double sum = 0.;
+	for (int i = 0; i < _bin_sums.size(); ++i)
+	{
+		sum += _bin_sums[i][0];
+	}
+
+	return sum / (float)n_histories;
+}
+
 std::vector<std::vector<double>> Tally::getScores(int n_histories) const
 {
 	std::vector<std::vector<double>> scores;
 	std::vector<double> temp_scores;
-	for (int i = 0; i < _bin_sums.size(); ++i)
+	for (int i = 0; i < _bin_sums.size(); ++i) //loop over angular bins, from - to +
 	{
 		temp_scores.clear();
-		for (int j = 0; j < _bin_sums[i].size(); ++j)
+		for (int j = 0; j < _bin_sums[i].size(); ++j) //loop over spatial bins, from 0 to ...
 		{
 			temp_scores.push_back(getScore(n_histories,i,j));
 		}

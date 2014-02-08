@@ -212,20 +212,6 @@ void Particle1D::sampleSourceParticle()
 	//Update particle properties for the new cell
 	updateElementProperties();
 
-	//Test it out
-	std::vector<int> scores;
-	scores.assign(_n_elements, 0);
-	for (int i = 0; i < 500000; ++i)
-	{
-		_current_element = _alias_sampler->sampleBin(_rng->rand_num(),_rng->rand_num());
-		scores[_current_element] += 1;
-	}
-	for (int i = 0; i < _n_elements; ++i)
-	{
-		cout << "Score: " << scores[i] << endl;
-	}
-
-	system("pause");
 }
 
 //May not need this function if doesn't do more later
@@ -338,7 +324,7 @@ inline double Particle1D::getRandNum()
 void Particle1D::updateElementProperties()
 {
 	Element* element = _mesh->getElement(_current_element);
-	_element_width_mfp = _mfp_tot*element->getElementDimensions()[0]; //always need to update the width in general
+	_element_width_mfp = _sigma_tot*element->getElementDimensions()[0]; //always need to update the width in general
 	if (element->getMaterialID() == _element_mat_ID)
 	{
 		return; //no need to update

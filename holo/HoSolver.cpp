@@ -72,13 +72,52 @@ void HoSolver::solveSystem()
 }
 
 //Print element and face tallies out
+
+LoData1D HoSolver::getLoData(int element_id)
+{
+	//NOTE: all variables in this section are independent of the sources strength in the problem, 
+	//not in general true
+	//local variables to calculate	
+	LoData1D lo_data;
+	double alpha;
+	double alpha_plus;
+	double alpha_minus;
+	AveragedCosines surf_cosines;
+	AveragedCosines vol_cosines;
+
+	//Calculate alpha based on phi left and phi right moments, and face flux value
+	double phi_left_moment;
+	double phi_right_moment;
+	double left_face_value;
+	double right_face_value;
+
+	//based on relations between phi_zeta and phi_avg, can be derived from definition moments
+	phi_right_moment = 2.*_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 1);
+	phi_left_moment = 2.*(_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 0)) - phi_right_moment;
+	left_face_value = _flux_face_tallies[_mesh->getFaceIndex(element_id,0)]->getScoreAngularIntegrated(_n_histories);
+	right_face_value = _flux_face_tallies[_mesh->getFaceIndex(element_id, 1)]->getScoreAngularIntegrated(_n_histories);
+
+	//calculate alpha plus and alpha minus
+	alpha_plus = (right_face_value - phi_left_moment) / (phi_right_moment - phi_left_moment);
+	alpha_minus = (left_face_value - phi_right_moment) / (phi_left_moment - phi_right_moment);
+
+	//Assume alpha is average of these two for now, quite possibly totally wrong though
+	alpha = 0.5*(alpha_plus + alpha_minus);
+
+	lo_data.setSpatialClosureFactor(alpha);
+/*	lo_data.setSurfAveragedCos(surf_cosines);
+	lo_data.setVolAveragedCos(vol_cosines); */
+
+	return lo_data;
+}
+
 void HoSolver::printAllTallies(std::ostream& out) const
 {
 	using std::endl;
 
 	out << "\n---------------------------------------------------------\n"
 		<< "                   Element tallies\n"
-		<< "(ID) (Type) (+ dir. spat. moments) (- dir. spat. moments)\n"
+		<< "(ID) (Type) (- dir. spat. moments) (+ dir. spat. moments)\n"
 		<< "---------------------------------------------------------\n";
 	for (int elem = 0; elem < _mesh->getNumElems(); elem++)
 	{
@@ -86,7 +125,7 @@ void HoSolver::printAllTallies(std::ostream& out) const
 	}
 	out << "\n---------------------------------------------------------\n"
 		<< "             Face tallies\n"
-		<< "(ID) (Type) (+ dir. tally) (- dir. tally)\n"
+		<< "(ID) (Type) (- dir. tally) (+ dir. tally)\n"
 		<< "---------------------------------------------------------\n";
 	for (size_t face = 0; face < _current_face_tallies.size(); face++)
 	{
