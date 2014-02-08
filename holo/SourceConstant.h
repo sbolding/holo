@@ -1,6 +1,8 @@
 #ifndef _SOURCECONSTANT_H
 #define _SOURCECONSTANT_H
 
+//THIS CLASS IS NOT ACTUALLY IMPLEMENTED YET
+
 #include "Source.h"
 
 class SourceConstant : public Source

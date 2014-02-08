@@ -12,6 +12,9 @@
 #include "Particle1D.h"
 #include <iostream>
 #include "Controller.h"
+#include "Source.h"
+#include "LinDiscSource.h"
+#include "ResidualSource.h"
 
 Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	std::vector<CurrentFaceTally*>& current_face_tallies,
@@ -44,7 +47,7 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	_flux_element_tallies = flux_element_tallies;
 
 	//Initialize the data needed for source sampling
-	initializeSamplingSource();
+	initializeSamplingSource("standard");
 }
 
 inline double Particle1D::samplePathLength()
@@ -102,123 +105,17 @@ void Particle1D::sampleCollision()
 
 }
 
-void Particle1D::sampleLinDiscontSource(std::vector<double> nodal_values)
+void Particle1D::initializeSamplingSource(string sampling_method)
 {
-	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
+	//Initially source is always a standard mc source of some kind
+	_source = new LinDiscSource(this, sampling_method);
 
-	//If this routine is too slow, do a soft check to see if they are different first, then do the check below
-	if (abs(nodal_values[0] - nodal_values[1])/nodal_values[0] < 1.E-10) //then effectively a constant source, sampling is uniform across the cell
-	{
-		_position_mfp = _rng->rand_num()*_element_width_mfp;
-	}
-	else //need to sample from lin discontinuous source //THIS ROUTINE WORKS
-	{
-		double left_hat, right_hat; //Normalized nodal values, such that CDF is normalized
-		left_hat = 2.0*nodal_values[0] / (nodal_values[1] + nodal_values[0]);
-		right_hat = 2.0 - left_hat;
-		//use direct inversion of CDF to sample position, based on quadratic formula
-		_position_mfp = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
-		_position_mfp /= (right_hat - left_hat);
-		_position_mfp *= _element_width_mfp; //convert to mfp
-	}
-}
-
-void Particle1D::initializeSamplingSource()
-{
-	//get the area of the source, and the total external source nodal values
-	std::vector<Element*>* elements;
-	elements = _mesh->getElements();
-	_source_strength_per_cell = new std::vector<double>();
-	std::vector<Element*>::iterator it_el;  //element iterator
-	it_el = elements->begin();				//initialize iterator
-	double ext_source_el;					//magnitude of external source of curr element
-	std::vector<double> total_src_nodal_values_el; 
-
-	for (; it_el != elements->end(); it_el++)
-	{
-		//Initialize to the external source strength
-		try
-		{
-			total_src_nodal_values_el = (*it_el)->getExtSourceNodalValues(); //initialize to ext source values
-			if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //append scattering source
-			{
-				double sigma_s_el = (*it_el)->getMaterial().getSigmaS();
-				std::vector<double> scat_src_nodal_values_el = (*it_el)->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
-				if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
-				{
-					std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
-					exit(0);
-				}
-				for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
-				{
-					total_src_nodal_values_el[node] += scat_src_nodal_values_el[node]* sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
-				}				
-			}
-			ext_source_el = getTotalSourceMagnitude(total_src_nodal_values_el, (*it_el)->getElementDimensions()[0]);
-			_total_src_nodal_values.push_back(total_src_nodal_values_el);
-			_source_strength_per_cell->push_back(ext_source_el);
-			_vol_src_total += ext_source_el;
-		}
-		catch (...)
-		{
-			std::cerr << "The HoSolver had trouble initialized because the Lo System was not properly initialized and not solved, in Particle1D" << std::endl;
-			exit(1);
-		}
-	}
-
-	if (HoController::SAMPLING_METHOD == 1) //standard source sampling
-	{
-		//Create sampler with alias sampling, let it normalize, delete unneccessary data
-		_alias_sampler = new AliasSampler( (*_source_strength_per_cell), false);
-		_source_strength_per_cell->clear();
-		delete _source_strength_per_cell;
-	}
-	else
-	{
-		std::cerr << "No other samplilng methods are implemented yet" << std::endl;
-		exit(1);
-	}
-
-	//Initially assume no BC source TODO
-	_BC_src_total = 0.0;
-}
-
-inline double Particle1D::getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume)
-{
-	return 0.5*(nodal_values[0] + nodal_values[1])*element_volume;
 }
 
 void Particle1D::sampleSourceParticle()
 {
-	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
-	//Store the entire source (ext + scattering) into the other one and compute its area.  With the area you can easily determine if sample
-	//is from isotropic source or if it is from 
-	if (_rng->rand_num() < _vol_src_total / (_BC_src_total + _vol_src_total))
-	{
-		_current_element = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample direction
-		sampleLinDiscontSource(_total_src_nodal_values[_current_element]); //sample position TODO pull this out into MC utility class
-		//sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues()); //THIS MIGHT BE USEFUL IN A STANDARD MC CALC, but is essentially equivalent
-	}
-	else //Volumetric source
-	{
-		std::cerr << "Sampling of BC source is not yet implemented" << std::endl;
-		exit(1);
-	}
-	
-	//Assume all sources have isotropic angular distribution TODO this will need to be updated for the case of boundary sources, just add over
-	//loaded function for sampleAngleIsotropic that takes a start and end range of angle to be allowed in and adjusts weight accordingly
-	_mu = sampleAngleIsotropic();
-
-	//Update particle properties for the new cell
-	updateElementProperties();
-
-}
-
-//May not need this function if doesn't do more later
-inline void Particle1D::initializeHistory()
-{
-	_weight = 1.0;
-	_is_dead = false;
+	initializeHistory();
+	_source->sampleSourceParticle();
 }
 
 inline double Particle1D::sampleAngleIsotropic()
@@ -405,4 +302,10 @@ void Particle1D::printParticleBalance(int n_hist)
 		<< "      Number Leaked: " << _n_leak << endl
 		<< "    Number Scatters: " << _n_scat << endl
 		<< "  Number Terminated: " << _n_terminations << endl;	
+}
+
+inline void Particle1D::initializeHistory()
+{
+	_weight = 1.0;
+	_is_dead = false;
 }

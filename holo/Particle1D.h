@@ -25,18 +25,24 @@
 #include "GlobalConstants.h"
 #include "AliasSampler.h"
 
+//forward declarations for friend classes
+class Source; 
+class LinDiscSource;
+class ResidualSource;
+
 class Particle1D
 {
 protected:
 
 	Mesh* _mesh;
+	unsigned int _method; //type of MC
+	RNG* _rng;
 
-	//Sampling properties
-	AliasSampler* _alias_sampler; //pointer because it is dynamically allocated, may not be called if stratified sampling is used
-	std::vector<std::vector<double>> _total_src_nodal_values; //nodal values of external source + (possibly scattering source), depending on method
-	std::vector<double>* _source_strength_per_cell; // particle/sec for each cell, this will get deleted for certain sampling methods
-	double _vol_src_total; //The total volumetric source (p/sec)
-	double _BC_src_total; //The total BC source (p/sec)
+	//Sampling properties, use friend classes that handles the source sampling
+	friend class Source;
+	friend class LinDiscSource;
+	friend class ResidualSource;
+	Source* _source;
 
 	//general particle properties
 	double _position_mfp;
@@ -55,7 +61,6 @@ protected:
 	double _scat_ratio;
 	double _sigma_abs;
 	double _sigma_scat;
-	unsigned int _method;
 	double _element_width_mfp; //to ray trace easily
 
 	//data for tracking across elements
@@ -63,7 +68,6 @@ protected:
 	size_t _n_elements;		//for sampling which element a particle is born in
 	int _element_mat_ID;  //the material ID of the current element
 	bool _is_dead;		 //for terminating particle history
-	RNG* _rng;			
 
 	//tally arrays
 	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
@@ -81,7 +85,6 @@ protected:
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
-	void initializeHistory(); //Initialize weight, etc., that is done for all sources
 
 	//tallies
 	void scoreFaceTally();
@@ -89,12 +92,8 @@ protected:
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//base method, called to create a source particle
-	void sampleLinDiscontSource(std::vector<double>); //method used to sample lin discontinuous sources
-	void sampleConstExtSource();	//Don't know if this is actually ever needed? probably not
-	void sampleDirichletBCSource();	//Not yet implemented TODO
-	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines 
-	double getTotalSourceMagnitude(std::vector<double> nodal_values, double element_volume); //will need to change outside of 1D possibly
-
+	void initializeSamplingSource(string sampling_method); //determine where to put the particle
+	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime
 	
 public:
 

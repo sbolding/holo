@@ -132,6 +132,12 @@
     <ClInclude Include="DataTransfer.h">
       <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
+    <ClInclude Include="LinDiscSource.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResidualSource.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -171,9 +177,6 @@
       <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
     <ClCompile Include="Tally.cpp">
-      <Filter>Source Files\Ho Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SourceConstant.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="Source.cpp">
@@ -220,6 +223,12 @@
     </ClCompile>
     <ClCompile Include="DataTransfer.cpp">
       <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinDiscSource.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ResidualSource.cpp">
+      <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
