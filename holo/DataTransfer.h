@@ -23,7 +23,7 @@ protected:
 public:
 	DataTransfer(HoSolver* HoSolver, Mesh* mesh);
 	void updateLoSystem(); //Calculate the new LoData based on the Hodata.
-	virtual void calculateLoData(LoData1D & lo_data, int element_id);	//calculate the LoData parameters based on tallies of Ho solver;
+//	virtual void calculateLoData(LoData1D & lo_data, int element_id);	//calculate the LoData parameters based on tallies of Ho solver;
 };
 
 #endif  //_DATATRANSFER_H

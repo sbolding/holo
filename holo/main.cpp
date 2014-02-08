@@ -45,7 +45,7 @@ int main()
 	lo_solver->updateSystem();*/
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 5000000; //50000000
+	int n_histories = 500000; //50000000
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);
@@ -53,8 +53,8 @@ int main()
 	ho_solver->printAllTallies(cout);
 
 	//Transfer HO data to the LO system
-	DataTransfer data_transfer(ho_solver, &mesh_1D);
-	data_transfer.updateLoSystem();
+	/*DataTransfer data_transfer(ho_solver, &mesh_1D);
+	data_transfer.updateLoSystem();*/
 	
 	//temporary return
 	system("pause");
