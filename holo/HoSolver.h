@@ -45,6 +45,9 @@ protected:
 	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
 	RNG _rng; //random number generator
+
+	//methods for data transfer
+
 	
 public:
 

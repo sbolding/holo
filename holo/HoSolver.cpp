@@ -90,6 +90,8 @@ LoData1D HoSolver::getLoData(int element_id)
 	double phi_right_moment;
 	double left_face_value;
 	double right_face_value;
+	int left_face_id = _mesh->getFaceIndex(element_id, 0);
+	int right_face_id = _mesh->getFaceIndex(element_id, 1);
 
 	//based on relations between phi_zeta and phi_avg, can be derived from definition moments
 	phi_right_moment = 2.*_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 1);
@@ -103,8 +105,11 @@ LoData1D HoSolver::getLoData(int element_id)
 
 	//Assume alpha is average of these two for now, quite possibly totally wrong though
 	alpha = 0.5*(alpha_plus + alpha_minus);
-
 	lo_data.setSpatialClosureFactor(alpha);
+
+	//Calculate the different surface cosines
+	surf_cosines._mu_left_minus = _current_face_tallies[left_face_id]->getScore(_n_histories, 0) /
+		_flux_face_tallies[left_face_id]->getScore(_n_histories,0);
 /*	lo_data.setSurfAveragedCos(surf_cosines);
 	lo_data.setVolAveragedCos(vol_cosines); */
 
