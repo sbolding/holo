@@ -19,6 +19,7 @@ protected:
 
 	//Angle sampling methods
 	void sampleAngleIsotropic();
+
 	void sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias=false);  //will adjust weight to produce unbiased particle if source distribution is uniform over sphere, i.e., 1/4PI (default)
 
 	//Spatial sampling methods
