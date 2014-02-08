@@ -25,6 +25,7 @@ private:
 	
 public:
 	virtual void sampleSourceParticle(); 
+
 	LinDiscSource(Particle1D * particle, string sampling_method);
 
 };
