@@ -189,7 +189,6 @@ Element* Mesh::getElement(int element_id) const
 		std::cerr << "The elements were not ordered properly" << std::endl;
 	}
 	return element;
-	//
 }
 
 int Mesh::getFaceIndex(int element_id, int face_id) const

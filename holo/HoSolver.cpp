@@ -19,10 +19,10 @@ HoSolver::HoSolver()
 	exit(1);
 }
 
-HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method) :
+HoSolver::HoSolver(Mesh* mesh, int n_histories, int n_ang_bins_half_range, string method) :
 	_rng()
 {
-	_mesh = mesh;
+	_lo_mesh = mesh;
 	_n_histories = n_histories;
 	_current_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
 	_current_element_tallies.resize(mesh->getNumElems());  
@@ -44,7 +44,7 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, double ext_source, string method
 	}
 
 	//initialize particle class
-	_particle = new Particle1D(mesh, &_rng, method, _current_face_tallies,
+	_particle = new Particle1D(_ho_mesh, &_rng, method, _current_face_tallies,
 		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);
 }
 
@@ -75,7 +75,9 @@ void HoSolver::solveSystem()
 
 LoData1D HoSolver::getLoData(int element_id)
 {
-	//NOTE: all variables in this section are independent of the sources strength in the problem, 
+	std::cerr << "This doesnt work whatsoever\n";
+	exit(1);
+	/*//NOTE: all variables in this section are independent of the sources strength in the problem, 
 	//not in general true
 	//local variables to calculate	
 	LoData1D lo_data;
@@ -90,8 +92,8 @@ LoData1D HoSolver::getLoData(int element_id)
 	double phi_right_moment;
 	double left_face_value;
 	double right_face_value;
-	int left_face_id = _mesh->getFaceIndex(element_id, 0);
-	int right_face_id = _mesh->getFaceIndex(element_id, 1);
+	int left_face_id = _lo_mesh->getFaceIndex(element_id, 0);
+	int right_face_id = _lo_mesh->getFaceIndex(element_id, 1);
 
 	//based on relations between phi_zeta and phi_avg, can be derived from definition moments
 	phi_right_moment = 2.*_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 1);
@@ -110,10 +112,10 @@ LoData1D HoSolver::getLoData(int element_id)
 	//Calculate the different surface cosines
 	surf_cosines._mu_left_minus = _current_face_tallies[left_face_id]->getScore(_n_histories, 0) /
 		_flux_face_tallies[left_face_id]->getScore(_n_histories,0);
-/*	lo_data.setSurfAveragedCos(surf_cosines);
-	lo_data.setVolAveragedCos(vol_cosines); */
+//	lo_data.setSurfAveragedCos(surf_cosines);
+//	lo_data.setVolAveragedCos(vol_cosines); 
 
-	return lo_data;
+	return lo_data; */
 }
 
 void HoSolver::printAllTallies(std::ostream& out) const
@@ -124,7 +126,7 @@ void HoSolver::printAllTallies(std::ostream& out) const
 		<< "                   Element tallies\n"
 		<< "(ID) (Type) (- dir. spat. moments) (+ dir. spat. moments)\n"
 		<< "---------------------------------------------------------\n";
-	for (int elem = 0; elem < _mesh->getNumElems(); elem++)
+	for (int elem = 0; elem < _lo_mesh->getNumElems(); elem++)
 	{
 		printElementTally(elem, out);
 	}

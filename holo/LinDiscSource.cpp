@@ -8,11 +8,15 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	//need to initialize alias sampler
 	//get the area of the source, and the total external source nodal values
 
+	std::cerr << "source method needs updating to the ECMC elements" << endl;
+	system("pause");
+	exit(1);
+	/*
 	//local variables
-	std::vector<Element*>* elements;
+	std::vector<ECMCElement*>* elements;
 	elements = _particle->_mesh->getElements();
 	std::vector<double> source_strength_per_cell;
-	std::vector<Element*>::iterator it_el;          //element iterator
+	std::vector<ECMCElement*>::iterator it_el;          //element iterator
 	it_el = elements->begin();			            //initialize iterator
 	double ext_source_el;		             		//magnitude of external source of curr element
 	std::vector<double> total_src_nodal_values_el;
@@ -65,7 +69,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 
 	//Initially assume no BC source TODO
 	_BC_src_total = 0.0;
-	
+	*/
 }
 
 void LinDiscSource::sampleSourceParticle()
@@ -75,8 +79,8 @@ void LinDiscSource::sampleSourceParticle()
 	//is from isotropic source or if it is from 
 	if (_rng->rand_num() < _vol_src_total / (_BC_src_total + _vol_src_total))
 	{
-		_particle->_current_element = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
-		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element]); 
+		_particle->_current_element_ID = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
+		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element_ID]); 
 		//sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues()); //THIS MIGHT BE USEFUL IN A STANDARD MC CALC, but is essentially equivalent
 	}
 	else //Volumetric source

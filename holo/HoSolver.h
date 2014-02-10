@@ -32,7 +32,8 @@ class HoSolver
 {
 protected:
 
-	Mesh* _mesh;	//pointer to the mesh to be use
+	Mesh* _lo_mesh;	//pointer to the mesh to be use
+	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
 	//Tallies
 	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face current tallies, indexed using connectivity array
 	std::vector<CurrentElementTally*> _current_element_tallies; //vector of element current tallies 
@@ -49,7 +50,7 @@ protected:
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
-	HoSolver(Mesh* _mesh, int n_histories, double ext_source, string solver_mode); //For a constant external source
+	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode); //How many angular cells to split each spatial mesh cell into initially
 	void solveSystem(); //run the high order problem
 
 	//reader, printer, and interface functions

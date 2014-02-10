@@ -35,6 +35,10 @@ public:
 
 	//Access functions
 	std::vector<double> getElementDimensions() const;
+	Element* getSpatialElement() const
+	{
+		return _spatial_element;
+	}
 
 };
 

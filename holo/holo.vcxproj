@@ -82,6 +82,7 @@
     <ClInclude Include="FluxElementTally.h" />
     <ClInclude Include="FluxFaceTally.h" />
     <ClInclude Include="GlobalConstants.h" />
+    <ClInclude Include="HoMesh.h" />
     <ClInclude Include="HoSolver.h" />
     <ClInclude Include="LinDiscSource.h" />
     <ClInclude Include="LoData1D.h" />
@@ -119,6 +120,7 @@
     <ClCompile Include="FaceTally.cpp" />
     <ClCompile Include="FluxElementTally.cpp" />
     <ClCompile Include="FluxFaceTally.cpp" />
+    <ClCompile Include="HoMesh.cpp" />
     <ClCompile Include="HoSolver.cpp" />
     <ClCompile Include="LinDiscSource.cpp" />
     <ClCompile Include="LoData1D.cpp" />

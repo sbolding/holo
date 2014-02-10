@@ -49,8 +49,8 @@ int main()
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, ext_source, solver_mode);
-	ho_solver->solveSystem();
-	ho_solver->printAllTallies(cout);
+/*	ho_solver->solveSystem();
+	ho_solver->printAllTallies(cout); */
 
 	//Transfer HO data to the LO system
 	/*DataTransfer data_transfer(ho_solver, &mesh_1D);

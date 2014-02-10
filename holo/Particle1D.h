@@ -14,7 +14,7 @@
 #define _PARTICLE1D_H
 
 #include <string>
-#include "Mesh.h"
+#include "HoMesh.h"
 #include "RNG.h"
 #include "FaceTally.h"
 #include "ElementTally.h"
@@ -34,7 +34,7 @@ class Particle1D
 {
 protected:
 
-	Mesh* _mesh;
+	HoMesh* _mesh;
 	unsigned int _method; //type of MC
 	RNG* _rng;
 
@@ -61,15 +61,17 @@ protected:
 	double _scat_ratio;
 	double _sigma_abs;
 	double _sigma_scat;
-	double _element_width_mfp; //to ray trace easily
+	double _element_width_mfp; //in MFP to ray trace easily
+	double _element_angular_width; //for tallying
 
 	//data for tracking across elements
-	int _current_element;	//which element are you in
+	int _current_element_ID;	//which element are you in
+	ECMCElement* _current_element; //Pointer to the current ECMC element
+	Element* _spatial_element; //The spatial element you are currently in
 	size_t _n_elements;		//for sampling which element a particle is born in
-	int _element_mat_ID;  //the material ID of the current element
 	bool _is_dead;		 //for terminating particle history
 
-	//tally arrays
+	//tally arrays, will eventually be removed
 	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
 	std::vector<CurrentElementTally*> _current_element_tallies; //vector of all the volume tallies, indexed using connectivity array
 	std::vector<FluxFaceTally*> _flux_face_tallies;  //vector of all the face tallies, indexed using connectivity array
@@ -87,7 +89,7 @@ protected:
 	void terminateHistory(); //kill particle, do other appropriate things
 
 	//tallies
-	void scoreFaceTally();
+	//void scoreFaceTally(); //this doesnt make sense in ECMC context
 	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods
@@ -98,7 +100,7 @@ protected:
 public:
 
 	//constructors
-	Particle1D(Mesh* mesh, RNG* rng, string method_str,
+	Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 		std::vector<CurrentFaceTally*>& current_face_tallies,
 		std::vector<CurrentElementTally*>& current_element_tallies,
 		std::vector<FluxFaceTally*>& flux_face_tallies,

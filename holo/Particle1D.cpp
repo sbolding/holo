@@ -16,7 +16,7 @@
 #include "LinDiscSource.h"
 #include "ResidualSource.h"
 
-Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
+Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 	std::vector<CurrentFaceTally*>& current_face_tallies,
 	std::vector<CurrentElementTally*>& current_element_tallies,
 	std::vector<FluxFaceTally*>& flux_face_tallies,
@@ -27,7 +27,7 @@ Particle1D::Particle1D(Mesh* mesh, RNG* rng, string method_str,
 	_mesh = mesh;
 	_position_mfp = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
 	_n_elements = _mesh->getNumElems();
-	_current_element = 0;	   //particle needs to be somewhere to initialize material properties
+	_current_element_ID = 0;	   //particle needs to be somewhere to initialize material properties
 	updateElementProperties(); //intiialize to the material properties of the 0-th element, will likely change once sampling occurs, but must initialize
 	_method = HoMethods::method_map.at(method_str);
 	_is_dead = true;
@@ -125,24 +125,23 @@ inline double Particle1D::sampleAngleIsotropic()
 
 void Particle1D::leaveElement()
 {
-	scoreFaceTally(); //Score the surface tally, based on the current face
 	//Contribute to tallies, determine which element you are entering
-	if ( (_mu >= 0.0) && (_current_element < (_n_elements-1)) ) //stream to the cell to the right
+	if ( (_mu >= 0.0) && (_current_element_ID < (_n_elements-1)) ) //stream to the cell to the right
 	{
-		_current_element++; //move to the right one cell	
+		_current_element_ID++; //move to the right one cell	
 		updateElementProperties();
 		_position_mfp = 0.0; //at the left edge of the new cell
 		
 	}
-	else if( (_mu < 0.0) && (_current_element > 0) ) //stream to the cell to the left
+	else if( (_mu < 0.0) && (_current_element_ID > 0) ) //stream to the cell to the left
 	{
-		_current_element--;
+		_current_element_ID--;
 		updateElementProperties();
 		_position_mfp = _element_width_mfp; //particle is at right edge of the new cell
 	}
 	else //particle has left the problem domain
 	{
-		//cout << "I have leaked from element " << _current_element << endl;
+		//cout << "I have leaked from element " << _current_element_ID << endl;
 		if (HoController::PARTICLE_BALANCE)
 		{
 			_n_leak++;
@@ -220,21 +219,20 @@ inline double Particle1D::getRandNum()
 //for when particle has entered a new cell need to update the properties to the current cell
 void Particle1D::updateElementProperties()
 {
-	Element* element = _mesh->getElement(_current_element);
-	_element_width_mfp = _sigma_tot*element->getElementDimensions()[0]; //always need to update the width in general
-	if (element->getMaterialID() == _element_mat_ID)
+	_element_width_mfp = _sigma_tot*_current_element->getElementDimensions()[0]; //always need to update the width in general
+	_element_angular_width = _current_element->getElementDimensions().back(); //angular dimension is always last
+	if (_spatial_element == _current_element->getSpatialElement())
 	{
-		return; //no need to update
+		return; //no need to update, materials etc. are still the same
 	}
 	else
 	{
 		MaterialConstant mat;
-		mat = element->getMaterial();
+		mat = _current_element->getSpatialElement()->getMaterial();
 		_sigma_tot = mat.getSigmaT();
 		_mfp_tot = 1. / _sigma_tot;
 		_sigma_scat = mat.getSigmaS();
 		_sigma_abs = mat.getSigmaA();
-		_element_mat_ID = element->getMaterialID();
 		//Set the material data
 		if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem, maybe?
 		{
@@ -258,29 +256,13 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
 	
 	//increment tallies
-	_current_element_tallies[_current_element]->incrementScore(_weight,
+	_current_element_tallies[_current_element_ID]->incrementScore(_weight,
 		path_length_cm, _mu, volume_cm, normalized_position); 
-	_flux_element_tallies[_current_element]->incrementScore(_weight,
+	_flux_element_tallies[_current_element_ID]->incrementScore(_weight,
 		path_length_cm, _mu, volume_cm, normalized_position);
 }
 
-inline void Particle1D::scoreFaceTally()
-{
-	//The face tally is scored before you have left the cell, so everything is
-	//based on the cell you are leaving, not the cell you are entering
 
-	//determine face based on direction
-	int face_id = 0; //Leaving to the left
-	if (_mu >= 0.0) //Leaving to the right
-	{
-		face_id = 1;
-	}
-
-	//increment the correct tallies
-	int face_index = _mesh->getFaceIndex(_current_element,face_id);
-	_current_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0); //for one-d, per cm sq
-	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
-}
 
 inline void Particle1D::terminateHistory()
 {
