@@ -41,14 +41,25 @@ void Source::sampleAngleIsotropic(double min_cosine, double max_cosine, bool dir
 }
 
 
-void Source::sampleLinDiscontSource(std::vector<double> nodal_values)
+double Source::sampleLinDiscFunc(std::vector<double> nodal_values, double left_node_coor, double right_node_coor)
 {
+	std::cout << "This function has not been checked yet" << std::endl;
+	system("pause");
+	exit(1); 
+
 	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
+	double coordinate;
+	double width = (right_node_coor - left_node_coor);
+	if (width > 0.0)
+	{
+		std::cerr << "Passed in coordinates in reverse order to sampleLinDiscFunc, in source.cpp" << std::endl;
+		exit(1);
+	}
 
 	//If this routine is too slow, do a soft check to see if they are different first, then do the check below
 	if (abs(nodal_values[0] - nodal_values[1]) / nodal_values[0] < 1.E-10) //then effectively a constant source, sampling is uniform across the cell
 	{
-		_particle->_position_mfp = _rng->rand_num()*_particle->_element_width_mfp;
+		coordinate = _rng->rand_num()* width + left_node_coor;
 	}
 	else //need to sample from lin discontinuous source //THIS ROUTINE WORKS
 	{
@@ -56,8 +67,9 @@ void Source::sampleLinDiscontSource(std::vector<double> nodal_values)
 		left_hat = 2.0*nodal_values[0] / (nodal_values[1] + nodal_values[0]);
 		right_hat = 2.0 - left_hat;
 		//use direct inversion of CDF to sample position, based on quadratic formula
-		_particle->_position_mfp = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
-		_particle->_position_mfp /= (right_hat - left_hat);
-		_particle->_position_mfp *= _particle->_element_width_mfp; //convert to mfp
+		coordinate = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
+		coordinate /= (right_hat - left_hat);
+		coordinate = coordinate*width + left_node_coor; //convert to mfp
 	}
+	return coordinate;
 }

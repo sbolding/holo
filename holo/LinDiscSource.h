@@ -22,10 +22,10 @@ private:
 
 	AliasSampler* _alias_sampler; //pointer because it is dynamically allocated, may not be called if stratified sampling is used
     std::vector<std::vector<double>> _total_src_nodal_values; //nodal values of external source + (possibly scattering source), depending on method
+	void sampleLinDiscSource(std::vector<double> nodal_values); //Samples position based on linear discontinuous source
 	
 public:
 	virtual void sampleSourceParticle(); 
-
 	LinDiscSource(Particle1D * particle, string sampling_method);
 
 };

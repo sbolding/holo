@@ -41,7 +41,7 @@ protected:
 	std::vector<Node *> _nodes; //Pointers to node objects
 	std::vector<DirichletBC1D *> _dirichlet_bcs; //Pointers to bc's;
     int _dim;					      //dimension of the problem
-    std::vector<std::vector<int>> _connectivity_array; //first index is element, second is face of element
+    std::vector<std::vector<int>> _connectivity_array; //first index is element, second is faces of element
 	std::vector<MaterialConstant *> _mat_list;
 
 public:

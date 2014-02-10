@@ -138,6 +138,15 @@
     <ClInclude Include="ResidualSource.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="ECMCElement.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ECMCElement1D.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ECMCTally.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -228,6 +237,15 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="ResidualSource.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ECMCElement1D.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ECMCTally.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ECMCElement.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>

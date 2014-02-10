@@ -76,7 +76,7 @@ void LinDiscSource::sampleSourceParticle()
 	if (_rng->rand_num() < _vol_src_total / (_BC_src_total + _vol_src_total))
 	{
 		_particle->_current_element = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
-		sampleLinDiscontSource(_total_src_nodal_values[_particle->_current_element]); 
+		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element]); 
 		//sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues()); //THIS MIGHT BE USEFUL IN A STANDARD MC CALC, but is essentially equivalent
 	}
 	else //Volumetric source
@@ -91,4 +91,25 @@ void LinDiscSource::sampleSourceParticle()
 
 	//Update particle properties for the new cell
 	_particle->updateElementProperties();
+}
+
+void LinDiscSource::sampleLinDiscSource(std::vector<double> nodal_values)
+{
+	//Sample the position based on the nodal values, should write a function to get the area of the source from the element somehow
+
+	//If this routine is too slow, do a soft check to see if they are different first, then do the check below
+	if (abs(nodal_values[0] - nodal_values[1]) / nodal_values[0] < 1.E-10) //then effectively a constant source, sampling is uniform across the cell
+	{
+		_particle->_position_mfp = _rng->rand_num()*_particle->_element_width_mfp;
+	}
+	else //need to sample from lin discontinuous source //THIS ROUTINE WORKS
+	{
+		double left_hat, right_hat; //Normalized nodal values, such that CDF is normalized
+		left_hat = 2.0*nodal_values[0] / (nodal_values[1] + nodal_values[0]);
+		right_hat = 2.0 - left_hat;
+		//use direct inversion of CDF to sample position, based on quadratic formula
+		_particle->_position_mfp = -left_hat + sqrt(left_hat*left_hat + 2 * _rng->rand_num()*(right_hat - left_hat));
+		_particle->_position_mfp /= (right_hat - left_hat);
+		_particle->_position_mfp *= _particle->_element_width_mfp; //convert to mfp
+	}
 }
