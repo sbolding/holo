@@ -43,6 +43,9 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, int n_ang_bins_half_range, strin
 		_current_element_tallies[elem] = new CurrentElementTally(2,2);
 	}
 
+	//Create high order mesh
+	_ho_mesh = new HoMesh(_lo_mesh, n_ang_bins_half_range);
+
 	//initialize particle class
 	_particle = new Particle1D(_ho_mesh, &_rng, method, _current_face_tallies,
 		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);

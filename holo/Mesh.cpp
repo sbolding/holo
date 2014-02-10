@@ -213,3 +213,8 @@ void Mesh::printLDScalarFluxValues(std::ostream &out) const
 		(*it_el)->printLDScalarFluxValues(out);
 	}
 }
+
+int Mesh::getSpatialDimension() const
+{
+	return _dim;
+}

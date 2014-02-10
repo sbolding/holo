@@ -58,6 +58,7 @@ public:
 	int getNumElems() const;
 	int getNumNodes() const;
 	int getNumEdges() const;
+	int getSpatialDimension() const;
 	int getNumDirichletBC() const;
 	std::vector<Element* >* getElements(void);		//WARNING returns a pointer to elements, you can change it outside of class
 	std::vector < DirichletBC1D *> getDirichletBCs(void);
