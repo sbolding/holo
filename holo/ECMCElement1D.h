@@ -34,7 +34,7 @@ protected:
 
 public:
 	ECMCElement1D(Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
-	virtual ECMCElement* getDownStreamElement() const;
+	virtual ECMCElement1D* getDownStreamElement() const;
 };
 
 #endif  //_ECMCELEMENT1D_H

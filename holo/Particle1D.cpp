@@ -126,7 +126,7 @@ inline double Particle1D::sampleAngleIsotropic()
 void Particle1D::leaveElement()
 {
 	//Contribute to tallies, determine which element you are entering
-	scoreFaceTally();
+//	scoreFaceTally();
 	if (_current_element->getDownStreamElement() == NULL) //Leaked out of the problem
 	{
 		//cout << "I have leaked from element " << _current_element_ID << endl;
@@ -255,8 +255,6 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 	_flux_element_tallies[_current_element_ID]->incrementScore(_weight,
 		path_length_cm, _mu, volume_cm, normalized_position);
 }
-
-
 
 inline void Particle1D::terminateHistory()
 {

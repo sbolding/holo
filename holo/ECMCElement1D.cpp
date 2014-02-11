@@ -21,7 +21,7 @@ _position_center(_coordinates[0]), _mu_center(_coordinates[1])
 	_tally = new ECMCTally(); //intializes the correct size
 }
 
-ECMCElement* ECMCElement1D::getDownStreamElement() const
+ECMCElement1D* ECMCElement1D::getDownStreamElement() const
 {
 	return _down_stream_element;
 }
