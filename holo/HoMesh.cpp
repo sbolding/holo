@@ -14,55 +14,101 @@
 
 HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 {
-	//Local variables
+	if (n_ang_cells_half_range < 1)
+	{
+		n_ang_cells_half_range = 1; //must have at least 1 cell in each direction
+		std::cout << "Creating Ho mesh with 2 elements..." << std::endl;
+	}
+
 	std::vector<Element*>* spatial_elements;
 	spatial_elements = lo_mesh->getElements();
-	std::vector<Element*>::iterator it_el;          //element iterator
-	it_el = spatial_elements->begin();
+	Element* spat_elem;        //pointer to current spatial element
 
 	//TODO this is an angular connectivity array, currently not used, but correctly constructed
 	std::vector<std::vector<int>> connectivity_array;
-	connectivity_array.resize(lo_mesh->getNumElems());
+	connectivity_array.resize(lo_mesh->getNumElems()); //each member is a list of ECMC elements that correspond to each spatial cell
 
 
 	//create the number of angular elements needed for both half ranges
 	if (lo_mesh->getSpatialDimension() == 1)
 	{
 		//Local dimensions to pass into element constructors
-		std::vector<double> dimensions, coordinates;
-		std::vector<double> nodal_locations; //edge node values
+		std::vector<double> dimensions, coordinates; //width_X,width_mu, X_i, mu_i
 		dimensions.resize(2);
 		coordinates.resize(2);
-		double mu_center = 0.0; //the center of each element in mu
-		double x_center = 0.0;  // the center of each element in x
+		double mu_center=0.0; //the center of each element in mu
+		double x_center;  // the center of each element in x
+		ECMCElement1D* down_stream_element = NULL;
+		ECMCElement1D* last_element = NULL;
 		
 		//all angular widths are the same before refinement
-		dimensions[1] = 1. / (double)n_ang_cells_half_range;
+		dimensions[1] = 1. / (double)(n_ang_cells_half_range);
+		mu_center = -1 - 0.5*dimensions[1]; //starting value for mu_center (ghost cell)
 
 		//create the elments for negative flow direction first, currently makes in reverse order because it is easiest
+		//to create the elements upstream, and the order in the array doesnt actually matter
 		for (int i_ang = 0; i_ang < n_ang_cells_half_range; i_ang++)
-		{
-			//Loop over the lo mesh elements
-			for (; it_el != spatial_elements->end(); it_el++)
-			{
-				//determine dimensions for the element
-				dimensions[0] = (*it_el)->getElementDimensions()[0]; //width_x
-				x_center += dimensions[0] * 0.5; //move the center forward each time
-				coordinates[0] = x_center;
-				mu_center += dimensions[1] * 0.5;
-				coordinates[1] = mu_center;
-
-				if (it_el == spatial_elements->end() - 1)
+		{	
+			mu_center += dimensions[1];
+			coordinates[1] = mu_center;
+			
+			for (int it_el = 0; it_el<spatial_elements->size(); it_el++)
+			{	
+				spat_elem = (*spatial_elements)[it_el];
+				if (it_el == 0) //Edge elements have a null pointer
 				{
-
+					x_center = -0.5*spat_elem->getElementDimensions()[0];
+					down_stream_element = NULL;
 				}
-				_elements.push_back(new ECMCElement1D(*it_el, dimensions, coordinates));
+				else
+				{
+					down_stream_element = last_element;
+				}
+				
+				//determine dimensions for the element
+				dimensions[0] = spat_elem->getElementDimensions()[0]; //width_x
+				x_center += dimensions[0]; //move the center forward each time
+				coordinates[0] = x_center;
+
+				//create the element
+				last_element = new ECMCElement1D(spat_elem, down_stream_element, dimensions, coordinates);
+				_elements.push_back(last_element);
+				connectivity_array[it_el].push_back(_elements.size() - 1); //add last element to correct connectivity array
 			}
-
-
-
 		}
 
+		//store x_center at the end for easy access next time
+		double x_center_start = x_center;
+
+		//Construct elements for positive flow direction, traverse loop up stream
+		for (int i_ang = 0; i_ang < n_ang_cells_half_range; i_ang++)
+		{
+			mu_center += dimensions[1];
+			coordinates[1] = mu_center;
+			for (int it_el = spatial_elements->size()-1; it_el >= 0; it_el--)
+			{
+				spat_elem = (*spatial_elements)[it_el];
+				if (it_el == spatial_elements->size()-1) //Edge elements have a null pointer
+				{
+					x_center = x_center_start;
+					down_stream_element = NULL;
+				}
+				else
+				{
+					down_stream_element = last_element;
+				}
+
+				//determine dimensions for the element
+				dimensions[0] = spat_elem->getElementDimensions()[0]; //width_x
+				x_center += dimensions[0]; //move the center forward each time
+				coordinates[0] = x_center;
+
+				//create the element
+				last_element = new ECMCElement1D(spat_elem, down_stream_element, dimensions, coordinates);
+				_elements.push_back(last_element);
+				connectivity_array[it_el].push_back(_elements.size() - 1); //add last element to correct connectivity array
+			}
+		}
 	}
 	else
 	{

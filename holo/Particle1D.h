@@ -38,7 +38,7 @@ protected:
 	unsigned int _method; //type of MC
 	RNG* _rng;
 
-	//Sampling properties, use friend classes that handles the source sampling
+	//Sampling properties, use friend classes that handle the source sampling
 	friend class Source;
 	friend class LinDiscSource;
 	friend class ResidualSource;
@@ -89,7 +89,7 @@ protected:
 	void terminateHistory(); //kill particle, do other appropriate things
 
 	//tallies
-	//void scoreFaceTally(); //this doesnt make sense in ECMC context
+	void scoreFaceTally(); //this doesnt make sense in ECMC context, just for verifying particles are being tracked properly
 	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods

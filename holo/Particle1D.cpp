@@ -28,6 +28,7 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 	_position_mfp = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
 	_n_elements = _mesh->getNumElems();
 	_current_element_ID = 0;	   //particle needs to be somewhere to initialize material properties
+	_current_element = _mesh->getElement(0);
 	updateElementProperties(); //intiialize to the material properties of the 0-th element, will likely change once sampling occurs, but must initialize
 	_method = HoMethods::method_map.at(method_str);
 	_is_dead = true;
@@ -46,7 +47,7 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 	_flux_face_tallies = flux_face_tallies;
 	_flux_element_tallies = flux_element_tallies;
 
-	//Initialize the data needed for source sampling
+	//Initialize the data needed for source sampling, must call this routine last!!!
 	initializeSamplingSource("standard");
 }
 
@@ -108,8 +109,7 @@ void Particle1D::sampleCollision()
 void Particle1D::initializeSamplingSource(string sampling_method)
 {
 	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(this, sampling_method);
-
+	_source = new LinDiscSource(this, sampling_method); //this is a complete pointer to particle
 }
 
 void Particle1D::sampleSourceParticle()
@@ -126,20 +126,8 @@ inline double Particle1D::sampleAngleIsotropic()
 void Particle1D::leaveElement()
 {
 	//Contribute to tallies, determine which element you are entering
-	if ( (_mu >= 0.0) && (_current_element_ID < (_n_elements-1)) ) //stream to the cell to the right
-	{
-		_current_element_ID++; //move to the right one cell	
-		updateElementProperties();
-		_position_mfp = 0.0; //at the left edge of the new cell
-		
-	}
-	else if( (_mu < 0.0) && (_current_element_ID > 0) ) //stream to the cell to the left
-	{
-		_current_element_ID--;
-		updateElementProperties();
-		_position_mfp = _element_width_mfp; //particle is at right edge of the new cell
-	}
-	else //particle has left the problem domain
+	scoreFaceTally();
+	if (_current_element->getDownStreamElement() == NULL) //Leaked out of the problem
 	{
 		//cout << "I have leaked from element " << _current_element_ID << endl;
 		if (HoController::PARTICLE_BALANCE)
@@ -148,11 +136,16 @@ void Particle1D::leaveElement()
 		}
 		terminateHistory();
 	}
+	else
+	{
+		_current_element = _current_element->getDownStreamElement(); //move to the downstream element
+	}
 }
 
 void Particle1D::runHistory()
 {
 	//TODO need to pull the streaming stuff out into its own function again so it will be easier to implement the derived classes
+	//and to allow for super duper efficient ray tracing
 	//cout << "starting history..." << endl;
 	//start history
 	initializeHistory(); //Reset the basic parameters
@@ -248,6 +241,7 @@ void Particle1D::updateElementProperties()
 
 void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 {
+	//UPDATE FOR ECMC TALLY
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
 	//int _elem_id = _current_element;

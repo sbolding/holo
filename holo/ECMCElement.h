@@ -35,6 +35,7 @@ public:
 
 	//Access functions
 	std::vector<double> getElementDimensions() const;
+	virtual ECMCElement* getDownStreamElement() const;
 	Element* getSpatialElement() const
 	{
 		return _spatial_element;

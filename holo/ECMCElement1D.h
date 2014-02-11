@@ -33,7 +33,8 @@ protected:
 	ECMCElement1D* _down_stream_element;
 
 public:
-	ECMCElement1D(Element* element, ECMCElement1D* down_stream_element, std::vector<double> angular_nodes, std::vector<double> spatial_nodes);
+	ECMCElement1D(Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
+	virtual ECMCElement* getDownStreamElement() const;
 };
 
 #endif  //_ECMCELEMENT1D_H

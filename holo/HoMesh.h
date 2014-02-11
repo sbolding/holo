@@ -18,6 +18,7 @@
 #define _HOMESH_H
 
 #include "ECMCElement.h"
+#include "ECMCElement1D.h"
 #include "Mesh.h"
 
 
