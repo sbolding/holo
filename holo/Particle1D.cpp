@@ -137,9 +137,18 @@ void Particle1D::leaveElement()
 		}
 		terminateHistory();
 	}
-	else
+	else //move to the new element and update properties
 	{
 		_current_element = _current_element->getDownStreamElement(); //move to the downstream element
+		updateElementProperties();
+		if (_mu > 0) //moving to the right
+		{
+			_position_mfp = 0.0;
+		}
+		else
+		{
+			_position_mfp = _element_width_mfp;
+		}
 	}
 }
 
