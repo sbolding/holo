@@ -25,14 +25,14 @@
 class HoMesh
 {
 protected:
-	std::vector<ECMCElement*> _elements;
+	std::vector<ECMCElement1D*> _elements; //I think this can be generalized to ECMCElements by using a virtual destructor and dynamic_cast in particle1D class
 	int _n_elems;
 	HoMesh(); //don't use
 public:
 	HoMesh(Mesh* mesh, int n_ang_cells_half_range); //how much to divide the angular cells into
-	ECMCElement* getElement(int element_id) const;
+	ECMCElement1D* getElement(int element_id) const; 
 	int getNumElems() const;
-	std::vector<ECMCElement* >* getElements(void);
+	std::vector<ECMCElement1D* >* getElements(void);
 };
 
 #endif  //_HOMESH_H

@@ -34,7 +34,12 @@ protected:
 
 public:
 	ECMCElement1D(Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
+
+	//methods only used by Particle1D
 	virtual ECMCElement1D* getDownStreamElement() const;
+	double getAngularWidth() const;	//width of element in angle
+	double getSpatialWidth() const; //width of element in x
+	double getAngularCoordinate() const; //center of element in angle
 };
 
 #endif  //_ECMCELEMENT1D_H

@@ -220,6 +220,10 @@ void Particle1D::updateElementProperties()
 	}
 	else
 	{
+		//check to see if materials have changed
+		_spatial_element = _current_element->getSpatialElement();
+		//Determine if material has changed
+		
 		MaterialConstant mat;
 		mat = _current_element->getSpatialElement()->getMaterial();
 		_sigma_tot = mat.getSigmaT();

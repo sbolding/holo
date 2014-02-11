@@ -8,32 +8,33 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	//need to initialize alias sampler
 	//get the area of the source, and the total external source nodal values
 
-	std::cerr << "source method needs updating to the ECMC elements" << endl;
-	system("pause");
-	exit(1);
-	/*
 	//local variables
-	std::vector<ECMCElement*>* elements;
+	std::vector<ECMCElement1D*>* elements;
 	elements = _particle->_mesh->getElements();
 	std::vector<double> source_strength_per_cell;
-	std::vector<ECMCElement*>::iterator it_el;          //element iterator
+	std::vector<ECMCElement1D*>::iterator it_el;          //element iterator
 	it_el = elements->begin();			            //initialize iterator
-	double ext_source_el;		             		//magnitude of external source of curr element
+	double ext_source_el;		             		//magnitude of external source of curren ECMC element, units of p/sec
 	std::vector<double> total_src_nodal_values_el;
 
 	//Local variables to prevent repeated accessing of particle class
-	double method = _particle->_method;
+	unsigned int method = _particle->_method;
+	double angular_probability; //probability of being in each angular bin, assuming isotropic
+	Element* spatial_element; //spatial element corresponding to the current element
 
 	for (; it_el != elements->end(); it_el++)
 	{
 		//Initialize to the external source strength
 		try
 		{
-			total_src_nodal_values_el = (*it_el)->getExtSourceNodalValues(); //initialize to ext source values
+			spatial_element = (*it_el)->getSpatialElement();
+			angular_probability = 0.5*(*it_el)->getAngularWidth();
+			
+			total_src_nodal_values_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
 			if (method == HoMethods::HOLO_ECMC || method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 			{
-				double sigma_s_el = (*it_el)->getMaterial().getSigmaS();
-				std::vector<double> scat_src_nodal_values_el = (*it_el)->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
+				double sigma_s_el = spatial_element->getMaterial().getSigmaS();
+				std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
 				if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
 				{
 					std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
@@ -44,10 +45,15 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 					total_src_nodal_values_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
 				}
 			}
-			ext_source_el = getAreaLinDiscFunction(total_src_nodal_values_el, (*it_el)->getElementDimensions()[0]);
+			ext_source_el = getAreaLinDiscFunction(total_src_nodal_values_el, spatial_element->getElementDimensions()[0]) 
+				* angular_probability; //fraction in this angular element, units of p / (sec-str)
+			for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //multiply by angular fraction
+			{
+				total_src_nodal_values_el[node] *= angular_probability; //this is probably not necessary, since normalized anyways
+			}
 			_total_src_nodal_values.push_back(total_src_nodal_values_el);
 			source_strength_per_cell.push_back(ext_source_el);
-			_vol_src_total += ext_source_el;
+			_vol_src_total += ext_source_el; //units of p / sec
 		}
 		catch (...)
 		{
@@ -69,29 +75,32 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 
 	//Initially assume no BC source TODO
 	_BC_src_total = 0.0;
-	*/
+
 }
 
 void LinDiscSource::sampleSourceParticle()
 {
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)
 	//Store the entire source (ext + scattering) into the other one and compute its area.  With the area you can easily determine if sample
-	//is from isotropic source or if it is from 
+	//is from isotropic source or if it is from boundary
 	if (_rng->rand_num() < _vol_src_total / (_BC_src_total + _vol_src_total))
 	{
 		_particle->_current_element_ID = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
-		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element_ID]); 
-		//sampleLinDiscontSource(_mesh->getElement(_current_element)->getExtSourceNodalValues()); //THIS MIGHT BE USEFUL IN A STANDARD MC CALC, but is essentially equivalent
+		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
+		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element_ID]); //sample position in bin
+		
+		//determine direction within the element
+		double mu_center = _particle->_current_element->getAngularCoordinate();
+		double half_angular_width = 0.5*_particle->_current_element->getAngularWidth();
+
+		sampleAngleIsotropic(mu_center - half_angular_width, mu_center + half_angular_width); //sample isotropically within the bin
+		
 	}
-	else //Volumetric source
+	else //Boundary Source
 	{
 		std::cerr << "Sampling of BC source is not yet implemented" << std::endl;
 		exit(1);
 	}
-
-	//Assume all sources have isotropic angular distribution TODO this will need to be updated for the case of boundary sources, just add over
-	//loaded function for sampleAngleIsotropic that takes a start and end range of angle to be allowed in and adjusts weight accordingly
-	Source::sampleAngleIsotropic();
 
 	//Update particle properties for the new cell
 	_particle->updateElementProperties();

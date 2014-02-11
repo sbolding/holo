@@ -100,7 +100,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 
 				//determine dimensions for the element
 				dimensions[0] = spat_elem->getElementDimensions()[0]; //width_x
-				x_center += dimensions[0]; //move the center forward each time
+				x_center -= dimensions[0]; //move the center backward each time, moving to the left
 				coordinates[0] = x_center;
 
 				//create the element
@@ -122,7 +122,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 	_n_elems = _elements.size();
 }
 
-ECMCElement* HoMesh::getElement(int element_id) const
+ECMCElement1D* HoMesh::getElement(int element_id) const
 {
 	return _elements[element_id];
 }
@@ -132,7 +132,7 @@ int HoMesh::getNumElems() const
 	return _n_elems;
 }
 
-std::vector<ECMCElement* >* HoMesh::getElements(void)
+std::vector<ECMCElement1D* >* HoMesh::getElements(void)
 {
 	return &_elements; //pointer, be careful not to change these values
 }

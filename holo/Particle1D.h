@@ -66,6 +66,7 @@ protected:
 
 	//data for tracking across elements
 	int _current_element_ID;	//which element are you in
+	int _current_mat_ID;  //Material of current element
 	ECMCElement1D* _current_element; //Pointer to the current ECMC element
 	Element* _spatial_element; //The spatial element you are currently in
 	size_t _n_elements;		//for sampling which element a particle is born in

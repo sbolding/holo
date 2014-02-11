@@ -19,11 +19,10 @@ protected:
 
 	//Angle sampling methods
 	void sampleAngleIsotropic();
-	void sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias=false);  //will adjust weight to produce unbiased particle if source distribution is uniform over sphere, i.e., 1/4PI (default)
+	void sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias=true);  //if true, will adjust weight to produce unbiased particle if source distribution is uniform over sphere, i.e., 1/4PI 
 
 	//Spatial sampling methods
 	double sampleLinDiscFunc(std::vector<double>, double left_node_coor, double right_node_coor); // method samples a coordinate between left and right coors, from linear fn.
-	//void sampleConstExtSource();	//Don't know if this is actually ever needed? probably not
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:

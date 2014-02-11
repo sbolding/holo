@@ -21,10 +21,6 @@ void Source::sampleAngleIsotropic()
 
 void Source::sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias)
 {
-	std::cerr << "This code has not been checked yet, really only needs to be in BC source class" << std::endl;
-	system("pause");
-	exit(1);
-
 	if (min_cosine > max_cosine)
 	{
 		std::cerr << "Passed a min cosine greater than max cosine to sampling routine" << std::endl;

@@ -25,3 +25,18 @@ ECMCElement1D* ECMCElement1D::getDownStreamElement() const
 {
 	return _down_stream_element;
 }
+
+double ECMCElement1D::getSpatialWidth() const
+{
+	return _width_spatial;
+}
+
+double ECMCElement1D::getAngularWidth() const
+{
+	return _width_angle;
+}
+
+double ECMCElement1D::getAngularCoordinate() const
+{
+	return _mu_center;
+}
