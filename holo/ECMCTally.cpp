@@ -16,6 +16,11 @@
 ECMCTally::ECMCTally() : _angular_moment(1, 1), _spatial_moments(1,2)
 {}
 
-
+void ECMCTally::incrementScores(double weight, double path_length, double normalized_dir_cosine,
+	double volume, double normalized_position)
+{
+	_angular_moment.incrementScore(weight, path_length, normalized_dir_cosine, volume, normalized_position);
+	_spatial_moments.incrementScore(weight, path_length, normalized_dir_cosine, volume, normalized_position);
+}
 
 

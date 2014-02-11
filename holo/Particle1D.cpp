@@ -25,10 +25,11 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 {
 	_rng = rng;
 	_mesh = mesh;
-	_position_mfp = -999999999999.; //initialize outside teh domain to check that source samplign works correctly
+	_position_mfp = -9999.; //initialize outside teh domain to check that source samplign works correctly
 	_n_elements = _mesh->getNumElems();
 	_current_element_ID = 0;	   //particle needs to be somewhere to initialize material properties
-	_current_element = _mesh->getElement(0);
+	_current_element = _mesh->getElement(_current_element_ID);
+	_current_mat_ID = 0;
 	updateElementProperties(); //intiialize to the material properties of the 0-th element, will likely change once sampling occurs, but must initialize
 	_method = HoMethods::method_map.at(method_str);
 	_is_dead = true;
@@ -126,7 +127,7 @@ inline double Particle1D::sampleAngleIsotropic()
 void Particle1D::leaveElement()
 {
 	//Contribute to tallies, determine which element you are entering
-//	scoreFaceTally();
+	scoreFaceTally();
 	if (_current_element->getDownStreamElement() == NULL) //Leaked out of the problem
 	{
 		//cout << "I have leaked from element " << _current_element_ID << endl;
@@ -222,10 +223,14 @@ void Particle1D::updateElementProperties()
 	{
 		//check to see if materials have changed
 		_spatial_element = _current_element->getSpatialElement();
-		//Determine if material has changed
+		if (_current_mat_ID == _spatial_element->getMaterialID())
+		{
+			return;
+		}
 		
 		MaterialConstant mat;
 		mat = _current_element->getSpatialElement()->getMaterial();
+		_current_mat_ID = mat.getID();
 		_sigma_tot = mat.getSigmaT();
 		_mfp_tot = 1. / _sigma_tot;
 		_sigma_scat = mat.getSigmaS();
@@ -245,19 +250,17 @@ void Particle1D::updateElementProperties()
 
 void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 {
-	//UPDATE FOR ECMC TALLY
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
-	//int _elem_id = _current_element;
+	double angular_width = _current_element->getAngularWidth();
 	double path_length_cm = abs((path_start_mfp - path_end_mfp)*_mfp_tot/_mu);
-	double volume_cm = _element_width_mfp*_mfp_tot;//*1.0cm*1.0cm = h_x(cm^3)
+	double volume_cm_str = _element_width_mfp*_mfp_tot*angular_width;//*1.0cm*1.0cm*delta_mu = h_xh_mu(cm^3)
 	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
+	double normalized_direction = ((_mu - _current_element->getAngularCoordinate()) / angular_width) + 0.5; //normalized direction cosine
 	
-	//increment tallies
-	_current_element_tallies[_current_element_ID]->incrementScore(_weight,
-		path_length_cm, _mu, volume_cm, normalized_position); 
-	_flux_element_tallies[_current_element_ID]->incrementScore(_weight,
-		path_length_cm, _mu, volume_cm, normalized_position);
+	//ScoreECMCTallies, using a normalized direction cosine to ensure positive tallies
+	_current_element->incrementTallyScores(_weight, path_length_cm, 
+		normalized_direction, volume_cm_str, normalized_position);
 }
 
 inline void Particle1D::terminateHistory()
@@ -287,3 +290,22 @@ inline void Particle1D::initializeHistory()
 	_weight = 1.0;
 	_is_dead = false;
 }
+
+inline void Particle1D::scoreFaceTally()
+{
+	//The face tally is scored before you have left the cell, so everything is
+	//based on the cell you are leaving, not the cell you are entering
+
+	//determine face based on direction
+	int face_id = 0; //Leaving to the left
+	if (_mu >= 0.0) //Leaving to the right
+	{
+		face_id = 1;
+	}
+
+	//increment the correct tallies
+	int face_index = _spatial_element->getID()+face_id;
+	_current_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0); //for one-d, per cm sq
+	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
+}
+

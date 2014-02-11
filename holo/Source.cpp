@@ -26,7 +26,7 @@ void Source::sampleAngleIsotropic(double min_cosine, double max_cosine, bool dir
 		std::cerr << "Passed a min cosine greater than max cosine to sampling routine" << std::endl;
 		exit(1);
 	}
-	_particle->_mu = _rng->rand_num()*(max_cosine - min_cosine) - min_cosine;
+	_particle->_mu = _rng->rand_num()*(max_cosine - min_cosine) + min_cosine;
 
 	//Adjust weight to be unbiased if necessary
 	if (!directional_bias)

@@ -40,3 +40,9 @@ double ECMCElement1D::getAngularCoordinate() const
 {
 	return _mu_center;
 }
+
+void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, double normalized_dir_cosine,
+	double volume, double normalized_position) //this method will normalize the direction cosine
+{
+	_tally->incrementScores(weight, path_length_cm, normalized_dir_cosine, volume, normalized_position);
+}

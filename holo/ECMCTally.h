@@ -23,6 +23,8 @@ protected:
 	FluxElementTally _spatial_moments;
 public:
 	ECMCTally(); //default constructor, will initialize the spatial moments
+	void incrementScores(double weight, double path_length, double normalized_dir_cosine, 
+		double volume, double normalized_position); //Using a normalized dir_cosine produces an always positive value for moment
 };
 
 #endif  //_ECMCTALLY_H

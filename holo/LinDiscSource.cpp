@@ -87,6 +87,7 @@ void LinDiscSource::sampleSourceParticle()
 	{
 		_particle->_current_element_ID = _alias_sampler->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
 		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
+		_particle->updateElementProperties(); 
 		sampleLinDiscSource(_total_src_nodal_values[_particle->_current_element_ID]); //sample position in bin
 		
 		//determine direction within the element
@@ -102,8 +103,6 @@ void LinDiscSource::sampleSourceParticle()
 		exit(1);
 	}
 
-	//Update particle properties for the new cell
-	_particle->updateElementProperties();
 }
 
 void LinDiscSource::sampleLinDiscSource(std::vector<double> nodal_values)
