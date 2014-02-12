@@ -20,6 +20,7 @@
 #include "ECMCElement.h"
 #include "ECMCElement1D.h"
 #include "Mesh.h"
+#include <ostream>
 
 
 class HoMesh
@@ -33,6 +34,10 @@ public:
 	ECMCElement1D* getElement(int element_id) const; 
 	int getNumElems() const;
 	std::vector<ECMCElement1D* >* getElements(void);
+
+	//computing angular flux
+	void computeAngularFluxes(int n_histories, double total_src_strength = 1.0); //compute moments of angular flux based on n_histories and total source strength (assumed 1 if normalizing to per source particle)
+	void printAngularFluxes(std::ostream &out);
 };
 
 #endif  //_HOMESH_H

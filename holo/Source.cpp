@@ -12,6 +12,8 @@ Source::Source(Particle1D* particle, string sampling_method)
 	_particle = particle;
 	_rng = particle->_rng;
 	_sampling_method = HoMethods::sampling_map.at(sampling_method);
+	_vol_src_total = 0.0;
+	_BC_src_total = 0.0;
 }
 
 void Source::sampleAngleIsotropic()
@@ -35,7 +37,6 @@ void Source::sampleAngleIsotropic(double min_cosine, double max_cosine, bool dir
 	}
 
 }
-
 
 double Source::sampleLinDiscFunc(std::vector<double> nodal_values, double left_node_coor, double right_node_coor)
 {
@@ -68,4 +69,34 @@ double Source::sampleLinDiscFunc(std::vector<double> nodal_values, double left_n
 		coordinate = coordinate*width + left_node_coor; //convert to mfp
 	}
 	return coordinate;
+}
+
+void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el, double & tot_src_strength,
+	Element* spatial_element, ECMCElement1D* element)
+{
+	double angular_probability = 0.5*element->getAngularWidth();
+
+	total_src_nodal_values_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
+	if (_particle->_method == HoMethods::HOLO_ECMC || _particle->_method == HoMethods::HOLO_STANDARD_MC) //append scattering source
+	{
+		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
+		std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
+		if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
+		{
+			std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
+			exit(0);
+		}
+		for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
+		{
+			total_src_nodal_values_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
+		}
+	}
+	tot_src_strength = getAreaLinDiscFunction(total_src_nodal_values_el, spatial_element->getElementDimensions()[0])
+		* angular_probability; //fraction in this angular element, units of p / (sec-str)
+	for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //multiply by angular fraction
+	{
+		total_src_nodal_values_el[node] *= angular_probability; //this is probably not necessary, since normalized anyways
+	}
+
+
 }

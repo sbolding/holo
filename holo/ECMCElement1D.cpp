@@ -46,3 +46,40 @@ void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, d
 {
 	_tally->incrementScores(weight, path_length_cm, normalized_dir_cosine, volume, normalized_position);
 }
+
+void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_strength) 
+{
+	std::vector<double> spatial_moments = _tally->getSpatialMoments(n_histories); //0th and 1st spatial moment
+	double angular_moment = _tally->getAngularMoment(n_histories);
+	_psi_average += spatial_moments[0]*total_src_strength;
+
+	if (abs(total_src_strength - 1.0) > 1.0E-13)
+	{
+		std::cerr << "Have not checked that compute Angular Flux DOF works for a scaled ext source strength";
+		system("pause");
+		exit(1);
+	}
+
+	//calculate moments based on LD closure, adding the moments from the tallies
+	//if standard MC, tallies are the the angular flux, else tallies are the additive error
+	_psi_x += 6 * (spatial_moments[1] + _width_spatial*0.5*spatial_moments[0])*total_src_strength; 
+	_psi_mu += 6 * (angular_moment + _width_angle*0.5*spatial_moments[0])*total_src_strength;      
+
+	//reset tallies to zero
+	_tally->reset();
+}
+
+void ECMCElement1D::printAngularFluxDOF(std::ostream &out) const
+{
+	using std::ios;
+
+	out << " psi avg. = ";
+	out.setf(ios::scientific);
+	out.precision(8);
+	out.width(12);
+	out << _psi_average << " psi x. = ";
+	out.width(12);
+	out << _psi_x << " psi mu. =";
+	out.width(12);
+	out << _psi_mu << std::endl;
+}

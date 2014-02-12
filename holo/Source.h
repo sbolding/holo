@@ -3,6 +3,8 @@
 
 #include <vector>
 #include "RNG.h"
+#include "Element.h"
+#include "ECMCElement1D.h"
 
 class Particle1D; //forward declaration
 
@@ -23,6 +25,11 @@ protected:
 
 	//Spatial sampling methods
 	double sampleLinDiscFunc(std::vector<double>, double left_node_coor, double right_node_coor); // method samples a coordinate between left and right coors, from linear fn.
+
+	//Useful tools for use with LD sources
+	void mapExtSrcToElement(std::vector<double> & tot_src_nodal_values_el, double & tot_src_strength,
+		Element* spatial_element, ECMCElement1D* element); //for computing tot src values on elements
+	void mapExtSrcNodalValues(std::vector<double>)
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:

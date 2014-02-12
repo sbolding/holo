@@ -40,6 +40,9 @@ public:
 	double getStdDev(int n_histories, int angular_bin, int spatial_moment) const; //return the absolute stnadard deviation
 	double getStdDev(int n_histories, int angular_bin) const; //return the absolute standard deviation
 	std::vector<std::vector<double>> getStdDevs(int n_histories) const;
+
+	//Manipulating functions
+	void reset(); //set tally bins to zero
 	
 };
 

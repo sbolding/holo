@@ -15,6 +15,8 @@
 
 #include "ECMCTally.h"
 #include "Element.h"
+#include <iostream>
+#include <ios>
 
 class ECMCElement
 {
@@ -32,6 +34,10 @@ public:
 	//Constructors
 	ECMCElement(Element* spatial_element, std::vector<double> dimensions, std::vector<double> coordinates);
 	ECMCElement(Element* spatial_element, int number_spatial_dimensions, int number_angular_dimensions);  //let derived classes set actual values
+
+	//virtual functions
+	virtual void computeAngularFLuxDOF(int n_histories, double total_src_strength=1.0) = 0; //optional ext src strength, 1.0 normalizes to per source particle
+	virtual void printAngularFluxDOF(std::ostream & out) const = 0;
 
 	//Access functions
 	std::vector<double> getElementDimensions() const;

@@ -65,12 +65,23 @@ void HoSolver::solveSystem()
 		}
 		_particle->runHistory();
 	}
-
+	_ho_mesh->computeAngularFluxes(_n_histories, 1.0);
 
 	if (HoController::PARTICLE_BALANCE) //for debugging
 	{
 		_particle->printParticleBalance(_n_histories);
 	}
+	if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
+	{
+		return;
+	}
+	else //ECMC method
+	{
+		//compute new residual source
+		_particle->computeResidualSource();
+	}
+
+
 		
 }
 
@@ -141,6 +152,9 @@ void HoSolver::printAllTallies(std::ostream& out) const
 	{
 		printFaceTally(face, out);
 	}
+
+	//Print out the homesh tallies
+	_ho_mesh->printAngularFluxes(out);
 }
 
 void HoSolver::printElementTally(int element_id, std::ostream &out) const
@@ -233,4 +247,10 @@ void HoSolver::printFaceTally(int face_id, std::ostream &out) const
 
 	out << endl;
 
+}
+
+void HoSolver::updateSystem()
+{
+	//update angular fluxes
+	_ho_mesh->computeAngularFluxes(_n_histories);
 }

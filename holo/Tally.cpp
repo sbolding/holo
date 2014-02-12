@@ -133,8 +133,16 @@ Tally::Tally(int n_angle_bins, int n_spatial_moment_bins)
 		_bin_sums[i].assign(n_spatial_moment_bins, 0.);
 		_bin_sums_sq[i].assign(n_spatial_moment_bins, 0.);
 	}
+}
 
-	
+void Tally::reset()
+{
+	//set all tally bins to zero
+	for (int i = 0; i < _bin_sums.size(); ++i)
+	{
+		std::fill(_bin_sums[i].begin(), _bin_sums[i].end(), 0.0);
+		std::fill(_bin_sums_sq[i].begin(), _bin_sums_sq[i].end(), 0.0);
+	}
 }
 
 Tally::Tally()

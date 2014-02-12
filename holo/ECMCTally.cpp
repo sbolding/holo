@@ -23,4 +23,18 @@ void ECMCTally::incrementScores(double weight, double path_length, double normal
 	_spatial_moments.incrementScore(weight, path_length, normalized_dir_cosine, volume, normalized_position);
 }
 
+double ECMCTally::getAngularMoment(int n_histories)
+{
+	return _angular_moment.getScore(n_histories, 0); //there is only one angular bin
+}
 
+std::vector<double> ECMCTally::getSpatialMoments(int n_histories)
+{
+	return _spatial_moments.getScores(n_histories)[0]; //there is only one angular bin
+}
+
+void ECMCTally::reset()
+{
+	_angular_moment.reset();
+	_spatial_moments.reset();
+}

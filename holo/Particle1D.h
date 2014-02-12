@@ -43,6 +43,7 @@ protected:
 	friend class LinDiscSource;
 	friend class ResidualSource;
 	Source* _source;
+	string _sampling_method; 
 
 	//general particle properties
 	double _position_mfp;
@@ -95,7 +96,8 @@ protected:
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//base method, called to create a source particle
-	void initializeSamplingSource(string sampling_method); //determine where to put the particle
+	void initializeSamplingSource(string sampling_method); //initialize method that determines where to put the particle
+
 	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime
 	
 public:
@@ -114,6 +116,7 @@ public:
 	double getRandNum();
 	void runHistory();
 	void printParticleBalance(int n_histories);
+	void computeResidualSource();
 
 
 };

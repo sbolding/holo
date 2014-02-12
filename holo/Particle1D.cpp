@@ -49,7 +49,8 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 	_flux_element_tallies = flux_element_tallies;
 
 	//Initialize the data needed for source sampling, must call this routine last!!!
-	initializeSamplingSource("standard");
+	_sampling_method = "standard";
+	initializeSamplingSource(_sampling_method);
 }
 
 inline double Particle1D::samplePathLength()
@@ -111,6 +112,15 @@ void Particle1D::initializeSamplingSource(string sampling_method)
 {
 	//Initially source is always a standard mc source of some kind
 	_source = new LinDiscSource(this, sampling_method); //this is a complete pointer to particle
+}
+
+void Particle1D::computeResidualSource()
+{
+	//Delete the old source
+	delete _source;
+
+	//create new source
+	_source = new ResidualSource(this, _sampling_method);
 }
 
 void Particle1D::sampleSourceParticle()
@@ -265,7 +275,7 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 	double path_length_cm = abs((path_start_mfp - path_end_mfp)*_mfp_tot/_mu);
 	double volume_cm_str = _element_width_mfp*_mfp_tot*angular_width;//*1.0cm*1.0cm*delta_mu = h_xh_mu(cm^3)
 	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
-	double normalized_direction = ((_mu - _current_element->getAngularCoordinate()) / angular_width) + 0.5; //normalized direction cosine
+	double normalized_direction = ((_mu - _current_element->getAngularCoordinate()) / angular_width) + 0.5; //normalized angle with in the element
 	
 	//ScoreECMCTallies, using a normalized direction cosine to ensure positive tallies
 	_current_element->incrementTallyScores(_weight, path_length_cm, 

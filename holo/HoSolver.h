@@ -52,6 +52,7 @@ public:
 	HoSolver(); //Default constructor, should probably never be called
 	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode); //How many angular cells to split each spatial mesh cell into initially
 	void solveSystem(); //run the high order problem
+	void updateSystem(); //compute the angular fluxes and compute new residual source
 
 	//reader, printer, and interface functions
 	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;

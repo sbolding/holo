@@ -15,6 +15,7 @@
 
 #include "CurrentElementTally.h"
 #include "FluxElementTally.h"
+#include <vector>
 
 class ECMCTally
 {
@@ -25,6 +26,9 @@ public:
 	ECMCTally(); //default constructor, will initialize the spatial moments
 	void incrementScores(double weight, double path_length, double normalized_dir_cosine, 
 		double volume, double normalized_position); //Using a normalized dir_cosine produces an always positive value for moment
+	std::vector<double> getSpatialMoments(int n_histories); //return the score for the spatial moment
+	double getAngularMoment(int n_histories); //return the score for angular moment
+	void reset(); //reset all values to zero
 };
 
 #endif  //_ECMCTALLY_H

@@ -25,13 +25,13 @@ int main()
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
-	double width = 1.0; //cm
+	double width = 2.0; //cm
 	double ext_source = 1.0; //(p/(sec cm^3))
-	int num_elems = 2;
-	int n_ang_elements = 2; //number angles in half range
+	int num_elems = 10;
+	int n_ang_elements = 1; //number angles in half range
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 1.0, 0.0);
+	MaterialConstant mat(10, 0.50, 0.0);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -46,11 +46,12 @@ int main()
 	lo_solver->updateSystem();*/
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 1000000; //50000000
+	int n_histories = 5000000; //50000000
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode);
 	ho_solver->solveSystem();
+	ho_solver->updateSystem();
 	ho_solver->printAllTallies(cout); 
 
 	//Transfer HO data to the LO system

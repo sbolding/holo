@@ -20,9 +20,9 @@ class ECMCElement1D : public ECMCElement
 protected:
 
 	//references for easy use in 1D calculations
-	double & _psi_average;	    //Average flux
+	double & _psi_average;	    //Average flux, ALL FLUXES CURRENTLY HAVE UNITS OF PER SOURCE PARTICLE
 	double & _psi_x;			//Moment in x direction
-	double & _psi_mu;			//Moment in y direction
+	double & _psi_mu;			//Moment in mu direction
 	double & _width_spatial;	//delta_x
 	double & _width_angle;		//delta_mu
 	double & _position_center;	//x_i (center of element in x)
@@ -42,6 +42,10 @@ public:
 	double getAngularCoordinate() const; //center of element in angle
 	void incrementTallyScores(double weight, double path_length_cm, double normalized_dir_cosine,
 		double volume, double normalized_position);
+
+	//virtual methods
+	virtual void printAngularFluxDOF(std::ostream & out) const;
+	virtual void computeAngularFLuxDOF(int n_histories, double ext_src_str = 1.0);
 
 };
 #endif  //_ECMCELEMENT1D_H

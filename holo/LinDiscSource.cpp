@@ -17,41 +17,18 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	double ext_source_el;		             		//magnitude of external source of curren ECMC element, units of p/sec
 	std::vector<double> total_src_nodal_values_el;
 
-	//Local variables to prevent repeated accessing of particle class
-	unsigned int method = _particle->_method;
-	double angular_probability; //probability of being in each angular bin, assuming isotropic
 	Element* spatial_element; //spatial element corresponding to the current element
 
 	for (; it_el != elements->end(); it_el++)
 	{
-		//Initialize to the external source strength
 		try
 		{
+			//Map external source (and scattering source if ECMC) onto each element
 			spatial_element = (*it_el)->getSpatialElement();
-			angular_probability = 0.5*(*it_el)->getAngularWidth();
-			
-			total_src_nodal_values_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
-			if (method == HoMethods::HOLO_ECMC || method == HoMethods::HOLO_STANDARD_MC) //append scattering source
-			{
-				double sigma_s_el = spatial_element->getMaterial().getSigmaS();
-				std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
-				if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
-				{
-					std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
-					exit(0);
-				}
-				for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
-				{
-					total_src_nodal_values_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
-				}
-			}
-			ext_source_el = getAreaLinDiscFunction(total_src_nodal_values_el, spatial_element->getElementDimensions()[0]) 
-				* angular_probability; //fraction in this angular element, units of p / (sec-str)
-			for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //multiply by angular fraction
-			{
-				total_src_nodal_values_el[node] *= angular_probability; //this is probably not necessary, since normalized anyways
-			}
-			_total_src_nodal_values.push_back(total_src_nodal_values_el);
+			mapExtSrcToElement(total_src_nodal_values_el, ext_source_el, spatial_element, *it_el); //determine external source nodal values over the element
+
+			//Add element values to total array
+			_total_src_nodal_values.push_back(total_src_nodal_values_el); 
 			source_strength_per_cell.push_back(ext_source_el);
 			_vol_src_total += ext_source_el; //units of p / sec
 		}
@@ -75,7 +52,6 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 
 	//Initially assume no BC source TODO
 	_BC_src_total = 0.0;
-
 }
 
 void LinDiscSource::sampleSourceParticle()

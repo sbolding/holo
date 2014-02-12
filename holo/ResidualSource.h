@@ -14,11 +14,23 @@
 #define _RESIDUALSOURCE_H
 
 #include "Source.h"
+#include "AliasSampler.h"
+#include <vector>
 
 class ResidualSource : public Source
 {
+protected:
+	AliasSampler* _element_source;  //Sampler to determine which source you are in
+	AliasSampler* _face_source;	    //Sampler to determine which face you are on
+
+	double _face_src_total; //magnitude of the face source total
+
+	std::vector<std::vector<double>> _residual_element_LD_values; //each member contains average, slope x, slope mu;
+	std::vector<std::vector<double>> _residual_face_coeffs; //each memeber contains average and slope in mu for sampling
+
 public:
-	virtual void sampleSourceParticle() = 0;
+	virtual void sampleSourceParticle();
+	ResidualSource(Particle1D* particle, string sampling_method);
 };
 
 #endif  //_RESIDUALSOURCE_H

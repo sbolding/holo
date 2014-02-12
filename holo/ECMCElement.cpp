@@ -6,7 +6,7 @@ ECMCElement::ECMCElement(Element* spatial_element, std::vector<double> dimension
 	_spatial_element = spatial_element;
 	_dimensions = dimensions;
 	_coordinates = coordinates;
-	_ang_flux_dof.resize(_dimensions.size() + 1); //1 extra for average flux
+	_ang_flux_dof.assign(_dimensions.size() + 1, 0.0); //1 extra for average flux, set all to 0
 	_tally = NULL; //make derived classes create this
 
 	if (_dimensions.size() != _coordinates.size())
