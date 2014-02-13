@@ -14,6 +14,8 @@
 
 HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 {
+	_lo_mesh = lo_mesh; //stored for finding boundary cells
+
 	if (n_ang_cells_half_range < 1)
 	{
 		n_ang_cells_half_range = 1; //must have at least 1 cell in each direction
@@ -40,6 +42,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 		double x_center;  // the center of each element in x
 		ECMCElement1D* down_stream_element = NULL;
 		ECMCElement1D* last_element = NULL;
+		int element_id=-1;
 		
 		//all angular widths are the same before refinement
 		dimensions[1] = 1. / (double)(n_ang_cells_half_range);
@@ -54,6 +57,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 			
 			for (int it_el = 0; it_el<spatial_elements->size(); it_el++)
 			{	
+				element_id++;
 				spat_elem = (*spatial_elements)[it_el];
 				if (it_el == 0) //Edge elements have a null pointer
 				{
@@ -71,7 +75,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 				coordinates[0] = x_center;
 
 				//create the element
-				last_element = new ECMCElement1D(spat_elem, down_stream_element, dimensions, coordinates);
+				last_element = new ECMCElement1D(element_id, spat_elem, down_stream_element, dimensions, coordinates);
 				_elements.push_back(last_element);
 				connectivity_array[it_el].push_back(_elements.size() - 1); //add last element to correct connectivity array
 			}
@@ -87,6 +91,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 			coordinates[1] = mu_center;
 			for (int it_el = spatial_elements->size()-1; it_el >= 0; it_el--)
 			{
+				element_id++;
 				spat_elem = (*spatial_elements)[it_el];
 				if (it_el == spatial_elements->size()-1) //Edge elements have a null pointer
 				{
@@ -104,7 +109,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 				coordinates[0] = x_center;
 
 				//create the element
-				last_element = new ECMCElement1D(spat_elem, down_stream_element, dimensions, coordinates);
+				last_element = new ECMCElement1D(element_id, spat_elem, down_stream_element, dimensions, coordinates);
 				_elements.push_back(last_element);
 				connectivity_array[it_el].push_back(_elements.size() - 1); //add last element to correct connectivity array
 			}
@@ -158,4 +163,32 @@ void HoMesh::printAngularFluxes(std::ostream &out)
 		out << "ID = " << i;
 		_elements[i]->printAngularFluxDOF(out);
 	}
+}
+
+std::vector<int> HoMesh::findUpwindBoundaryCells() const
+{
+	if (_lo_mesh->getSpatialDimension() != 1)
+	{
+		std::cerr << "HoMesh::findBoundaryCells only works on 1D meshes currently" << std::endl;
+		system("pause");
+		exit(1);
+	}
+
+	std::vector<int> boundary_cells;
+	int spatial_ID;
+	int last_element_ID = _lo_mesh->getNumElems() - 1;
+
+	for (int i = 0; i < _n_elems; ++i)
+	{
+		spatial_ID = _elements[i]->getSpatialElement()->getID();
+		if ( spatial_ID == 0 || spatial_ID == last_element_ID) //on a boundary, need to make sure boudary is upwind
+		{
+			if (_elements[i]->getDownStreamElement() != NULL) //boundary cell, THIS DOES NOT WORK WITH MESH REFINEMENT
+			{
+				boundary_cells.push_back(i);
+			}
+		}
+	}
+
+	return boundary_cells;
 }

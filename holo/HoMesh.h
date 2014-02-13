@@ -28,6 +28,7 @@ class HoMesh
 protected:
 	std::vector<ECMCElement1D*> _elements; //I think this can be generalized to ECMCElements by using a virtual destructor and dynamic_cast in particle1D class
 	int _n_elems;
+	Mesh* _lo_mesh;
 	HoMesh(); //don't use
 public:
 	HoMesh(Mesh* mesh, int n_ang_cells_half_range); //how much to divide the angular cells into
@@ -38,6 +39,7 @@ public:
 	//computing angular flux
 	void computeAngularFluxes(int n_histories, double total_src_strength = 1.0); //compute moments of angular flux based on n_histories and total source strength (assumed 1 if normalizing to per source particle)
 	void printAngularFluxes(std::ostream &out);
+	std::vector<int> findUpwindBoundaryCells() const; //return a list of cells who have boundary on their upwind face
 };
 
 #endif  //_HOMESH_H

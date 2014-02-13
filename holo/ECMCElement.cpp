@@ -1,8 +1,9 @@
 #include "ECMCElement.h"
 #include <iostream>
 
-ECMCElement::ECMCElement(Element* spatial_element, std::vector<double> dimensions, std::vector<double> coordinates)
+ECMCElement::ECMCElement(int id, Element* spatial_element, std::vector<double> dimensions, std::vector<double> coordinates)
 {
+	_id = id;
 	_spatial_element = spatial_element;
 	_dimensions = dimensions;
 	_coordinates = coordinates;
@@ -16,8 +17,9 @@ ECMCElement::ECMCElement(Element* spatial_element, std::vector<double> dimension
 	}
 }
 
-ECMCElement::ECMCElement(Element* spatial_element, int n_spatial_dimensions, int n_angular_dimensions)
+ECMCElement::ECMCElement(int id, Element* spatial_element, int n_spatial_dimensions, int n_angular_dimensions)
 {
+	_id = id;
 	_spatial_element = spatial_element;
 	_tally = NULL;
 
@@ -36,4 +38,9 @@ std::vector<double> ECMCElement::getElementDimensions() const
 std::vector<double> ECMCElement::getAngularFluxDOF() const
 {
 	return _ang_flux_dof;
+}
+
+int ECMCElement::getID() const
+{
+	return _id;
 }

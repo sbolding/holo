@@ -21,7 +21,8 @@
 class ECMCElement
 {
 protected:
-
+	
+	int _id;							//Element ID #
 	std::vector<double> _ang_flux_dof;  //The moments that are needed to reconstruct the angular flux
 	ECMCTally* _tally;					//Tally that is used to compute the error each time
 	std::vector<double> _coordinates;	//The center of the cell in terms of x,y,mu, mu is always last
@@ -32,8 +33,8 @@ protected:
 public:
 
 	//Constructors
-	ECMCElement(Element* spatial_element, std::vector<double> dimensions, std::vector<double> coordinates);
-	ECMCElement(Element* spatial_element, int number_spatial_dimensions, int number_angular_dimensions);  //let derived classes set actual values
+	ECMCElement(int id, Element* spatial_element, std::vector<double> dimensions, std::vector<double> coordinates);
+	ECMCElement(int id, Element* spatial_element, int number_spatial_dimensions, int number_angular_dimensions);  //let derived classes set actual values
 
 	//virtual functions
 	virtual void computeAngularFLuxDOF(int n_histories, double total_src_strength=1.0) = 0; //optional ext src strength, 1.0 normalizes to per source particle
@@ -42,6 +43,7 @@ public:
 	//Access functions
 	std::vector<double> getElementDimensions() const;
 	std::vector<double> getAngularFluxDOF() const;
+	int getID() const;
 	Element* getSpatialElement() const
 	{
 		return _spatial_element;

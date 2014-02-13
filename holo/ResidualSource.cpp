@@ -3,11 +3,13 @@
 
 ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : Source(particle, sampling_method)
 { 
+	//member variables initialize
+	_face_src_total = 0.0;
+
 	//local variables
 	std::vector<ECMCElement1D*>* elements;
+	std::vector<ECMCElement1D*>::iterator it_el;
 	elements = _particle->_mesh->getElements();
-	std::vector<ECMCElement1D*>::iterator it_el;          //element iterator
-	it_el = elements->begin();			            //initialize iterator
 	double res_element_mag_el;		         //mag of element residual
 	double res_face_mag_el;					//magnitude of residaul on face
 	std::vector<double> res_element_mags;  //magnitue of residual source over elements
@@ -17,23 +19,42 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	std::vector<double> res_LD_values_el; //the dof of the residual for a particular element
 	std::vector<double> res_LD_values_face; //the dof of the residual for the delta source
 
+	//for computing face residuals on boundary
+	std::vector<int> boundary_cells = _particle->_mesh->findUpwindBoundaryCells(); 
 
+	//initialize res vectors
+	int n_elems = _particle->_mesh->getNumElems();
+	res_face_mags.resize(n_elems);
+	res_element_mags.resize(n_elems);
+	_residual_element_LD_values.resize(n_elems);
+	_residual_face_LD_values.resize(n_elems);
+
+	it_el = elements->begin();
 	for (; it_el != elements->end(); it_el++)
 	{
+		//reset magnitudes just in case
+		res_face_mag_el = 0.0;
+		res_element_mag_el = 0.0;
+
 		//compute volume integrals //IF CELL IS ACTIVE
 		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
-		computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el);
+		computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 
-
-
-
-
-
-
-
+		_residual_element_LD_values[(*it_el)->getID()] = res_LD_values_el;
+		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to
+		{
+			_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
+		}
+		
 		_vol_src_total += res_element_mag_el; //units of p / sec
+		_face_src_total += res_face_mag_el; //units of p / sec
+	}
 
-	
+	for (int bc_el = 0; bc_el < boundary_cells.size(); bc_el++)
+	{
+		computeFaceResidual((*elements)[bc_el], res_LD_values_el, res_face_mag_el, true);
+
+		_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
 	if (_sampling_method == HoMethods::STANDARD_SAMPLING) //standard source sampling
@@ -96,7 +117,9 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 }
 
-void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & res_face_mag)
+void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude,
+	bool on_boundary)
 {
+
 	
 }

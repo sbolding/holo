@@ -33,7 +33,7 @@ protected:
 	ECMCElement1D* _down_stream_element;
 
 public:
-	ECMCElement1D(Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
+	ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
 
 	//methods only used by Particle1D
 	virtual ECMCElement1D* getDownStreamElement() const;
