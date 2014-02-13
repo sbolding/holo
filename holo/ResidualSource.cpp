@@ -15,13 +15,14 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 	//Local variables to prevent repeated accessing of particle class
 	std::vector<double> res_LD_values_el; //the dof of the residual for a particular element
+	std::vector<double> res_LD_values_face; //the dof of the residual for the delta source
 
 
 	for (; it_el != elements->end(); it_el++)
 	{
 		//compute volume integrals //IF CELL IS ACTIVE
-		computeElementResidual(*it_el, res_LD_values_el,res_element_mag_el);
-
+		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
+		computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el);
 
 
 
@@ -90,7 +91,12 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 	//temporary computation, totally wrong
 	std::cout << "this is so wrong " << std::endl;
-	res_mag = h_x*h_mu*res_LD_values_el[0];
+	res_mag = h_x*h_mu*abs(res_LD_values_el[0]);
 
 
+}
+
+void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & res_face_mag)
+{
+	
 }

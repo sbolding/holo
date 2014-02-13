@@ -30,6 +30,7 @@ protected:
 
 	//Functions for building sampler
 	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 
+	void computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude);
 
 public:
 	virtual void sampleSourceParticle();
