@@ -32,3 +32,8 @@ std::vector<double> ECMCElement::getElementDimensions() const
 {
 	return _dimensions;
 }
+
+std::vector<double> ECMCElement::getAngularFluxDOF() const
+{
+	return _ang_flux_dof;
+}

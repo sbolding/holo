@@ -28,9 +28,13 @@ protected:
 	std::vector<std::vector<double>> _residual_element_LD_values; //each member contains average, slope x, slope mu;
 	std::vector<std::vector<double>> _residual_face_coeffs; //each memeber contains average and slope in mu for sampling
 
+	//Functions for building sampler
+	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 
+
 public:
 	virtual void sampleSourceParticle();
 	ResidualSource(Particle1D* particle, string sampling_method);
+
 };
 
 #endif  //_RESIDUALSOURCE_H
