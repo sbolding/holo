@@ -53,7 +53,6 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	for (int bc_el = 0; bc_el < boundary_cells.size(); bc_el++)
 	{
 		computeFaceResidual((*elements)[bc_el], res_LD_values_el, res_face_mag_el, true);
-
 		_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
@@ -117,9 +116,52 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 }
 
-void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude,
+void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & res_mag,
 	bool on_boundary)
 {
+	if (element->getDownStreamElement() == NULL) 
+	{
+		res_LD_values_face.clear();
+		res_mag = 0.;
+		return;
+	}
 
-	
+	//initialize variables
+	res_mag = 0.0;
+	res_LD_values_face.assign(3, 0.0);
+	double h_mu = element->getAngularWidth();
+	double dir_coor = element->getAngularCoordinate();
+	double mu_sgn = dir_coor / abs(dir_coor); //negative or positive direction
+	double & res_avg = res_LD_values_face[0];
+	double & res_mu = res_LD_values_face[1];
+
+	std::vector<double> psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
+	std::vector<double> psi_up = element->getAngularFluxDOF(); //upstream element values
+
+	if (on_boundary)
+	{
+		//TODO Here would need to add boundary term
+		psi_down.assign(3, 0.);
+	}
+	//mu_sgn*psi[1] tells you if on left or right face
+	res_avg = (psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]);
+	res_mu = (psi_up[2] - psi_down[2]);
+
+	//compute magnitude of integral
+	if (abs(res_avg / res_mu) < 1) //sign change
+	{
+		double ratio = res_avg / res_mu; //see jakes thesis for terms, this has been checked
+		res_mag = h_mu*abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
+			+ 0.25*h_mu*res_avg);
+		if (abs(ratio) > 1.0e+10)
+		{
+			std::cerr << "Really high ratio, may cause problems in ResidualSourceFaceCalculation" << std::endl;
+			system("pause");
+			exit(1);
+		}
+	}
+	else //no sign change
+	{
+		res_mag = h_mu*abs(dir_coor*res_avg + h_mu*res_mu / 6.);
+	}	
 }
