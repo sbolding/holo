@@ -29,7 +29,8 @@ protected:
 	//Useful tools for use with LD sources
 	void mapExtSrcToElement(std::vector<double> & tot_src_nodal_values_el, double & tot_src_strength,
 		Element* spatial_element, ECMCElement1D* element); //for computing tot src values on elements
-	void mapExtSrcNodalValues(std::vector<double>)
+	void convertNodalValuesToMoments(std::vector<double> & nodal_values, std::vector<double> 
+		& ld_moments, bool nodal_values_isotropic = false); //convert LD nodal values to LD avg and moments
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:

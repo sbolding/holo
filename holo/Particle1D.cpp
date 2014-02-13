@@ -116,7 +116,7 @@ void Particle1D::initializeSamplingSource(string sampling_method)
 
 void Particle1D::computeResidualSource()
 {
-	//Delete the old source
+	//Free memory for old source (whether last residual or standard MC source)
 	delete _source;
 
 	//create new source

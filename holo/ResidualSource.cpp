@@ -22,7 +22,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//Map external source (and scattering source if ECMC) onto each element
 		spatial_element = (*it_el)->getSpatialElement();
 		mapExtSrcToElement(total_src_nodal_values_el, ext_source_el, spatial_element, *it_el); //determine external source nodal values over the element
-		convertNodalToMoments(total_src_nodal_values_el, residual_element_LD_values); 
+		total_src_nodal_values_el[1] += 2.0;
+		convertNodalValuesToMoments(total_src_nodal_values_el, residual_element_LD_values, true); //if isotropic special case
 		
 		
 

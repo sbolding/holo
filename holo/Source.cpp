@@ -97,6 +97,32 @@ void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el,
 	{
 		total_src_nodal_values_el[node] *= angular_probability; //this is probably not necessary, since normalized anyways
 	}
+}
 
+void Source::convertNodalValuesToMoments(std::vector<double> & nodal_values,
+	std::vector<double> & ld_moments, bool nodal_values_isotropic)
+{
+	if (nodal_values.size() != 2)
+	{
+		std::cerr << "This method is only implemented for 1D, in Source::convertNodalValues\n";
+		system("pause");
+		exit(1);
+	}
+	//Set ld_moments to have one more DOF than nodal values
+	ld_moments.clear();
+	ld_moments.assign(nodal_values.size() + 1, 0.0);
 
+	//compute average and spatial moment
+	ld_moments[0] = 0.5*(nodal_values[0] + nodal_values[1]);
+	ld_moments[1] = 0.5*(nodal_values[1] - nodal_values[0]);
+	if (!nodal_values_isotropic)
+	{
+		std::cerr << "I have not implemented this method yet" << std::endl;
+		system("pause");
+		exit(1);
+	}
+	else //isotropic
+	{
+		//angular moment is zero because uniform value in angle, the nodal values have taken into account angular fraction already	
+	}
 }
