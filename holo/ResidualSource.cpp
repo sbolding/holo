@@ -39,26 +39,37 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//compute volume integrals //IF CELL IS ACTIVE
 		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
 		computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
-
 		_residual_element_LD_values[(*it_el)->getID()] = res_LD_values_el;
-		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to
+		res_element_mags[(*it_el)->getID()] = res_element_mag_el;
+
+		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to the downwind cell
 		{
 			_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
+			res_face_mags[(*it_el)->getDownStreamElement()->getID()] = res_face_mag_el;
 		}
 
-_vol_src_total += res_element_mag_el; //units of p / sec
-_face_src_total += res_face_mag_el; //units of p / sec
+		//add magnitudes to appropriate values,
+		_vol_src_total += res_element_mag_el; //units of p / sec
+		_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
-	for (int bc_el = 0; bc_el < boundary_cells.size(); bc_el++)
+	int bc_element_ID;
+	for (int i = 0; i < boundary_cells.size(); i++)
 	{
-		computeFaceResidual((*elements)[bc_el], res_LD_values_el, res_face_mag_el, true);
+		//add terms to the elements on the boundary (do not add to downwind element)
+		res_face_mag_el = 0.0; //initialize
+		bc_element_ID = boundary_cells[i];
+		computeFaceResidual((*elements)[bc_element_ID], res_LD_values_el, res_face_mag_el, true);
+		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
+		res_face_mags[bc_element_ID] = res_face_mag_el;
 		_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
 	if (_sampling_method == HoMethods::STANDARD_SAMPLING) //standard source sampling
 	{
 		//Create sampler with alias sampling, let it normalize, delete unneccessary data
+		_element_source = new AliasSampler(res_element_mags, false);
+		_face_source = new AliasSampler(res_face_mags, false);
 		//_alias_sampler = new AliasSampler(source_strength_per_cell, false);
 	}
 	else
