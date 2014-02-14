@@ -26,7 +26,7 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 2.0; //cm
-	double ext_source = 1.0; //(p/(sec cm^3))
+	double ext_source = 1.0; //(p/(sec cm^3)), do not use values << 1 or some logic will be wrong
 	int num_elems = 10;
 	int n_ang_elements = 2; //number angles in half range
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"

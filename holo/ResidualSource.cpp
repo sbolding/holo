@@ -45,9 +45,9 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		{
 			_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
 		}
-		
-		_vol_src_total += res_element_mag_el; //units of p / sec
-		_face_src_total += res_face_mag_el; //units of p / sec
+
+_vol_src_total += res_element_mag_el; //units of p / sec
+_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
 	for (int bc_el = 0; bc_el < boundary_cells.size(); bc_el++)
@@ -68,7 +68,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	}
 
 	//Initially assume no BC source TODO
-	_BC_src_total = 0.0; 
+	_BC_src_total = 0.0;
 }
 
 void ResidualSource::sampleSourceParticle()
@@ -76,12 +76,12 @@ void ResidualSource::sampleSourceParticle()
 
 }
 
-void ResidualSource::computeElementResidual(ECMCElement1D* element, 
+void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	std::vector<double> & res_LD_values_el, double & res_mag)
 {
 	//initialize variables
 	res_mag = 0.0;
-	res_LD_values_el.assign(3,0.0);
+	res_LD_values_el.assign(3, 0.0);
 	double h_mu = element->getAngularWidth();
 	double dir_coor = element->getAngularCoordinate();
 	double h_x = element->getSpatialWidth();
@@ -89,6 +89,9 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	double & psi_avg = ang_flux_dof[0]; //references for better legibility
 	double & psi_x = ang_flux_dof[1];
 	double & psi_mu = ang_flux_dof[2];
+	double & res_avg = res_LD_values_el[0]; //aliases for computing residual magnitude
+	double & res_x = res_LD_values_el[1];
+	double & res_mu = res_LD_values_el[2];
 
 	//Local variables to prevent repeated accessing of particle class
 	Element* spatial_element; //spatial element corresponding to the current element
@@ -109,9 +112,121 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	res_LD_values_el[2] = ext_source_LD_values[2] - sigma_tot*psi_mu
 		- psi_x*h_mu / h_x;  //mu moment
 
-	//temporary computation, totally wrong
+	//compute four corner values to figure out which integral to use
+	double r_right_plus = res_LD_values_el[0] + res_LD_values_el[1] + res_LD_values_el[2];
+	double r_right_minus = res_LD_values_el[0] + res_LD_values_el[1] - res_LD_values_el[2];
+	double r_left_plus = res_LD_values_el[0] - res_LD_values_el[1] + res_LD_values_el[2];
+	double r_left_minus = res_LD_values_el[0] - res_LD_values_el[1] - res_LD_values_el[2];
+
+	r_right_plus = +2.0;
+	r_right_minus = -3.;
+	r_left_plus = +7.0;
+	r_left_minus = +5.0;
+
+
+	//this first if block is from jake's code, not sure why it is needed
+	if (abs(res_x)/abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
+	{
+		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
+		system("pause");
+		exit(1);
+		if (abs(res_mu)/abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
+		{
+			res_mag = abs(res_avg);
+		}
+		else //mu slope non-zero
+		{
+			
+			res_mag = (res_mu*res_mu + res_avg*res_avg) / abs(2.*res_mu);
+		}
+	}
+	else if (abs(res_mu)/abs(res_avg)<GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
+	{
+		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
+		system("pause");
+		exit(1);
+		res_mag = (res_x*res_x + res_avg*res_avg) / abs(2.*res_x);
+	}
+
+
+	else if (r_left_plus*r_right_plus > 0.0) //no sign change on top
+	{
+		if (r_left_minus*r_right_minus > 0.0) //no change on bottom
+		{
+			if (r_left_plus*r_left_minus > 0.0) //no change at all
+			{
+				res_mag = abs(res_LD_values_el[0]);
+			}
+			else if (r_left_plus*r_right_minus < 0.0) //change on left and right
+			{
+				res_mag = (res_avg*res_avg + res_x*res_x / 3. + res_mu*res_mu) / abs(2.*res_mu);
+			}
+			else
+			{
+				std::cerr << "You should not be here, error in integral logic, ResidualSource.cpp\n";
+				system("pause");
+				exit(1);
+			}
+		}
+		else if (r_left_minus*r_right_minus < 0.0) //change on bottom (minus)
+		{
+			if (r_left_plus*r_right_minus < 0.0) // change on bottom  and right
+			{
+				res_mag = abs(res_avg + pow(r_right_minus, 3) / (12.*res_x*res_mu));
+			}
+			else if (r_right_plus*r_left_minus < 0.0) //change on bottom and left
+			{
+				res_mag = abs(res_avg + pow(r_left_minus, 3) / (12.*res_x*res_mu));
+			}
+			else
+			{
+				std::cerr << "You should not be here, error in integral logic, ResidualSource.cpp\n";
+				system("pause");
+				exit(1);
+			}
+		}
+		else
+		{
+			std::cerr << "You should not be here, error in integral logic, ResidualSource.cpp\n";
+			system("pause");
+			exit(1);
+		}
+	}
+	else if (r_left_plus*r_right_plus < 0.0) //change on top (plus)
+	{
+		if (r_left_minus*r_right_minus>0.0) //no change on bottom
+		{
+			if (r_right_plus*r_right_minus < 0.0) //change on top and right
+			{
+				res_mag = abs(res_avg + pow(r_right_plus, 3) / (12.*res_x*res_mu));
+			}
+			else if (r_left_plus*r_left_minus < 0.0) //change on top and left
+			{
+				res_mag = abs(res_avg + pow(r_left_plus, 3) / (12.*res_x*res_mu));
+			}
+			else
+			{
+				std::cerr << "You should not be here, error in integral logic, ResidualSource.cpp\n";
+				system("pause");
+				exit(1);
+			}
+		}
+		else // change on top and bottom
+		{
+			res_mag = (res_avg*res_avg + res_x*res_x + res_mu*res_mu / 3.) / (2 * abs(res_x));
+		}
+	}
+	else
+	{
+		std::cerr << "You should not be here, error in integral logic, ResidualSource.cpp\n";
+		system("pause");
+		exit(1);
+	}
+
+	//multiply by area
+	res_mag *= h_x*h_mu;
 	std::cout << "this is so wrong " << std::endl;
-	res_mag = h_x*h_mu*abs(res_LD_values_el[0]);
+
 
 
 }
