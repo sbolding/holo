@@ -125,14 +125,14 @@ void ResidualSource::sampleFaceSource()
 	std::vector<double> res_dof = _residual_face_LD_values[element->getID()];
 	double & res_avg = res_dof[0];
 	double & res_mu = res_dof[2];	
-	if (res_dof.size() != 2)
+	if (res_dof.size() != 3)
 	{
 		std::cerr << "Evaluating Lin Disc Function that is not 2D, in ResidualSource.cpp\n";
 		system("pause");
 		exit(1);
 	}
 	
-	//Determine max value of pdf function "f"
+	//Determine max value of residual pdf function "f"
 	double mu_max = 0.5*dir_coor - 0.25*res_avg*h_mu / res_mu;
 	double f_minus = std::abs((dir_coor - 0.5*h_mu)*(res_avg - res_mu)); //value on left boundary
 	double f_plus = std::abs((dir_coor + 0.5*h_mu)*(res_avg + res_mu)); // value on right boundary
@@ -147,14 +147,18 @@ void ResidualSource::sampleFaceSource()
 	double f_new;
 	while (true)
 	{
-		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); //pic new direction
-		f_new = std::abs(mu_new*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new));
-		if (_rng->rand_num()*f_max < f_new) //keep mu
+		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); //pick new direction
+		f_new = (abs(mu_new)*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new)); //evaluate residual at new mu TODO abs of mu is artifact, not sure why yet, jakes code has this to force to work, probably because deltas are defined going in the wrong direction
+		if (_rng->rand_num()*f_max < abs(f_new)) //keep mu
 		{
+			_particle->_mu = mu_new;
+			if (f_new < 0.0) //is residual negative here?
+			{
+				_particle->_weight *= -1.0;
+			}
 			break;
 		}
 	}
-	_particle->_mu = mu_new;	
 }
 
 void ResidualSource::sampleElementSource()
@@ -337,7 +341,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	double dir_coor = element->getAngularCoordinate();
 	double mu_sgn = dir_coor / abs(dir_coor); //negative or positive direction
 	double & res_avg = res_LD_values_face[0];
-	double & res_mu = res_LD_values_face[1]; 
+	double & res_mu = res_LD_values_face[2]; 
 
 	std::vector<double> psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
 	std::vector<double> psi_up = element->getAngularFluxDOF(); //upstream element values
