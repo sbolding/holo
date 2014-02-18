@@ -10,7 +10,7 @@ Source::Source()
 Source::Source(Particle1D* particle, string sampling_method)
 {
 	_particle = particle;
-	_rng = particle->_rng;
+	_rng = particle->_rng; 
 	_sampling_method = HoMethods::sampling_map.at(sampling_method);
 	_vol_src_total = 0.0;
 	_BC_src_total = 0.0;
@@ -38,7 +38,7 @@ void Source::sampleAngleIsotropic(double min_cosine, double max_cosine, bool dir
 
 }
 
-double Source::sampleLinDiscFunc(std::vector<double> nodal_values, double left_node_coor, double right_node_coor)
+double Source::sampleLinDiscFunc1D(std::vector<double> nodal_values, double left_node_coor, double right_node_coor)
 {
 	std::cout << "This function has not been checked yet" << std::endl;
 	system("pause");

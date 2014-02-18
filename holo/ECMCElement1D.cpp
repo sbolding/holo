@@ -41,6 +41,11 @@ double ECMCElement1D::getAngularCoordinate() const
 	return _mu_center;
 }
 
+double ECMCElement1D::getSpatialCoordinate() const
+{
+	return _position_center;
+}
+
 void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, double normalized_dir_cosine,
 	double volume, double normalized_position) //this method will normalize the direction cosine
 {

@@ -33,6 +33,11 @@ protected:
 	void computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude,
 		bool on_boundary = false); //special case for boundary cells
 
+	//Functions for sampling position and direction
+	void sampleElementSource();
+	void sampleFaceSource();
+	double evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu); //evaluate based on dof and dimensions of particular element
+
 public:
 	virtual void sampleSourceParticle();
 	ResidualSource(Particle1D* particle, string sampling_method);

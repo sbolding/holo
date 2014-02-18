@@ -40,6 +40,7 @@ public:
 	double getAngularWidth() const;	//width of element in angle
 	double getSpatialWidth() const; //width of element in x
 	double getAngularCoordinate() const; //center of element in angle
+	double getSpatialCoordinate() const; //center of element in x
 	void incrementTallyScores(double weight, double path_length_cm, double normalized_dir_cosine,
 		double volume, double normalized_position);
 

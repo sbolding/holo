@@ -1,5 +1,6 @@
 #include "ResidualSource.h"
 #include "Particle1D.h"
+#include <cmath>
 
 ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : Source(particle, sampling_method)
 { 
@@ -84,7 +85,88 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 void ResidualSource::sampleSourceParticle()
 {
+	//Sample if face or element source
+	if (_rng->rand_num() < (_vol_src_total / (_vol_src_total + _face_src_total))) //element source
+	{
+		_particle->_current_element_ID = _element_source->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
+		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
+		_particle->updateElementProperties();
 
+		//determine location and direction within element using rejection method
+		sampleElementSource();
+	}
+	else //face source
+	{
+		_particle->_current_element_ID = _face_source->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
+		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
+		_particle->updateElementProperties();
+
+		//determine location and direction within element using rejection method
+		sampleFaceSource();
+	}
+}
+
+void ResidualSource::sampleFaceSource()
+{
+	ECMCElement1D* element = _particle->_current_element;
+	//put particle on the upwind face
+	if (element->getAngularCoordinate() > 0.0) //particle moving to the right
+	{
+		_particle->_position_mfp = 0.0; 
+	}
+	else //moving to the left, on right face
+	{
+		_particle->_position_mfp = _particle->_element_width_mfp;
+	}
+
+	//Sample angle using rejection method
+	double h_mu = element->getAngularWidth();
+	double dir_coor = element->getAngularCoordinate();
+	std::vector<double> res_dof = _residual_face_LD_values[element->getID()];
+	double & res_avg = res_dof[0];
+	double & res_mu = res_dof[2];	
+	if (res_dof.size() != 2)
+	{
+		std::cerr << "Evaluating Lin Disc Function that is not 2D, in ResidualSource.cpp\n";
+		system("pause");
+		exit(1);
+	}
+	
+	//Determine max value of pdf function "f"
+	double mu_max = 0.5*dir_coor - 0.25*res_avg*h_mu / res_mu;
+	double f_minus = std::abs((dir_coor - 0.5*h_mu)*(res_avg - res_mu)); //value on left boundary
+	double f_plus = std::abs((dir_coor + 0.5*h_mu)*(res_avg + res_mu)); // value on right boundary
+	double f_max = std::fmax(f_minus, f_plus);
+	if (abs(mu_max - dir_coor) < 0.5*h_mu) //max of quadratic is within range
+	{
+		f_max = std::fmax(f_max, std::abs( mu_max*(evalLinDiscFunc2D(res_dof,element,0.0,mu_max))));
+	}
+
+	//Perform rejection sampling for direction
+	double mu_new = 0;
+	double f_new;
+	while (true)
+	{
+		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); //pic new direction
+		f_new = std::abs(mu_new*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new));
+		if (_rng->rand_num()*f_max < f_new) //keep mu
+		{
+			break;
+		}
+	}
+	_particle->_mu = mu_new;	
+}
+
+void ResidualSource::sampleElementSource()
+{
+	ECMCElement1D* element = _particle->_current_element;
+
+}
+
+inline double ResidualSource::evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu)
+{
+	return dof[0] + 2. / element->getSpatialWidth()*dof[1] * (x - element->getSpatialCoordinate())
+		+ 2. / element->getAngularWidth()*dof[2] * (mu - element->getAngularCoordinate());
 }
 
 void ResidualSource::computeElementResidual(ECMCElement1D* element,
@@ -236,10 +318,6 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 	//multiply by area
 	res_mag *= h_x*h_mu;
-	std::cout << "this is so wrong " << std::endl;
-
-
-
 }
 
 void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & res_mag,
@@ -259,7 +337,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	double dir_coor = element->getAngularCoordinate();
 	double mu_sgn = dir_coor / abs(dir_coor); //negative or positive direction
 	double & res_avg = res_LD_values_face[0];
-	double & res_mu = res_LD_values_face[1];
+	double & res_mu = res_LD_values_face[1]; 
 
 	std::vector<double> psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
 	std::vector<double> psi_up = element->getAngularFluxDOF(); //upstream element values
@@ -272,11 +350,12 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	//mu_sgn*psi[1] tells you if on left or right face
 	res_avg = (psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]);
 	res_mu = (psi_up[2] - psi_down[2]);
+	//res_X is zero on face
 
 	//compute magnitude of integral
 	if (abs(res_avg / res_mu) < 1) //sign change
 	{
-		double ratio = res_avg / res_mu; //see jakes thesis for terms, this has been checked
+		double ratio = res_avg / res_mu; //see jakes thesis for terms, computation has been checked
 		res_mag = h_mu*abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
 			+ 0.25*h_mu*res_avg);
 		if (abs(ratio) > 1.0e+10)
