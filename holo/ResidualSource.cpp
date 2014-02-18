@@ -148,7 +148,7 @@ void ResidualSource::sampleFaceSource()
 	while (true)
 	{
 		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); //pick new direction
-		f_new = (abs(mu_new)*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new)); //evaluate residual at new mu TODO abs of mu is artifact, not sure why yet, jakes code has this to force to work, probably because deltas are defined going in the wrong direction
+		f_new = (mu_new*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new)); //evaluate residual at new mu TODO abs of mu is artifact, not sure why yet, jakes code has this to force to work, probably because deltas are defined going in the wrong direction
 		if (_rng->rand_num()*f_max < abs(f_new)) //keep mu
 		{
 			_particle->_mu = mu_new;
@@ -352,9 +352,9 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 		psi_down.assign(3, 0.);
 	}
 	//mu_sgn*psi[1] tells you if on left or right face
-	res_avg = (psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]);
-	res_mu = (psi_up[2] - psi_down[2]);
-	//res_X is zero on face
+	res_avg = mu_sgn*((psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]));
+	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
+	//res_X is zero here, note that the residual here is -dpsi/dx, does not include mu term
 
 	//compute magnitude of integral
 	if (abs(res_avg / res_mu) < 1) //sign change
