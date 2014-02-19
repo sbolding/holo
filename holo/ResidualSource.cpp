@@ -39,12 +39,12 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 		//compute volume integrals //IF CELL IS ACTIVE
 		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
-		computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 		_residual_element_LD_values[(*it_el)->getID()] = res_LD_values_el;
 		res_element_mags[(*it_el)->getID()] = res_element_mag_el;
 
 		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to the downwind cell
 		{
+			computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 			_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
 			res_face_mags[(*it_el)->getDownStreamElement()->getID()] = res_face_mag_el;
 		}
