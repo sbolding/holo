@@ -60,7 +60,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//add terms to the elements on the boundary (do not add to downwind element)
 		res_face_mag_el = 0.0; //initialize
 		bc_element_ID = boundary_cells[i];
-		computeFaceResidual((*elements)[bc_element_ID], res_LD_values_el, res_face_mag_el, true);
+		computeFaceResidual((*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true);
 		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
 		res_face_mags[bc_element_ID] = res_face_mag_el;
 		_face_src_total += res_face_mag_el; //units of p / sec
@@ -343,19 +343,26 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	double & res_avg = res_LD_values_face[0];
 	double & res_mu = res_LD_values_face[2]; 
 
-	std::vector<double> psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
-	std::vector<double> psi_up = element->getAngularFluxDOF(); //upstream element values
+	std::vector<double> psi_down; //downstream values
+	std::vector<double> psi_up; //upstream element values
 
 	if (on_boundary)
 	{
 		//TODO Here would need to add boundary term
-		psi_down.assign(3, 0.);
+		psi_up.assign(3, 0.);
+		psi_down = element->getAngularFluxDOF();
 	}
+	else
+	{
+		psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
+		psi_up = element->getAngularFluxDOF(); //upstream element values		
+	}
+
 	//mu_sgn*psi[1] tells you if on left or right face
+	//res_X is zero here, note that the residual here is -dpsi/dx, does not include mu term
 	res_avg = mu_sgn*((psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]));
 	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
-	//res_X is zero here, note that the residual here is -dpsi/dx, does not include mu term
-
+	
 	//compute magnitude of integral
 	if (abs(res_avg / res_mu) < 1) //sign change
 	{

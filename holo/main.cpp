@@ -46,7 +46,7 @@ int main()
 	lo_solver->updateSystem();*/
 
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 500; //50000000
+	int n_histories = 50000; //50000000
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode);
