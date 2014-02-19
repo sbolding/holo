@@ -121,8 +121,8 @@ void ResidualSource::sampleFaceSource()
 
 	//Sample angle using rejection method
 	double h_mu = element->getAngularWidth();
-	double dir_coor = element->getAngularCoordinate();
-	std::vector<double> res_dof = _residual_face_LD_values[element->getID()];
+	double dir_coor = element->getAngularCoordinate();  //mu_m, direction coordinate
+	std::vector<double> res_dof = _residual_face_LD_values[element->getID()]; //res_x is 0
 	double & res_avg = res_dof[0];
 	double & res_mu = res_dof[2];	
 	if (res_dof.size() != 3)
@@ -137,7 +137,7 @@ void ResidualSource::sampleFaceSource()
 	double f_minus = std::abs((dir_coor - 0.5*h_mu)*(res_avg - res_mu)); //value on left boundary
 	double f_plus = std::abs((dir_coor + 0.5*h_mu)*(res_avg + res_mu)); // value on right boundary
 	double f_max = std::fmax(f_minus, f_plus);
-	if (abs(mu_max - dir_coor) < 0.5*h_mu) //max of quadratic is within range
+	if (std::abs(mu_max - dir_coor) < 0.5*h_mu) //max of quadratic is within range
 	{
 		f_max = std::fmax(f_max, std::abs( mu_max*(evalLinDiscFunc2D(res_dof,element,0.0,mu_max))));
 	}
@@ -149,7 +149,7 @@ void ResidualSource::sampleFaceSource()
 	{
 		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); //pick new direction
 		f_new = (mu_new*evalLinDiscFunc2D(res_dof, element, 0.0, mu_new)); //evaluate residual at new mu TODO abs of mu is artifact, not sure why yet, jakes code has this to force to work, probably because deltas are defined going in the wrong direction
-		if (_rng->rand_num()*f_max < abs(f_new)) //keep mu
+		if (_rng->rand_num()*f_max < std::abs(f_new)) //keep mu
 		{
 			_particle->_mu = mu_new;
 			if (f_new < 0.0) //is residual negative here?
@@ -164,7 +164,42 @@ void ResidualSource::sampleFaceSource()
 void ResidualSource::sampleElementSource()
 {
 	ECMCElement1D* element = _particle->_current_element;
+	
+	//local variables
+	double h_mu = element->getAngularWidth();
+	double h_x = element->getSpatialWidth();
+	double dir_coor = element->getAngularCoordinate();  //mu_m, direction coordinate, cell center mu
+	double pos_coor = element->getSpatialCoordinate();  //x_i, cell center
+	std::vector<double> res_dof = _residual_element_LD_values[element->getID()]; //res_x is 0
+	double & res_avg = res_dof[0];
+	double & res_x = res_dof[1];
+	double & res_mu = res_dof[2];
 
+	
+	//determine maximum of function over the element (one of the edges since it is linear)
+	double f_max = std::abs(res_avg) + std::abs(res_x) + std::abs(res_mu);
+
+	//perform rejection sampling
+	double f_new, mu_new, x_new; //sampled variables
+	while (true)
+	{
+		x_new = pos_coor + h_x*(_rng->rand_num() - 0.5); 
+		mu_new = dir_coor + h_mu*(_rng->rand_num() - 0.5); 
+		f_new = evalLinDiscFunc2D(res_dof, element, x_new, mu_new);
+
+		if ((_rng->rand_num()*f_max) < abs(f_new)) //keep sample
+		{
+			_particle->_mu = mu_new;
+			_particle->_position_mfp = ((x_new - pos_coor) / h_x + 0.5)
+				* _particle->_element_width_mfp; //normalized position in element
+			
+			if (f_new < 0.0) //residual was negative set weight
+			{
+				_particle->_weight *= -1.0;
+			}
+			break;
+		}
+	}
 }
 
 inline double ResidualSource::evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu)
@@ -222,27 +257,27 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 
 	//this first if block is from jake's code, not sure why it is needed
-	if (abs(res_x)/abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
+	if (std::abs(res_x)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
 		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
 		system("pause");
 		exit(1);
-		if (abs(res_mu)/abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
+		if (std::abs(res_mu)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
 		{
-			res_mag = abs(res_avg);
+			res_mag = std::abs(res_avg);
 		}
 		else //mu slope non-zero
 		{
 			
-			res_mag = (res_mu*res_mu + res_avg*res_avg) / abs(2.*res_mu);
+			res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
 		}
 	}
-	else if (abs(res_mu)/abs(res_avg)<GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
+	else if (std::abs(res_mu)/std::abs(res_avg)<GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
 	{
 		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
 		system("pause");
 		exit(1);
-		res_mag = (res_x*res_x + res_avg*res_avg) / abs(2.*res_x);
+		res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
 	}
 
 
@@ -252,11 +287,11 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		{
 			if (r_left_plus*r_left_minus > 0.0) //no change at all
 			{
-				res_mag = abs(res_LD_values_el[0]);
+				res_mag = std::abs(res_LD_values_el[0]);
 			}
 			else if (r_left_plus*r_right_minus < 0.0) //change on left and right
 			{
-				res_mag = (res_avg*res_avg + res_x*res_x / 3. + res_mu*res_mu) / abs(2.*res_mu);
+				res_mag = (res_avg*res_avg + res_x*res_x / 3. + res_mu*res_mu) / std::abs(2.*res_mu);
 			}
 			else
 			{
@@ -269,11 +304,11 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		{
 			if (r_left_plus*r_right_minus < 0.0) // change on bottom  and right
 			{
-				res_mag = abs(res_avg + pow(r_right_minus, 3) / (12.*res_x*res_mu));
+				res_mag = std::abs(res_avg + pow(r_right_minus, 3) / (12.*res_x*res_mu));
 			}
 			else if (r_right_plus*r_left_minus < 0.0) //change on bottom and left
 			{
-				res_mag = abs(res_avg + pow(r_left_minus, 3) / (12.*res_x*res_mu));
+				res_mag = std::abs(res_avg + pow(r_left_minus, 3) / (12.*res_x*res_mu));
 			}
 			else
 			{
@@ -295,11 +330,11 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		{
 			if (r_right_plus*r_right_minus < 0.0) //change on top and right
 			{
-				res_mag = abs(res_avg + pow(r_right_plus, 3) / (12.*res_x*res_mu));
+				res_mag = std::abs(res_avg + pow(r_right_plus, 3) / (12.*res_x*res_mu));
 			}
 			else if (r_left_plus*r_left_minus < 0.0) //change on top and left
 			{
-				res_mag = abs(res_avg + pow(r_left_plus, 3) / (12.*res_x*res_mu));
+				res_mag = std::abs(res_avg + pow(r_left_plus, 3) / (12.*res_x*res_mu));
 			}
 			else
 			{
@@ -310,7 +345,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		}
 		else // change on top and bottom
 		{
-			res_mag = (res_avg*res_avg + res_x*res_x + res_mu*res_mu / 3.) / (2 * abs(res_x));
+			res_mag = (res_avg*res_avg + res_x*res_x + res_mu*res_mu / 3.) / (2 * std::abs(res_x));
 		}
 	}
 	else
@@ -339,7 +374,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	res_LD_values_face.assign(3, 0.0);
 	double h_mu = element->getAngularWidth();
 	double dir_coor = element->getAngularCoordinate();
-	double mu_sgn = dir_coor / abs(dir_coor); //negative or positive direction
+	double mu_sgn = dir_coor / std::abs(dir_coor); //negative or positive direction
 	double & res_avg = res_LD_values_face[0];
 	double & res_mu = res_LD_values_face[2]; 
 
@@ -364,12 +399,12 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
 	
 	//compute magnitude of integral
-	if (abs(res_avg / res_mu) < 1) //sign change
+	if (std::abs(res_avg / res_mu) < 1) //sign change
 	{
 		double ratio = res_avg / res_mu; //see jakes thesis for terms, computation has been checked
-		res_mag = h_mu*abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
+		res_mag = h_mu*std::abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
 			+ 0.25*h_mu*res_avg);
-		if (abs(ratio) > 1.0e+10)
+		if (std::abs(ratio) > 1.0e+10)
 		{
 			std::cerr << "Really high ratio, may cause problems in ResidualSourceFaceCalculation" << std::endl;
 			system("pause");
@@ -378,6 +413,6 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	}
 	else //no sign change
 	{
-		res_mag = h_mu*abs(dir_coor*res_avg + h_mu*res_mu / 6.);
+		res_mag = h_mu*std::abs(dir_coor*res_avg + h_mu*res_mu / 6.);
 	}	
 }

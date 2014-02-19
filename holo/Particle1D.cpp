@@ -122,7 +122,7 @@ void Particle1D::computeResidualSource()
 	//create new source
 	_source = new ResidualSource(this, _sampling_method);
 	//test source sampling of residual
-	for (int i = 0; i < 50000; ++i)
+	for (int i = 0; i < 500000; ++i)
 		_source->sampleSourceParticle();
 }
 
