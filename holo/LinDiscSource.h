@@ -27,9 +27,9 @@ private:
 	void sampleLinDiscSource(std::vector<double> nodal_values); //Samples position based on linear discontinuous source
 	
 public:
-	virtual void sampleSourceParticle(); 
 	LinDiscSource(Particle1D * particle, string sampling_method);
-
+	~LinDiscSource();
+	virtual void sampleSourceParticle();
 };
 
 #endif  //_LINDISCSOURCE_H

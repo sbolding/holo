@@ -7,6 +7,11 @@ Source::Source()
 	//do nothing;
 }
 
+Source::~Source()
+{
+	//do nothing
+}
+
 Source::Source(Particle1D* particle, string sampling_method)
 {
 	_particle = particle;

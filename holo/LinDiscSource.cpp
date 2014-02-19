@@ -54,6 +54,11 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	_BC_src_total = 0.0;
 }
 
+LinDiscSource::~LinDiscSource()
+{
+	delete _alias_sampler;
+}
+
 void LinDiscSource::sampleSourceParticle()
 {
 	//Determine if it is volumetric source, or surface source (depending on the mode you are in, may sample scattering source as well)

@@ -35,6 +35,8 @@ protected:
 
 public:
 	Source(Particle1D* particle, string sampling_method);
+	~Source();
+
 	virtual void sampleSourceParticle() = 0; //samples a source particle direction and location
 	double getAreaLinDiscFunction(std::vector<double> nodal_values, double element_volume) //for computing total source magnitudes
 	{

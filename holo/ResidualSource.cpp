@@ -71,7 +71,6 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//Create sampler with alias sampling, let it normalize, delete unneccessary data
 		_element_source = new AliasSampler(res_element_mags, false);
 		_face_source = new AliasSampler(res_face_mags, false);
-		//_alias_sampler = new AliasSampler(source_strength_per_cell, false);
 	}
 	else
 	{
@@ -81,6 +80,12 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 	//Initially assume no BC source TODO
 	_BC_src_total = 0.0;
+}
+
+ResidualSource::~ResidualSource()
+{
+	delete _element_source;
+	delete _face_source;
 }
 
 void ResidualSource::sampleSourceParticle()

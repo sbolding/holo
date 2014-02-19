@@ -39,8 +39,9 @@ protected:
 	double evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu); //evaluate based on dof and dimensions of particular element
 
 public:
-	virtual void sampleSourceParticle();
+	~ResidualSource();
 	ResidualSource(Particle1D* particle, string sampling_method);
+	virtual void sampleSourceParticle();
 
 };
 
