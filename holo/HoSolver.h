@@ -15,6 +15,7 @@
 
 #include "Mesh.h"
 #include <vector>
+#include <iostream>
 #include "FaceTally.h"
 #include "CurrentElementTally.h"
 #include "CurrentFaceTally.h"
@@ -42,6 +43,7 @@ protected:
 
 	//other problem parameters
 	int _n_histories;	//number of histories
+	int _n_batches; //number of batches for ECMC simulations
 	std::string _solver_mode_str;  ////either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
 	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
@@ -50,8 +52,8 @@ protected:
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
-	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode); //How many angular cells to split each spatial mesh cell into initially
-	void solveSystem(); //run the high order problem
+	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, int n_batches = 1); //How many angular cells to split each spatial mesh cell into initially
+	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
 	void updateSystem(); //compute the angular fluxes and compute new residual source
 
 	//reader, printer, and interface functions

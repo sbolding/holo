@@ -19,9 +19,11 @@ HoSolver::HoSolver()
 	exit(1);
 }
 
-HoSolver::HoSolver(Mesh* mesh, int n_histories, int n_ang_bins_half_range, string method) :
+HoSolver::HoSolver(Mesh* mesh, int n_histories,
+	int n_ang_bins_half_range, string method, int n_batches) :
 	_rng()
 {
+	_n_batches = n_batches;
 	_lo_mesh = mesh;
 	_n_histories = n_histories;
 	_current_face_tallies.resize(mesh->getNumEdges());		//initialize tallies to appropriate size
@@ -51,41 +53,49 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories, int n_ang_bins_half_range, strin
 		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);
 }
 
-void HoSolver::solveSystem()
+void HoSolver::solveSystem(std::ostream & out)
 {
 	std::cout << "Solving the HO system..." << std::endl;
 
-	//loop over the number of histories
-	for (int hist=1; hist <= _n_histories; hist++) 
+	for (int batch = 0; batch < _n_batches; batch++)
 	{
-		if ((hist % (_n_histories / 10)) == 0)
+		std::cout << "\nRunning batch " << batch + 1 << " of " << _n_batches << "...\n";
+		//loop over the number of histories
+		for (int hist = 0; hist < _n_histories; hist++)
 		{
-			std::cout << (int)(hist / (float)_n_histories * 100) << "% of "<<
-				_n_histories << " histories complete..." << std::endl;
+			if ((hist + 1) % (_n_histories / 10) == 0)
+			{
+				std::cout << (int)((hist + 1) / (float)_n_histories * 100) << "% of " <<
+					_n_histories << " histories complete..." << std::endl;
+			}
+			_particle->runHistory();
 		}
-		_particle->runHistory();
-	}
-	_ho_mesh->computeAngularFluxes(_n_histories, 1.0);
+		//compute the new angular fluxes
+		_ho_mesh->computeAngularFluxes(_n_histories, 1.0);
 
-	if (HoController::PARTICLE_BALANCE) //for debugging
-	{
-		_particle->printParticleBalance(_n_histories);
-	}
-	if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
-	{
-		return;
-	}
-	else //ECMC method
-	{
-		//compute new residual source
-		_particle->computeResidualSource();
-	}
+		if (HoController::PARTICLE_BALANCE) //for debugging
+		{
+			_particle->printParticleBalance(_n_histories);
+		}
+		if (HoController::WRITE_ALL_ANGULAR_FLUXES) //debug
+		{
+			_ho_mesh->printAngularFluxes(out); 
+		}
 
+		if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
+		{
+			return;
+		}
+		else //ECMC method
+		{
+			//compute new residual source
+			_particle->computeResidualSource();
+		}
 
 		
+	}	
 }
 
-//Print element and face tallies out
 
 LoData1D HoSolver::getLoData(int element_id)
 {

@@ -119,6 +119,15 @@ void Particle1D::computeResidualSource()
 	//Free memory for old source (whether last residual or standard MC source)
 	delete _source;
 
+	//reset debug variables
+	if (HoController::PARTICLE_BALANCE)
+	{
+		_n_abs = 0;
+		_n_leak = 0;
+		_n_scat = 0;
+		_n_terminations = 0;
+	}
+
 	//create new source
 	_source = new ResidualSource(this, _sampling_method);
 }
