@@ -192,3 +192,8 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 
 	return boundary_cells;
 }
+
+std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
+{
+	return _lo_mesh->getDirichletBCs();
+}

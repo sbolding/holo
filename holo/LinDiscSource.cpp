@@ -50,8 +50,41 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 		exit(1);
 	}
 
-	//Initially assume no BC source TODO
-	_BC_src_total = 0.0;
+	//Create boundary condition source info
+	std::vector<DirichletBC1D*> bcs = _particle->_mesh->getDirichletBCs();
+	std::vector<int> bc_elem_IDs = _particle->_mesh->findUpwindBoundaryCells();
+	std::vector<double> bc_magnitudes; //magnitude of bc on each element
+	ECMCElement1D* element;
+	double incident_current, incident_flux, direction;
+	if (bcs.size() > 2)
+	{
+		std::cout << "Currently only implemented BCs for 1D problems, in LinDiscSource.cpp\n";
+	}
+
+	for (int i_bc=0; i_bc < bcs.size(); i_bc++)
+	{
+		incident_current =  bcs[i_bc]->getValue();	//p/sec entering the region
+		_BC_src_total += incident_current;
+		incident_flux = 2.*incident_current; //This assumes incident flux is isotropic in halfspace
+
+		//map flux to boundary elements
+		for (int id=0; id < bc_elem_IDs.size(); id++)
+		{
+			int el_id = bc_elem_IDs[id]; //id of current boundary element
+			element = _particle->_mesh->getElement(el_id);
+			if (element->getSpatialElement() != bcs[i_bc]->getElement()) //on the wrong face
+			{
+				continue;
+			}
+			else
+			{
+				bc_magnitudes.push_back(incident_current* //fraction in this bin
+					2.0*element->getAngularWidth()*abs(element->getAngularCoordinate())); //based on cosine law PDF
+				_bc_element_map[bc_magnitudes.size() - 1] = el_id; //what element does the last bc value correspond to
+			}
+		}
+	}
+	_bc_element_sampler = new AliasSampler(bc_magnitudes);
 }
 
 LinDiscSource::~LinDiscSource()

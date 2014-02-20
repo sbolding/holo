@@ -17,6 +17,7 @@
 
 #include "Source.h"
 #include "AliasSampler.h"
+#include <map>
 
 class LinDiscSource : public Source
 {
@@ -25,6 +26,10 @@ private:
 	AliasSampler* _alias_sampler; //pointer because it is dynamically allocated, may not be called if stratified sampling is used
     std::vector<std::vector<double>> _total_src_nodal_values; //nodal values of external source + (possibly scattering source), depending on method
 	void sampleLinDiscSource(std::vector<double> nodal_values); //Samples position based on linear discontinuous source
+
+	//BC source information
+	AliasSampler* _bc_element_sampler;
+	std::map<int, int> _bc_element_map;  //maps alias sampler return result to the correct element ID
 	
 public:
 	LinDiscSource(Particle1D * particle, string sampling_method);

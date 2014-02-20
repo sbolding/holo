@@ -11,7 +11,15 @@ AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalize
 		sum = std::accumulate(bin_probabilities.begin(), bin_probabilities.end(), 0.);
 		double inv_sum = 1. / sum; //invert sum for cheaper multiply
 		for (int i = 0; i < bin_probabilities.size(); ++i)
+		{
+			if (bin_probabilities[i] < 0.0)
+			{
+				std::cerr << "You have passed in a negative probability to AliasSampler\n";
+				system("pause");
+				exit(1);
+			}
 			bin_probabilities[i] *= inv_sum;
+		}
 	} 
 
 	//create the list of probabilities
