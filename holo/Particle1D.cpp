@@ -48,7 +48,7 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 	_flux_face_tallies = flux_face_tallies;
 	_flux_element_tallies = flux_element_tallies;
 
-	//Initialize the data needed for source sampling, must call this routine last!!!
+	//Initialize the data needed for source sampling, must call this routine last because it contains a pointer to itself!!!
 	_sampling_method = "standard";
 	initializeSamplingSource(_sampling_method);
 }
@@ -111,7 +111,8 @@ void Particle1D::sampleCollision()
 void Particle1D::initializeSamplingSource(string sampling_method)
 {
 	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(this, sampling_method); //this is a complete pointer to particle
+	//_source = new LinDiscSource(this, sampling_method); //"this" is a complete pointer to particle
+	_source = new ResidualSource(this, sampling_method);
 }
 
 void Particle1D::computeResidualSource()

@@ -51,17 +51,16 @@ void Source::sampleAngleCosineLaw(int n, double min_cosine, double max_cosine)
 		exit(1);
 	}
 	//sample from pdf f(mu) = norm_const*mu^n, mu in [min_cosine, max_cosine]
-	double norm_const = (n + 1.) / (std::pow(max_cosine, n + 1) - std::pow(min_cosine, (n + 1)));
-	if (min_cosine > 0.0 && (n % 2) == 0)
+	double norm_const = (std::pow(max_cosine, n + 1) - std::pow(min_cosine, (n + 1)));
+	if (min_cosine > 0.0)
 	{
-		_particle->_mu = _rng->rand_num()*(n + 1.) + norm_const*pow(min_cosine, n + 1);
-		_particle->_mu = pow(_particle->_mu / norm_const, 1. / (n + 1.));
+		_particle->_mu = _rng->rand_num()*norm_const + pow(min_cosine, n + 1);
+		_particle->_mu = pow(_particle->_mu, 1. / (n + 1.));
 	}
 	else //mu is negative and odd function so special case
 	{
-		norm_const *= -1.;
-		_particle->_mu = _rng->rand_num()*(n + 1.) + norm_const*pow(min_cosine, n + 1);
-		_particle->_mu = pow(_particle->_mu / norm_const, 1. / (n + 1.));
+		_particle->_mu = _rng->rand_num()*abs(norm_const) + std::abs(pow(max_cosine, n + 1));
+		_particle->_mu = -1.*pow(_particle->_mu, 1. / (n + 1.));
 	}
 
 }
@@ -73,16 +72,16 @@ void Source::sampleAngleCosineLaw(double min_cosine, double max_cosine)
 		std::cerr << "Passed a min cosine greater than max cosine to sampling routine, or cell across zero" << std::endl;
 		exit(1);
 	}
-	//sample from pdf f(mu) = norm_const*mu, mu in [min_cosine, max_cosine]
-	if (min_cosine > 0.0)
-	{
-		_particle->_mu = std::sqrt(_rng->rand_num()*(max_cosine*max_cosine -
-			min_cosine*min_cosine) + min_cosine*min_cosine);
-	}
-	else //for negative case f(mu) = nrom_const*|mu|, mu in [min_cosine, max_cosine]
+	
+	if (min_cosine < 0.0) //for negative case f(mu) = nrom_const*|mu|, mu in [min_cosine, max_cosine]
 	{
 		_particle->_mu = -1.*std::sqrt(_rng->rand_num()*(min_cosine*min_cosine-
 			max_cosine*max_cosine) + max_cosine*max_cosine);
+	}
+	else //sample from pdf f(mu) = norm_const*mu, mu in [min_cosine, max_cosine]
+	{
+		_particle->_mu = std::sqrt(_rng->rand_num()*(max_cosine*max_cosine -
+			min_cosine*min_cosine) + min_cosine*min_cosine);
 	}
 }
 

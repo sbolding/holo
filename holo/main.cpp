@@ -27,8 +27,11 @@ int main()
 	int dimension = 1;
 	double width = 2.0; //cm
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use values << 1 or some logic will be wrong
-	int num_elems = 3;
-	int n_ang_elements = 2; //number angles in half range
+	int num_elems = 5;
+	int n_ang_elements = 2; //number angles in half ranges
+	//Temporarily hard coded monte carlo parameters
+	int n_histories = 100000; //50000000
+	int n_batches = 1;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.50, 0.0);
@@ -45,9 +48,6 @@ int main()
 	//Update lo order system to current solution
 	lo_solver->updateSystem();*/
 
-	//Temporarily hard coded monte carlo parameters
-	int n_histories = 1000000; //50000000
-	int n_batches = 10;
 
 	//Solve the low order system
 	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, n_batches);

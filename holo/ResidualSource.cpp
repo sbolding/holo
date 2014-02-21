@@ -78,8 +78,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		exit(1);
 	}
 
-	//Initially assume no BC source TODO
-	_BC_src_total = 0.0;
+	//No BC source, it is implicitly included in the residual
 }
 
 ResidualSource::~ResidualSource()
@@ -261,31 +260,23 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	r_left_minus = +5.0;
 
 
-	//this first if block is from jake's code, not sure why it is needed
-	if (std::abs(res_x)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
+	//this first block is for the speial cases to eliminate divide by zero errors
+	if (std::abs(res_x/res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
-		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
-		system("pause");
-		exit(1);
 		if (std::abs(res_mu)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
 		{
 			res_mag = std::abs(res_avg);
 		}
 		else //mu slope non-zero
-		{
-			
+		{			
 			res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
 		}
 	}
 	else if (std::abs(res_mu)/std::abs(res_avg)<GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
 	{
-		std::cerr << "This code has never actually been called, residualSource.cpp" << std::endl;
-		system("pause");
-		exit(1);
 		res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
 	}
-
-
+	//---
 	else if (r_left_plus*r_right_plus > 0.0) //no sign change on top
 	{
 		if (r_left_minus*r_right_minus > 0.0) //no change on bottom
@@ -404,17 +395,15 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
 	
 	//compute magnitude of integral
+	if (std::abs(res_mu / res_avg) < GlobalConstants::RELATIVE_TOLERANCE)
+	{
+		res_mag = h_mu*std::abs(res_avg*dir_coor);
+	}
 	if (std::abs(res_avg / res_mu) < 1) //sign change
 	{
-		double ratio = res_avg / res_mu; //see jakes thesis for terms, computation has been checked
+		double ratio = res_avg / res_mu; //see Jake Peterson A&M thesis for terms, computation has been checked
 		res_mag = h_mu*std::abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
 			+ 0.25*h_mu*res_avg);
-		if (std::abs(ratio) > 1.0e+10)
-		{
-			std::cerr << "Really high ratio, may cause problems in ResidualSourceFaceCalculation" << std::endl;
-			system("pause");
-			exit(1);
-		}
 	}
 	else //no sign change
 	{

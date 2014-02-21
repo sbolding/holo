@@ -121,11 +121,17 @@ void LinDiscSource::sampleSourceParticle()
 		//sample direction
 		double mu_center = _particle->_current_element->getAngularCoordinate();
 		double half_angular_width = 0.5*_particle->_current_element->getAngularWidth();
-
-		mu_center *= 1.;
 		sampleAngleCosineLaw(mu_center - half_angular_width, mu_center + half_angular_width);
-		sampleAngleCosineLaw(1, mu_center - half_angular_width, mu_center + half_angular_width);
-		sampleAngleCosineLaw(0, mu_center - half_angular_width, mu_center + half_angular_width);
+
+		//put on the correct face
+		if (_particle->_mu < 0.0)
+		{
+			_particle->_position_mfp = _particle->_element_width_mfp;
+		}
+		else //moving to the right
+		{
+			_particle->_position_mfp = 0.0;
+		}
 	}
 
 }
