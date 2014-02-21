@@ -71,7 +71,7 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->runHistory();
 		}
 		//compute the new angular fluxes
-		_ho_mesh->computeAngularFluxes(_n_histories, 1.0);
+		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
 
 		if (HoController::PARTICLE_BALANCE) //for debugging
 		{
@@ -90,9 +90,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			//compute new residual source
 			_particle->computeResidualSource();
-		}
-
-		
+		}	
 	}	
 }
 

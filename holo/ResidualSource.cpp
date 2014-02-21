@@ -449,3 +449,8 @@ void ResidualSource::computeBCAngularFluxDof()
 		}
 	}
 }
+
+double ResidualSource::getTotalSourceStrength()
+{
+	return _face_src_total + _vol_src_total;
+}

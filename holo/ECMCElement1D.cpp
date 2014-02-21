@@ -58,13 +58,6 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_stre
 	double angular_moment = _tally->getAngularMoment(n_histories);
 	_psi_average += spatial_moments[0]*total_src_strength;
 
-	if (abs(total_src_strength - 1.0) > 1.0E-13)
-	{
-		std::cerr << "Have not checked that compute Angular Flux DOF works for a scaled ext source strength";
-		system("pause");
-		exit(1);
-	}
-
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
 	_psi_x += 6 * (spatial_moments[1] + _width_spatial*0.5*spatial_moments[0])*total_src_strength; 

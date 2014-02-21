@@ -163,3 +163,8 @@ void LinDiscSource::sampleLinDiscSource(std::vector<double> nodal_values)
 		_particle->_position_mfp *= _particle->_element_width_mfp; //convert to mfp
 	}
 }
+
+double LinDiscSource::getTotalSourceStrength()
+{
+	return _BC_src_total + _vol_src_total;
+}

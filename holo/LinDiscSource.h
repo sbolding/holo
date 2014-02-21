@@ -35,6 +35,7 @@ public:
 	LinDiscSource(Particle1D * particle, string sampling_method);
 	~LinDiscSource();
 	virtual void sampleSourceParticle();
+	virtual double getTotalSourceStrength();
 };
 
 #endif  //_LINDISCSOURCE_H

@@ -183,7 +183,7 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 		spatial_ID = _elements[i]->getSpatialElement()->getID();
 		if ( spatial_ID == 0 || spatial_ID == last_element_ID) //on a boundary, need to make sure boudary is upwind
 		{
-			if (_elements[i]->getDownStreamElement() != NULL) //boundary cell, THIS DOES NOT WORK WITH MESH REFINEMENT
+			if (_elements[i]->getDownStreamElement() != NULL || last_element_ID == 0) //boundary cell, THIS DOES NOT WORK WITH MESH REFINEMENT
 			{
 				boundary_cells.push_back(i);
 			}

@@ -338,3 +338,7 @@ inline void Particle1D::scoreFaceTally()
 	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
 }
 
+double Particle1D::getTotalSourceStrength()
+{
+	return _source->getTotalSourceStrength();
+}

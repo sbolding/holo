@@ -46,6 +46,7 @@ public:
 	~ResidualSource();
 	ResidualSource(Particle1D* particle, string sampling_method);
 	virtual void sampleSourceParticle();
+	virtual double getTotalSourceStrength();
 
 };
 
