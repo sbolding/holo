@@ -52,7 +52,7 @@ void Source::sampleAngleCosineLaw(int n, double min_cosine, double max_cosine)
 	}
 	//sample from pdf f(mu) = norm_const*mu^n, mu in [min_cosine, max_cosine]
 	double norm_const = (std::pow(max_cosine, n + 1) - std::pow(min_cosine, (n + 1)));
-	if (min_cosine > 0.0)
+	if (min_cosine >= 0.0)
 	{
 		_particle->_mu = _rng->rand_num()*norm_const + pow(min_cosine, n + 1);
 		_particle->_mu = pow(_particle->_mu, 1. / (n + 1.));
@@ -84,8 +84,6 @@ void Source::sampleAngleCosineLaw(double min_cosine, double max_cosine)
 			min_cosine*min_cosine) + min_cosine*min_cosine);
 	}
 }
-
-
 
 double Source::sampleLinDiscFunc1D(std::vector<double> nodal_values, double left_node_coor, double right_node_coor)
 {

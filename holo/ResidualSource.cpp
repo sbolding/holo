@@ -54,6 +54,9 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		_face_src_total += res_face_mag_el; //units of p / sec
 	}
 
+	//compute the boundary condition LD representation over the face of each boundary element
+	computeBCAngularFluxDof();
+
 	int bc_element_ID;
 	for (int i = 0; i < boundary_cells.size(); i++)
 	{
@@ -74,11 +77,11 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	}
 	else
 	{
-		std::cerr << "No other samplilng methods are implemented yet" << std::endl;
+		std::cerr << "No other sampling methods are implemented yet" << std::endl;
 		exit(1);
 	}
 
-	//No BC source, it is implicitly included in the residual
+	//No BC source, it is implicitly included in the face residual calculations
 }
 
 ResidualSource::~ResidualSource()
@@ -179,8 +182,7 @@ void ResidualSource::sampleElementSource()
 	double & res_x = res_dof[1];
 	double & res_mu = res_dof[2];
 
-	
-	//determine maximum of function over the element (one of the edges since it is linear)
+	//determine maximum of function over the element (one of the nodes since it is linear)
 	double f_max = std::abs(res_avg) + std::abs(res_x) + std::abs(res_mu);
 
 	//perform rejection sampling
@@ -379,8 +381,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 
 	if (on_boundary)
 	{
-		//TODO Here would need to add boundary term
-		psi_up.assign(3, 0.);
+		psi_up = _bc_dof[_bc_element_to_dof_map[element->getID()]];
 		psi_down = element->getAngularFluxDOF();
 	}
 	else
@@ -409,4 +410,42 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	{
 		res_mag = h_mu*std::abs(dir_coor*res_avg + h_mu*res_mu / 6.);
 	}	
+}
+
+void ResidualSource::computeBCAngularFluxDof()
+{
+	//Calculate the magnitude of the boundary condition source over elements
+	std::vector<DirichletBC1D*> bcs = _particle->_mesh->getDirichletBCs();
+	std::vector<int> bc_elem_IDs = _particle->_mesh->findUpwindBoundaryCells();
+	std::vector<double> bc_dof_el; //LD dof for each bc, for now isotropic so will only be the average term
+	ECMCElement1D* element;
+	double incident_current, two_pi_incident_flux, direction;
+	if (bcs.size() > 2)
+	{
+		std::cout << "Currently only implemented BCs for 1D problems, in ResidualSource.cpp\n";
+	}
+
+	for (int i_bc = 0; i_bc < bcs.size(); i_bc++)
+	{
+		incident_current = bcs[i_bc]->getValue();	//p/sec entering the spatial cell
+		two_pi_incident_flux = 2.*incident_current; //This assumes incident flux is isotropic in halfspace and ECMC elements are azimuthally integrated
+
+		//map flux to boundary elements
+		for (int id = 0; id < bc_elem_IDs.size(); id++)
+		{
+			int el_id = bc_elem_IDs[id]; //id of current boundary element
+			element = _particle->_mesh->getElement(el_id);
+			if (element->getSpatialElement() != bcs[i_bc]->getElement()) //on the wrong face
+			{
+				continue;
+			}
+			else
+			{
+				bc_dof_el.assign(3, 0.0);
+				bc_dof_el[0] = two_pi_incident_flux; //fraction in this bin
+				_bc_dof.push_back(bc_dof_el);
+				_bc_element_to_dof_map[el_id] = _bc_dof.size() - 1; //index in bc_dof the last element corresponds to
+			}
+		}
+	}
 }

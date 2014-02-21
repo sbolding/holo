@@ -55,7 +55,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	std::vector<int> bc_elem_IDs = _particle->_mesh->findUpwindBoundaryCells();
 	std::vector<double> bc_magnitudes; //magnitude of bc on each element
 	ECMCElement1D* element;
-	double incident_current, incident_flux, direction;
+	double incident_current, two_pi_incident_flux, direction;
 	if (bcs.size() > 2)
 	{
 		std::cout << "Currently only implemented BCs for 1D problems, in LinDiscSource.cpp\n";
@@ -65,7 +65,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 	{
 		incident_current =  bcs[i_bc]->getValue();	//p/sec entering the region
 		_BC_src_total += incident_current;
-		incident_flux = 2.*incident_current; //This assumes incident flux is isotropic in halfspace
+		two_pi_incident_flux = 2.*incident_current; //p/sec-cm^2 This assumes incident flux is isotropic in halfspace
 
 		//map flux to boundary elements
 		for (int id=0; id < bc_elem_IDs.size(); id++)
@@ -85,6 +85,13 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 		}
 	}
 	_bc_element_sampler = new AliasSampler(bc_magnitudes);
+
+	if (_vol_src_total + _BC_src_total < GlobalConstants::RELATIVE_TOLERANCE)
+	{
+		std::cerr << "Source is zero, need to specify boundary or volumetric source\n";
+		system("pause");
+		exit(1);
+	}
 }
 
 LinDiscSource::~LinDiscSource()
@@ -123,7 +130,7 @@ void LinDiscSource::sampleSourceParticle()
 		double half_angular_width = 0.5*_particle->_current_element->getAngularWidth();
 		sampleAngleCosineLaw(mu_center - half_angular_width, mu_center + half_angular_width);
 
-		//put on the correct face
+		//put particle on the correct face
 		if (_particle->_mu < 0.0)
 		{
 			_particle->_position_mfp = _particle->_element_width_mfp;

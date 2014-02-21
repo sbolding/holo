@@ -16,14 +16,17 @@
 #include "Source.h"
 #include "AliasSampler.h"
 #include <vector>
+#include <map>
 
 class ResidualSource : public Source
 {
 protected:
 	AliasSampler* _element_source;  //Sampler to determine which source you are in
 	AliasSampler* _face_source;	    //Sampler to determine which face you are on
+	double _face_src_total; //magnitude of the face source total, vol src total is stored in base class
 
-	double _face_src_total; //magnitude of the face source total
+	std::vector<std::vector<double>> _bc_dof; //dof for boundary conditions for elements, access using map
+	std::map<int, int> _bc_element_to_dof_map;  //key: element, value: index in bc_dof array
 
 	std::vector<std::vector<double>> _residual_element_LD_values; //each member contains average, slope x, slope mu;
 	std::vector<std::vector<double>> _residual_face_LD_values; //each memeber contains average and slope in mu for sampling
@@ -32,6 +35,7 @@ protected:
 	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 
 	void computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude,
 		bool on_boundary = false); //special case for boundary cells
+	void computeBCAngularFluxDof(); //determine LD values for equivalent incident flux of boundary conditions and corresponding elements
 
 	//Functions for sampling position and direction
 	void sampleElementSource();
