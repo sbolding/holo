@@ -21,7 +21,9 @@ protected:
 
 	//Angle sampling methods
 	void sampleAngleIsotropic();
-	void sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias=true);  //if true, will adjust weight to produce unbiased particle if source distribution is uniform over sphere, i.e., 1/4PI 
+	void sampleAngleIsotropic(double min_cosine, double max_cosine, bool directional_bias=true);  //if false, will adjust weight to produce unbiased particle equivalent to source distribution uniform over sphere, i.e., 1/4PI 
+	void sampleAngleCosineLaw(int order, double min_cosine, double max_cosine); //mu^(order) sampling law
+	void sampleAngleCosineLaw(double min_cosine, double max_cosine); //mu^1 sampling law, more efficient implementation
 
 	//Spatial sampling methods
 	double sampleLinDiscFunc1D(std::vector<double>, double left_node_coor, double right_node_coor); // method samples a coordinate between left and right coors, from linear fn.

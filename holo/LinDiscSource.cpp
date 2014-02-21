@@ -113,8 +113,19 @@ void LinDiscSource::sampleSourceParticle()
 	}
 	else //Boundary Source
 	{
-		std::cerr << "Sampling of BC source is not yet implemented" << std::endl;
-		exit(1);
+		int alias_element = _bc_element_sampler->sampleBin(_rng->rand_num(), _rng->rand_num());
+		_particle->_current_element_ID = _bc_element_map[alias_element];
+		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
+		_particle->updateElementProperties();
+
+		//sample direction
+		double mu_center = _particle->_current_element->getAngularCoordinate();
+		double half_angular_width = 0.5*_particle->_current_element->getAngularWidth();
+
+		mu_center *= 1.;
+		sampleAngleCosineLaw(mu_center - half_angular_width, mu_center + half_angular_width);
+		sampleAngleCosineLaw(1, mu_center - half_angular_width, mu_center + half_angular_width);
+		sampleAngleCosineLaw(0, mu_center - half_angular_width, mu_center + half_angular_width);
 	}
 
 }
