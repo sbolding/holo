@@ -111,8 +111,8 @@ void Particle1D::sampleCollision()
 void Particle1D::initializeSamplingSource(string sampling_method)
 {
 	//Initially source is always a standard mc source of some kind
-	//_source = new LinDiscSource(this, sampling_method); //"this" is a complete pointer to particle
-	_source = new ResidualSource(this, sampling_method); 
+	_source = new LinDiscSource(this, sampling_method); //"this" is a complete pointer to particle
+	//_source = new ResidualSource(this, sampling_method); 
 }
 
 void Particle1D::computeResidualSource()

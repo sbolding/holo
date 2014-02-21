@@ -28,7 +28,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 			mapExtSrcToElement(total_src_nodal_values_el, ext_source_el, spatial_element, *it_el); //determine external source nodal values over the element
 
 			//Add element values to total array
-			_total_src_nodal_values.push_back(total_src_nodal_values_el); 
+			_total_src_nodal_values.push_back(total_src_nodal_values_el); //have units of particles per steradian, not exactly right, but since normalized doesnt matter
 			source_strength_per_cell.push_back(ext_source_el);
 			_vol_src_total += ext_source_el; //units of p / sec
 		}

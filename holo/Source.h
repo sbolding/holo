@@ -40,6 +40,7 @@ public:
 	~Source();
 
 	virtual void sampleSourceParticle() = 0; //samples a source particle direction and location
+	virtual double getTotalSourceStrength() = 0; //return the total source strenght, virtual because this will be uniqe for residual sources
 	double getAreaLinDiscFunction(std::vector<double> nodal_values, double element_volume) //for computing total source magnitudes
 	{
 		return 0.5*(nodal_values[0] + nodal_values[1])*element_volume;

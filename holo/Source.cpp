@@ -140,9 +140,9 @@ void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el,
 	}
 	tot_src_strength = getAreaLinDiscFunction(total_src_nodal_values_el, spatial_element->getElementDimensions()[0])
 		* angular_probability; //fraction in this angular element, units of p / (sec-str)
-	for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //multiply by angular fraction
+	for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //convert to per steradian
 	{
-		total_src_nodal_values_el[node] *= angular_probability; //this is probably not necessary, since normalized anyways
+		total_src_nodal_values_el[node] *= 0.5; //azimutthally integrated angular flux values
 	}
 }
 

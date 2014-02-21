@@ -117,6 +117,7 @@ public:
 	void runHistory();
 	void printParticleBalance(int n_histories);
 	void computeResidualSource();
+	double getTotalSourceStrength(); //get the total source strength from the source
 
 
 };
