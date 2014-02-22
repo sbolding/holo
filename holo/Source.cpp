@@ -47,8 +47,12 @@ void Source::sampleAngleCosineLaw(int n, double min_cosine, double max_cosine)
 {
 	if (min_cosine > max_cosine || n < 0 || min_cosine*max_cosine < 0.0)
 	{
-		std::cerr << "Passed a min cosine greater than max cosine to sampling routine" << std::endl;
-		exit(1);
+		if (std::abs(min_cosine) > GlobalConstants::RELATIVE_TOLERANCE
+			&& std::abs(max_cosine) > GlobalConstants::RELATIVE_TOLERANCE) //special case for roundoff error (0 can be negative)
+		{
+			std::cerr << "Passed a min cosine greater than max cosine to sampling routine, or cell across zero" << std::endl;
+			exit(1);
+		}
 	}
 	//sample from pdf f(mu) = norm_const*mu^n, mu in [min_cosine, max_cosine]
 	double norm_const = (std::pow(max_cosine, n + 1) - std::pow(min_cosine, (n + 1)));
@@ -69,11 +73,15 @@ void Source::sampleAngleCosineLaw(double min_cosine, double max_cosine)
 {
 	if (min_cosine > max_cosine || min_cosine*max_cosine < 0.0)
 	{
-		std::cerr << "Passed a min cosine greater than max cosine to sampling routine, or cell across zero" << std::endl;
-		exit(1);
+		if (std::abs(min_cosine) > GlobalConstants::RELATIVE_TOLERANCE
+			&& std::abs(max_cosine) > GlobalConstants::RELATIVE_TOLERANCE) //special case for roundoff error (0 can be negative)
+		{
+			std::cerr << "Passed a min cosine greater than max cosine to sampling routine, or cell across zero" << std::endl;
+			exit(1);
+		}
 	}
 	
-	if (min_cosine < 0.0) //for negative case f(mu) = nrom_const*|mu|, mu in [min_cosine, max_cosine]
+	if (min_cosine < -1.*GlobalConstants::RELATIVE_TOLERANCE) //for negative case f(mu) = nrom_const*|mu|, mu in [min_cosine, max_cosine]
 	{
 		_particle->_mu = -1.*std::sqrt(_rng->rand_num()*(min_cosine*min_cosine-
 			max_cosine*max_cosine) + max_cosine*max_cosine);
