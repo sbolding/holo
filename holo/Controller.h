@@ -15,8 +15,8 @@ namespace LoController
 
 namespace HoController
 {
-	const bool PARTICLE_BALANCE = false;
-	const bool WRITE_ALL_ANGULAR_FLUXES = false; //print out angular fluxes after each batch
+	const bool PARTICLE_BALANCE = true;
+	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch
 	const int INPUT_SEED = 73907;
 	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
 }

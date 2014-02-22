@@ -4,6 +4,8 @@
 #include <vector>
 #include "RNG.h"
 #include "Element.h"
+#include "Controller.h"
+#include "GlobalConstants.h"
 #include "ECMCElement1D.h"
 
 class Particle1D; //forward declaration
