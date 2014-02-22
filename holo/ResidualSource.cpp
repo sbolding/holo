@@ -256,6 +256,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	double r_left_plus = res_LD_values_el[0] - res_LD_values_el[1] + res_LD_values_el[2];
 	double r_left_minus = res_LD_values_el[0] - res_LD_values_el[1] - res_LD_values_el[2];
 
+
 	//this first block is for the speial cases to eliminate divide by zero errors
 	if (std::abs(res_x/res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
