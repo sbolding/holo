@@ -23,7 +23,7 @@ protected:
 	double & _psi_average;	    //Average flux, ALL FLUXES CURRENTLY HAVE UNITS OF PER SOURCE PARTICLE
 	double & _psi_x;			//Moment in x direction
 	double & _psi_mu;			//Moment in mu direction
-	double & _width_spatial;	//delta_x
+	double & _width_spatial;	//delta_x, in cm
 	double & _width_angle;		//delta_mu
 	double & _position_center;	//x_i (center of element in x)
 	double & _mu_center;		//mu_i (center of element in mu)
@@ -41,8 +41,8 @@ public:
 	double getSpatialWidth() const; //width of element in x
 	double getAngularCoordinate() const; //center of element in angle
 	double getSpatialCoordinate() const; //center of element in x
-	void incrementTallyScores(double weight, double path_length_cm, double normalized_dir_cosine,
-		double volume, double normalized_position);
+	void incrementTallyScores(double weight, double path_length_cm, double dir_cosine,
+		double normalized_position); //call appropriate code to increment the tally scores, normalized position is unitless
 
 	//virtual methods
 	virtual void printAngularFluxDOF(std::ostream & out) const;

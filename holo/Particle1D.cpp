@@ -281,15 +281,12 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 {
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
-	double angular_width = _current_element->getAngularWidth();
 	double path_length_cm = abs((path_start_mfp - path_end_mfp)*_mfp_tot/_mu);
-	double volume_cm_str = _element_width_mfp*_mfp_tot*angular_width;//*1.0cm*1.0cm*delta_mu = h_xh_mu(cm^3)
-	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp;
-	double normalized_direction = ((_mu - _current_element->getAngularCoordinate()) / angular_width) + 0.5; //normalized angle with in the element
+	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp; //location of the center of pathlength
 	
 	//ScoreECMCTallies, using a normalized direction cosine to ensure positive tallies
 	_current_element->incrementTallyScores(_weight, path_length_cm, 
-		normalized_direction, volume_cm_str, normalized_position);
+		_mu, normalized_position);
 }
 
 inline void Particle1D::terminateHistory()
