@@ -31,7 +31,7 @@ int main()
 	int n_ang_elements = 1; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = 100000; //50000000
-	int n_batches = 1;
+	int n_batches = 2;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.40, 0.0);

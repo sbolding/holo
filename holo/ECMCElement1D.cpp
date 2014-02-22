@@ -60,8 +60,8 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_stre
 
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
-	_psi_x += 6 * (spatial_moments[1] + _width_spatial*0.5*spatial_moments[0])*total_src_strength; 
-	_psi_mu += 6 * (angular_moment + _width_angle*0.5*spatial_moments[0])*total_src_strength;      
+	_psi_x += 6 * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength; 
+	_psi_mu += 6 * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;      
 
 	//reset tallies to zero
 	_tally->reset();
