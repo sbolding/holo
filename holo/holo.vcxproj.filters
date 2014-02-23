@@ -150,6 +150,9 @@
     <ClInclude Include="HoMesh.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="MeshController.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -252,6 +255,9 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="HoMesh.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshController.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>

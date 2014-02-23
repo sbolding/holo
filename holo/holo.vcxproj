@@ -92,6 +92,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialConstant.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshController.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Node1D.h" />
     <ClInclude Include="numMatrix.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MaterialConstant.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshController.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Node1D.cpp" />
     <ClCompile Include="numMatrix.cpp" />
