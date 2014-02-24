@@ -51,6 +51,9 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	//initialize particle class
 	_particle = new Particle1D(_ho_mesh, &_rng, method, _current_face_tallies,
 		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);
+
+	//create adaptive refinement class
+
 }
 
 void HoSolver::solveSystem(std::ostream & out)

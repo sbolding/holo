@@ -30,6 +30,10 @@ protected:
 	Element* _spatial_element; //The element in the LO geometry that this ECMC element points to
 	ECMCElement();	//do not use 
 
+	//For adaptive mesh refinement, the list of children could be stored in this class if it was done more appropriately
+	bool _has_children;				     //default of false
+	unsigned int _refinement_level;		 //0 is no refinement
+
 public:
 
 	//Constructors
@@ -48,6 +52,9 @@ public:
 	{
 		return _spatial_element;
 	}
+
+	//Mesh refinement functions
+	virtual void refine() = 0; //will create new elements and update refinement level, etc.
 
 };
 

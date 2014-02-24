@@ -23,6 +23,8 @@
 #include "DirichletBC1D.h"
 #include <ostream>
 
+//forward declarations for friend class
+class MeshController;
 
 class HoMesh
 {
@@ -31,6 +33,8 @@ protected:
 	int _n_elems;
 	Mesh* _lo_mesh;
 	HoMesh(); //don't use
+
+	friend class MeshController;
 public:
 	HoMesh(Mesh* mesh, int n_ang_cells_half_range); //how much to divide the angular cells into
 	ECMCElement1D* getElement(int element_id) const; 

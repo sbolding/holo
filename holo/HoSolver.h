@@ -35,6 +35,8 @@ protected:
 
 	Mesh* _lo_mesh;	//pointer to the mesh to be use
 	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
+	MeshController* _mesh_controller; //For adapting the high order mesh
+
 	//Tallies
 	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face current tallies, indexed using connectivity array
 	std::vector<CurrentElementTally*> _current_element_tallies; //vector of element current tallies 

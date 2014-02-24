@@ -32,6 +32,9 @@ protected:
 	//Pointer to the downstream element (different for positive and negative flow)
 	ECMCElement1D* _down_stream_element;
 
+	//For adaptive mesh refinement, this can be done in the super class once more generalized, should be easy to move
+	std::vector<ECMCElement1D*> _children; //a list of the children elements created for mesh refinement
+
 public:
 	ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates);
 
@@ -47,6 +50,9 @@ public:
 	//virtual methods
 	virtual void printAngularFluxDOF(std::ostream & out) const;
 	virtual void computeAngularFLuxDOF(int n_histories, double ext_src_str = 1.0);
+
+	//adaptive refinement methods
+	virtual void refine();
 
 };
 #endif  //_ECMCELEMENT1D_H

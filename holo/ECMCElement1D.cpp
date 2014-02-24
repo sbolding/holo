@@ -78,11 +78,20 @@ void ECMCElement1D::printAngularFluxDOF(std::ostream &out) const
 
 	out << " psi avg. = ";
 	out.setf(ios::scientific);
-	out.precision(8);
+	out.precision(15);
 	out.width(12);
 	out << _psi_average << " psi x. = ";
 	out.width(12);
 	out << _psi_x << " psi mu. =";
 	out.width(12);
 	out << _psi_mu << std::endl;
+}
+
+//-----------------------------------------------------------------------------------
+//Adaptive refinement functions
+//-----------------------------------------------------------------------------------
+
+void ECMCElement1D::refine()
+{
+
 }

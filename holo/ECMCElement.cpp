@@ -10,6 +10,10 @@ ECMCElement::ECMCElement(int id, Element* spatial_element, std::vector<double> d
 	_ang_flux_dof.assign(_dimensions.size() + 1, 0.0); //1 extra for average flux, set all to 0
 	_tally = NULL; //make derived classes create this
 
+	//mesh refinement info, leave vector uninitialized
+	_has_children = false;
+	_refinement_level = 0;
+
 	if (_dimensions.size() != _coordinates.size())
 	{
 		std::cerr << "Vector sizes do not agree in ECMCElement constructor" << std::endl;
@@ -28,6 +32,10 @@ ECMCElement::ECMCElement(int id, Element* spatial_element, int n_spatial_dimensi
 	_dimensions.resize(n_dimensions);
 	_coordinates.resize(n_dimensions);
 	_ang_flux_dof.resize(n_dimensions + 1); //1 extra for average flux
+
+	//mesh refinement info, leave vector uninitialized
+	_has_children = false;
+	_refinement_level = 0;
 }
 
 std::vector<double> ECMCElement::getElementDimensions() const
