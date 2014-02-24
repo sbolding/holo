@@ -9,14 +9,17 @@
 //
 //
 
-
+#include "GlobalConstants.h"
 #include "ECMCElement1D.h"
 
-ECMCElement1D::ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, std::vector<double> dimensions, std::vector<double> coordinates):
-ECMCElement(id, element,dimensions,coordinates), _psi_average(_ang_flux_dof[0]), _psi_x(_ang_flux_dof[1]), _psi_mu(_ang_flux_dof[2]),
-_width_spatial(_dimensions[0]), _width_angle(_dimensions[1]),
-_position_center(_coordinates[0]), _mu_center(_coordinates[1])
+ECMCElement1D::ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, 
+		std::vector<double> dimensions, std::vector<double> coordinates, int refinement_level):
+	ECMCElement(id, element,dimensions,coordinates),
+	_psi_average(_ang_flux_dof[0]), _psi_x(_ang_flux_dof[1]), _psi_mu(_ang_flux_dof[2]),
+	_width_spatial(_dimensions[0]), _width_angle(_dimensions[1]),
+	_position_center(_coordinates[0]), _mu_center(_coordinates[1])
 {
+	_refinement_level = refinement_level; //overwrite refinement level in the base class
 	_down_stream_element = down_stream_element;
 	_tally = new ECMCTally(); //intializes the correct size
 }
@@ -91,7 +94,73 @@ void ECMCElement1D::printAngularFluxDOF(std::ostream &out) const
 //Adaptive refinement functions
 //-----------------------------------------------------------------------------------
 
-void ECMCElement1D::refine()
+void ECMCElement1D::refine(int last_element_id)
 {
+	if (_has_children)
+	{
+		std::cout << "Cannot refine elements that already have children\n";
+		exit(1);
+	}
+	_children.clear(); //clear out the children list
 
+	//local variables
+	double sgn_mu = abs(_mu_center) / _mu_center; //+1 or -1
+	ECMCElement1D* child;
+	ECMCElement1D* child_ds_elem;
+	std::vector<double> child_dimens(2, NULL);
+	std::vector<double> child_coor(2, NULL);
+	double & child_h_mu = child_dimens[1];
+	double & child_h_x = child_dimens[0];
+	double & child_x_coor = child_dimens[0];
+	double & child_mu_coor = child_dimens[1];
+
+	//initialize variables before loops
+	child_h_mu = _width_angle*0.5;
+	child_h_x = _width_spatial*0.5;
+	child_mu_coor = _mu_center - child_h_mu*0.5; //intialize to first row of element
+	int child_id = last_element_id + 1; //initialized to last element+1
+
+	//update refinement 
+	_has_children = true;
+
+	//cells are created from downwind to upwind, then from minus mu to plus mu
+	for (int i = 0; i < 2; ++i) //start with downwind cells
+	{
+		if (_down_stream_element->hasChildren()) //downwind cell is refined, so get the up wind elements of it
+		{
+			std::vector<ECMCElement1D*> down_str_children = _down_stream_element->getChildren();
+			child_ds_elem = down_str_children[2*i + 1];
+		}
+		else //down stream element has is less refined
+		{
+			child_ds_elem = _down_stream_element;
+		}
+		child_x_coor = _position_center + sgn_mu*child_h_mu*0.5;
+		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
+			child_dimens,child_coor,_refinement_level+1);  		//create first element in row
+		_children.push_back(child);
+		
+		//create second element in row
+		child_x_coor -= sgn_mu*child_h_mu;
+		child_ds_elem = _down_stream_element;
+		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
+			child_dimens, child_coor, _refinement_level + 1);  		
+		_children.push_back(child);
+
+		child_mu_coor += child_h_mu; //update mu for next row
+	}
+
+}
+
+std::vector<ECMCElement1D*> ECMCElement1D::getChildren() const
+{
+	if (_has_children)
+	{
+		return _children;
+	}
+	else
+	{
+		std::cerr << "Tried to return children, but this element is not refined, in ECMCElement1D.cpp\n";
+		exit(1);
+	}
 }

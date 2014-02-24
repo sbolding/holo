@@ -12,9 +12,34 @@
 
 #include "MeshController.h"
 
+MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
+	_required_conv_rate(exp_conv_constant),
+	_mesh(mesh), 
+	_n_batches_to_check(n_batches_to_check),
+	_batch_errors()
+{
+	createConnectivityArray();
+}
+
 void MeshController::computeJumpError()
 {
 
+}
+
+void MeshController::createConnectivityArray()
+{
+	//loop over elements
+	std::vector<ECMCElement1D*>* elements = _mesh->getElements();
+	std::vector<ECMCElement1D*>::iterator it_el;
+	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
+	{
+		//TODO create the connectivity array
+	}
+}
+
+void MeshController::storeResidualNorm(double residual_norm)
+{
+	if (_batch_errors)
 }
 
 void MeshController::refineMesh()

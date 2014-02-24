@@ -20,7 +20,7 @@ HoSolver::HoSolver()
 }
 
 HoSolver::HoSolver(Mesh* mesh, int n_histories,
-	int n_ang_bins_half_range, string method, int n_batches) :
+	int n_ang_bins_half_range, string method, double exp_convg_constant, int n_batches, int n_batches_to_avg) :
 	_rng()
 {
 	_n_batches = n_batches;
@@ -53,7 +53,8 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 		_current_element_tallies, _flux_face_tallies, _flux_element_tallies);
 
 	//create adaptive refinement class
-
+	_mesh_controller = new MeshController(_ho_mesh,exp_convg_constant,n_batches_to_avg);
+	
 }
 
 void HoSolver::solveSystem(std::ostream & out)
@@ -94,6 +95,10 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			_ho_mesh->printAngularFluxes(out);
 		}
+
+		//if necessary refine solution
+		_mesh_controller->storeResidualNorm(_particle->getTotalSourceStrength());
+		_mesh_controller->refineMesh();
 	}	
 }
 

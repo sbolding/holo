@@ -32,6 +32,7 @@ int main()
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = 10000; //50000000
 	int n_batches = 2;
+	double exp_convg_rate = 0.4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.40, 0.0);
@@ -50,7 +51,7 @@ int main()
 
 
 	//Solve the low order system
-	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, n_batches);
+	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, exp_convg_rate, n_batches);
 	ho_solver->solveSystem();
 	ho_solver->updateSystem();
 	ho_solver->printAllTallies(cout); 

@@ -54,7 +54,11 @@ public:
 	}
 
 	//Mesh refinement functions
-	virtual void refine() = 0; //will create new elements and update refinement level, etc.
+	virtual void refine(int last_element_id) = 0; //will create new elements and update refinement level, etc.
+	bool hasChildren()
+	{
+		return _has_children;
+	}
 
 };
 

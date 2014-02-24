@@ -28,14 +28,15 @@
 #include "RNG.h"
 #include "Controller.h"
 #include "AverageCosineData.h"
+#include "MeshController.h"
 
 class HoSolver
 {
 protected:
 
-	Mesh* _lo_mesh;	//pointer to the mesh to be use
+	Mesh* _lo_mesh;	//pointer to the mesh to be used
 	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
-	MeshController* _mesh_controller; //For adapting the high order mesh
+	MeshController* _mesh_controller; //For adapting the high order mesh, dynamic because it is based on ho_mesh object
 
 	//Tallies
 	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face current tallies, indexed using connectivity array
@@ -54,7 +55,8 @@ protected:
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
-	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, int n_batches = 1); //How many angular cells to split each spatial mesh cell into initially
+	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, double required_exp_convg_constant, 
+		int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
 	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
 	void updateSystem(); //compute the angular fluxes and compute new residual source
 
