@@ -134,6 +134,11 @@ ECMCElement1D* HoMesh::getElement(int element_id) const
 
 int HoMesh::getNumElems() const
 {
+	if (_n_elems != _elements.size())
+	{
+		std::cerr << "Error in updating element sizes in HoMesh.cpp\n";
+		exit(1);
+	}
 	return _n_elems;
 }
 

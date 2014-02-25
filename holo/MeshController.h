@@ -51,7 +51,7 @@ protected:
 	//protected functions
 	void createConnectivityArray(); //go through the mesh and update the connectivity array
 	void computeJumpError(); //for determining where to refine the mesh
-	bool checkConvergence(); //Check is refinement needed?
+	bool meshNeedsRefinement(); //Check is refinement needed?
 
 public:
 

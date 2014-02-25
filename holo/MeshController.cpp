@@ -11,6 +11,7 @@
 
 
 #include "MeshController.h"
+#include <cmath>
 
 MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
 	_required_conv_rate(exp_conv_constant),
@@ -48,14 +49,23 @@ void MeshController::storeResidualNorm(double residual_norm)
 
 void MeshController::refineMesh()
 {
-	if (checkConvergence())
+	if (meshNeedsRefinement())
 	{
 		//Refine mesh
-	}
+		std::vector<ECMCElement1D*> new_elements;
+		_mesh->getElement(1)->refine(_mesh->_n_elems-1); //pass the id of last element made
+		//add the new elements to the list and update number of elements
+		new_elements = _mesh->getElement(1)->getChildren();
+		_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+		_mesh->_n_elems += 4;
+		//ADD CODE TO MAP FLUX DOF FROM THE COARSE ELEMENT TO THE FINE, PUT THIS IN MESH CONTROLLER BECAUSE IT WILL CLUTTER ECMC ELEMENT LESS
 
+
+		_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
+	}
 }
 
-bool MeshController::checkConvergence()
+bool MeshController::meshNeedsRefinement()
 {
 	if (_batch_residual_norms.size() != (_n_batches_to_check + 1))
 	{
@@ -63,6 +73,21 @@ bool MeshController::checkConvergence()
 	}
 	else
 	{
+		double alpha_avg = 0.0;
+		for (int i = 0; i < _n_batches_to_check; ++i) //loop over batches
+		{
+			alpha_avg += std::log(_batch_residual_norms[i] / _batch_residual_norms[i+1]);
+		}
+		alpha_avg /= (float)_n_batches_to_check;
 
+		//check convergence
+		if (alpha_avg < _required_conv_rate) //if error increases, alpha will be negative and go back up
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

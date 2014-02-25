@@ -101,6 +101,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		if (HoController::ADAPTIVE_REFINEMENT)
 		{
 			_mesh_controller->refineMesh(); //this will refine if necessary
+			_particle->computeResidualSource(); //need to recompute residual for the new cells
 		}
 	}	
 }

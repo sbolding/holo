@@ -111,8 +111,8 @@ void ECMCElement1D::refine(int last_element_id)
 	std::vector<double> child_coor(2, NULL);
 	double & child_h_mu = child_dimens[1];
 	double & child_h_x = child_dimens[0];
-	double & child_x_coor = child_dimens[0];
-	double & child_mu_coor = child_dimens[1];
+	double & child_x_coor = child_coor[0];
+	double & child_mu_coor = child_coor[1];
 
 	//initialize variables before loops
 	child_h_mu = _width_angle*0.5;
@@ -126,27 +126,31 @@ void ECMCElement1D::refine(int last_element_id)
 	//cells are created from downwind to upwind, then from minus mu to plus mu
 	for (int i = 0; i < 2; ++i) //start with downwind cells
 	{
-		if (_down_stream_element->hasChildren()) //downwind cell is refined, so get the up wind elements of it
+		//initialize to downstream element as less refined or NULL
+		child_ds_elem = _down_stream_element;
+		if (_down_stream_element != NULL) //nested because null cannot access hasChildren
 		{
-			std::vector<ECMCElement1D*> down_str_children = _down_stream_element->getChildren();
-			child_ds_elem = down_str_children[2*i + 1];
+			if (_down_stream_element->hasChildren()) //downwind cell is refined, so get the up wind element of the row
+			{
+				std::vector<ECMCElement1D*> down_str_children = _down_stream_element->getChildren();
+				child_ds_elem = down_str_children[2 * i + 1];
+			}
 		}
-		else //down stream element has is less refined
-		{
-			child_ds_elem = _down_stream_element;
-		}
+
 		child_x_coor = _position_center + sgn_mu*child_h_mu*0.5;
 		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
 			child_dimens,child_coor,_refinement_level+1);  		//create first element in row
 		_children.push_back(child);
+		child_id++; //increment id
 		
 		//create second element in row
 		child_x_coor -= sgn_mu*child_h_mu;
-		child_ds_elem = _down_stream_element;
+		child_ds_elem = child; //the first child is downstream of the next one
 		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
 			child_dimens, child_coor, _refinement_level + 1);  		
 		_children.push_back(child);
-
+		child_id++;
+		
 		child_mu_coor += child_h_mu; //update mu for next row
 	}
 
