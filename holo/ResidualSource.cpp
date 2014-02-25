@@ -30,8 +30,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	_residual_element_LD_values.resize(n_elems);
 	_residual_face_LD_values.resize(n_elems);
 
-	it_el = elements->begin();
-	for (; it_el != elements->end(); it_el++)
+	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
 	{
 		//reset magnitudes just in case
 		res_face_mag_el = 0.0;
