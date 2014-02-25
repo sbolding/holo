@@ -77,6 +77,10 @@ void HoSolver::solveSystem(std::ostream & out)
 		//compute the new angular fluxes
 		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
 
+		//debug outputs
+		if (HoController::PARTICLE_BALANCE)  _particle->printParticleBalance(_n_histories);
+		if (HoController::WRITE_ALL_ANGULAR_FLUXES) _ho_mesh->printAngularFluxes(out);
+		
 		if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
 		{
 			return;
@@ -87,21 +91,15 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->computeResidualSource();
 		}
 
-		if (HoController::PARTICLE_BALANCE) //for debugging
-		{
-			_particle->printParticleBalance(_n_histories);
-		}
-		if (HoController::WRITE_ALL_ANGULAR_FLUXES) //debug
-		{
-			_ho_mesh->printAngularFluxes(out);
-		}
-
 		//if necessary refine solution
 		_mesh_controller->storeResidualNorm(_particle->getTotalSourceStrength());
 		if (HoController::ADAPTIVE_REFINEMENT)
 		{
-			_mesh_controller->refineMesh(); //this will refine if necessary
-			_particle->computeResidualSource(); //need to recompute residual for the new cells
+			if (_mesh_controller->meshNeedsRefinement())
+			{
+				_mesh_controller->refineMesh(); //this will refine if necessary
+				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
+			}
 		}
 	}	
 }

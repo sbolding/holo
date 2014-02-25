@@ -51,12 +51,12 @@ protected:
 	//protected functions
 	void createConnectivityArray(); //go through the mesh and update the connectivity array
 	void computeJumpError(); //for determining where to refine the mesh
-	bool meshNeedsRefinement(); //Check is refinement needed?
 
 public:
 
 	MeshController(HoMesh* mesh, double exp_convergence_rate, int n_batches_to_check); //n_batches_to_check is how many batches to check convergence on 
 	void refineMesh();
+	bool meshNeedsRefinement(); //Check is refinement needed?
 	void storeResidualNorm(double L1_norm_of_residual); //add the L1_norm of the residual to the list
 };
 

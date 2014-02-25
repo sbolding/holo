@@ -12,6 +12,11 @@
 
 #include "Tally.h"
 
+Tally::~Tally()
+{
+	//no dynamic members, no need to delete anything
+}
+
 double Tally::getScore(int n_histories, int angular_bin, int spatial_moment) const
 {
 	if (spatial_moment >= _bin_sums[0].size() || angular_bin >= _bin_sums.size())

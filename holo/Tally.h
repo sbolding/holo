@@ -30,6 +30,7 @@ public:
 	//constructors
 	Tally(int n_angle_bins, int n_spatial_moment_bins);
 	Tally();
+	~Tally(); //destructor, gets called
 
 	//Get scores and variances, standard deviations are absolute
 	double getScore(int n_histories, int angular_bin, int spatial_moment) const;

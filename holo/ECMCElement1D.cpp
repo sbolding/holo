@@ -144,7 +144,7 @@ void ECMCElement1D::refine(int last_element_id)
 		child_id++; //increment id
 		
 		//create second element in row
-		child_x_coor -= sgn_mu*child_h_mu;
+		child_x_coor -= sgn_mu*child_h_mu;  //update x_coor
 		child_ds_elem = child; //the first child is downstream of the next one
 		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
 			child_dimens, child_coor, _refinement_level + 1);  		
@@ -154,6 +154,11 @@ void ECMCElement1D::refine(int last_element_id)
 		child_mu_coor += child_h_mu; //update mu for next row
 	}
 
+	//map current angular flux estimates to the new cells
+	mapAngFluxToChildren();
+
+	//delete info that is no longer important for the parent class
+	delete _tally; //will also ensure no errors in tracking routines
 }
 
 std::vector<ECMCElement1D*> ECMCElement1D::getChildren() const
@@ -167,4 +172,30 @@ std::vector<ECMCElement1D*> ECMCElement1D::getChildren() const
 		std::cerr << "Tried to return children, but this element is not refined, in ECMCElement1D.cpp\n";
 		exit(1);
 	}
+}
+
+void ECMCElement1D::mapAngFluxToChildren() 
+{
+	ECMCElement1D* child;
+	double sgn_x, sgn_mu; 
+	for (int child_id = 0; child_id < _children.size(); child_id++)
+	{
+		child = _children[child_id];
+		child->_psi_mu = _psi_mu*0.5; //same for all elements
+		child->_psi_x = _psi_x*0.5;  //same for all elements
+
+		//determien which quadrant cell is in
+		sgn_x = (child->_position_center > _position_center ? 1. : -1.);
+		sgn_mu = (child->_mu_center > _mu_center ? 1. : -1.);
+
+		//calculate psi_average based on quadrant and child's slopes
+		child->_psi_average = _psi_average + sgn_x*child->_psi_x + sgn_mu*child->_psi_mu;
+	}
+}
+
+ECMCElement1D*  ECMCElement1D::findChildEntered(double mu) const
+{
+	//since particle is moving downstream, must be either 1 or 3 in child vector, since 
+	//the elements are built upstream
+	return (mu < _mu_center) ? _children[1] : _children[3];	
 }

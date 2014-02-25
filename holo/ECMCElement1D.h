@@ -37,6 +37,7 @@ protected:
 
 	//For adaptive mesh refinement, this can be done in the super class once more generalized, should be easy to move
 	std::vector<ECMCElement1D*> _children; //a list of the children elements created for mesh refinement
+	void mapAngFluxToChildren(); //map the angular flux DOF to the children when they are created
 
 public:
 	ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, 
@@ -58,6 +59,7 @@ public:
 	//adaptive refinement methods
 	virtual void refine(int last_element_id); //the id of the last element in the element vector, first refined element will be id+1
 	std::vector<ECMCElement1D*> getChildren() const;
+	ECMCElement1D* findChildEntered(double mu) const; //find the child element that a particle has entered based on the direction
 
 };
 #endif  //_ECMCELEMENT1D_H

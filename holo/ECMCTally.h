@@ -24,6 +24,8 @@ protected:
 	FluxElementTally _spatial_moments;
 public:
 	ECMCTally(); //default constructor, will initialize the spatial moments
+	~ECMCTally(); //this gets called when mesh is refined because parent classes do not score tallies
+
 	void incrementScores(double weight, double path_length, double normalized_dir_cosine, 
 		double volume, double normalized_position); //Using a normalized dir_cosine produces an always positive value for moment
 	std::vector<double> getSpatialMoments(int n_histories); //return the score for the spatial moment

@@ -49,20 +49,15 @@ void MeshController::storeResidualNorm(double residual_norm)
 
 void MeshController::refineMesh()
 {
-	if (meshNeedsRefinement())
-	{
-		//Refine mesh
-		std::vector<ECMCElement1D*> new_elements;
-		_mesh->getElement(1)->refine(_mesh->_n_elems-1); //pass the id of last element made
-		//add the new elements to the list and update number of elements
-		new_elements = _mesh->getElement(1)->getChildren();
-		_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
-		_mesh->_n_elems += 4;
-		//ADD CODE TO MAP FLUX DOF FROM THE COARSE ELEMENT TO THE FINE, PUT THIS IN MESH CONTROLLER BECAUSE IT WILL CLUTTER ECMC ELEMENT LESS
+	//Refine mesh
+	std::vector<ECMCElement1D*> new_elements;
+	_mesh->getElement(1)->refine(_mesh->_n_elems-1); //pass the id of last element made
+	//add the new elements to the list and update number of elements
+	new_elements = _mesh->getElement(1)->getChildren();
+	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+	_mesh->_n_elems += new_elements.size();
+	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
 
-
-		_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
-	}
 }
 
 bool MeshController::meshNeedsRefinement()

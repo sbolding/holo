@@ -160,6 +160,10 @@ void Particle1D::leaveElement()
 	else //move to the new element and update properties
 	{
 		_current_element = _current_element->getDownStreamElement(); //move to the downstream element
+		if (_current_element->hasChildren()) //new cell is more refined, need to find current cell
+		{
+			_current_element->findChildEntered(_mu);
+		}
 		updateElementProperties();
 		if (_mu > 0) //moving to the right
 		{
