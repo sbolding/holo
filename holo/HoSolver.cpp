@@ -85,7 +85,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			//compute new residual source
 			_particle->computeResidualSource();
-		}	
+		}
 
 		if (HoController::PARTICLE_BALANCE) //for debugging
 		{
@@ -98,7 +98,10 @@ void HoSolver::solveSystem(std::ostream & out)
 
 		//if necessary refine solution
 		_mesh_controller->storeResidualNorm(_particle->getTotalSourceStrength());
-		_mesh_controller->refineMesh();
+		if (HoController::ADAPTIVE_REFINEMENT)
+		{
+			_mesh_controller->refineMesh(); //this will refine if necessary
+		}
 	}	
 }
 

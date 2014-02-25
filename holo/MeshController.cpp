@@ -16,7 +16,7 @@ MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_bat
 	_required_conv_rate(exp_conv_constant),
 	_mesh(mesh), 
 	_n_batches_to_check(n_batches_to_check),
-	_batch_errors()
+	_batch_residual_norms()
 {
 	createConnectivityArray();
 }
@@ -39,11 +39,30 @@ void MeshController::createConnectivityArray()
 
 void MeshController::storeResidualNorm(double residual_norm)
 {
-	if (_batch_errors)
+	if (_batch_residual_norms.size() == (_n_batches_to_check+1)) //one extra since you need ratios to check refinement
+	{
+		_batch_residual_norms.erase(_batch_residual_norms.begin()); //remove the oldest element
+	}
+	_batch_residual_norms.push_back(residual_norm);
 }
 
 void MeshController::refineMesh()
 {
+	if (checkConvergence())
+	{
+		//Refine mesh
+	}
 
 }
 
+bool MeshController::checkConvergence()
+{
+	if (_batch_residual_norms.size() != (_n_batches_to_check + 1))
+	{
+		return false; //not enough batches to check convergence, because of noise
+	}
+	else
+	{
+
+	}
+}
