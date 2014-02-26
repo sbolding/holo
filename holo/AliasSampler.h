@@ -26,16 +26,21 @@ struct AliasData
 	double non_alias_probability;
 };
 
+namespace HistogramUtilities
+{
+	void normalizeDiscreteDistribution(std::vector<double> & bin_probabilities); //will return a normalized pdf, overwrites bin_probabilities
+}
+
 class AliasSampler
 {
 private:
 	std::vector<AliasData> _alias_data; //index of array is the corresponding bin
-	AliasSampler(); //Dont use default constructor
 	void createAliasTable(std::vector<double> &pp);
 	int _n_bins;
 
 public:
 	AliasSampler(std::vector<double> bin_probabilities, bool normalized=false); 
+	AliasSampler(); //Default constructor
 	//Need the discrete probabilites of each bin, but can be unnormalized histogram
 	
 	//Functions

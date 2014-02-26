@@ -11,12 +11,25 @@ AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalize
 		sum = std::accumulate(bin_probabilities.begin(), bin_probabilities.end(), 0.);
 		double inv_sum = 1. / sum; //invert sum for cheaper multiply
 		for (int i = 0; i < bin_probabilities.size(); ++i)
+		{
+			if (bin_probabilities[i] < 0.0)
+			{
+				std::cerr << "You have passed in a negative probability to AliasSampler\n";
+				system("pause");
+				exit(1);
+			}
 			bin_probabilities[i] *= inv_sum;
+		}
 	} 
 
 	//create the list of probabilities
 	_n_bins = bin_probabilities.size();
 	createAliasTable(bin_probabilities);
+}
+
+AliasSampler::AliasSampler()
+{
+	//default do nothing
 }
 
 void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
@@ -38,6 +51,7 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 		if (abs(p_avg - bin_probs[i]) > hundred_epsilon)
 		{
 			all_bins_equal = false;
+			break;
 		}
 	}
 
@@ -86,9 +100,9 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 		//Determine if the current hi_bin goes into the lo_bins
 		if (bin_probs[i_big] < p_avg)
 		{
-			if (n_big < 1 ) //don't get rid of the last one, this is special case because of roundoff error
+			if (n_big < 1 ) //don't get rid of the last big bin, this is special case because of roundoff error
 			{
-				if (n_small < 0) //Still have more to initialize, again, because of roundoff
+				if (n_small < 0) //Still have more lo bins to initialize, again, because of roundoff
 				{
 					break;
 				}
@@ -107,8 +121,19 @@ void AliasSampler::createAliasTable(std::vector<double> & bin_probs)
 	//Any ho_bins that are left need to be initialized
 	for (int i = 0; i < (n_big+1); i++)
 	{
-		_alias_data[i].non_alias_probability = 1.0001; //ensure alias bin is never accessed
+		_alias_data[hi_bins[i]].non_alias_probability = 1.0001; //ensure alias bin is never accessed
+		_alias_data[hi_bins[i]].alias_event = hi_bins[i];
 	}
 
 }
 
+void HistogramUtilities::normalizeDiscreteDistribution(std::vector<double> & bin_probabilities)
+{
+	double sum = 0;
+	sum = std::accumulate(bin_probabilities.begin(), bin_probabilities.end(), 0.);
+	double inv_sum = 1. / sum; //invert sum for cheaper multiply
+	for (int i = 0; i < bin_probabilities.size(); ++i)
+	{
+		bin_probabilities[i] *= inv_sum;
+	}
+}
