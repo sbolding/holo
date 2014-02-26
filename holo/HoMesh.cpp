@@ -200,24 +200,38 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 	}
 	
 	//exclude boundary cells that have an upwind cell, i.e., cells that are down wind of another cell. This is for the refined case
+	//THIS CODE WORKS BUT REALLY NEEDS TO BE DONE IN A CLEANER MANNER
 	int down_wind_id = -9999;
 	ECMCElement1D* down_wind_el;
 	std::vector<int>::iterator exclusion_id;
+	std::vector<int> final_boundary_cells;
+	final_boundary_cells = boundary_cells; //copy over
 	for (int bc_id=0; bc_id < boundary_cells.size(); bc_id++)
 	{
 		down_wind_el = _elements[boundary_cells[bc_id]]->getDownStreamElement();
 		if (down_wind_el != NULL) //special case for when there is only one spatial element in LO mesh
 		{
 			down_wind_id = down_wind_el->getID();
-		} //else same as last time or intialized negative value, wont be found
-		exclusion_id = std::find(boundary_cells.begin(), boundary_cells.end(), down_wind_id); //is the downwind cell in boundary list
-		if (exclusion_id != boundary_cells.end()) 
+			if (down_wind_el->hasChildren()) //need to remove all children from options since they are not on boundary
+			{
+				std::vector<ECMCElement1D*> children = down_wind_el->getChildren();
+				for (int child = 0; child < children.size(); child++)
+				{
+					exclusion_id = std::find(final_boundary_cells.begin(), final_boundary_cells.end(), children[child]->getID()); //find if the downwind cell in boundary list
+					if (exclusion_id != final_boundary_cells.end())
+					{
+						final_boundary_cells.erase(exclusion_id); //found id, erase that memeber
+					}
+				}
+			}
+		} 
+		exclusion_id = std::find(final_boundary_cells.begin(), final_boundary_cells.end(), down_wind_id); //is the downwind cell in boundary list?
+		if (exclusion_id != final_boundary_cells.end()) 
 		{
-			boundary_cells.erase(exclusion_id); //found id, erase that memeber
+			final_boundary_cells.erase(exclusion_id); //found id, erase that memeber
 		}
 	}
-
-	return boundary_cells;
+	return final_boundary_cells;
 }
 
 std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const

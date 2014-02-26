@@ -56,6 +56,27 @@ void MeshController::refineMesh()
 	new_elements = _mesh->getElement(1)->getChildren();
 	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
 	_mesh->_n_elems += new_elements.size();
+
+	_mesh->getElement(4)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+	//add the new elements to the list and update number of elements
+	new_elements = _mesh->getElement(4)->getChildren();
+	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+	_mesh->_n_elems += new_elements.size();
+
+	_mesh->getElement(7)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+	//add the new elements to the list and update number of elements
+	new_elements = _mesh->getElement(7)->getChildren();
+	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+	_mesh->_n_elems += new_elements.size();
+
+
+
+
+
+
+
+
+	//reset convergence rate criteria
 	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
 
 }

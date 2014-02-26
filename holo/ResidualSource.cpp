@@ -68,6 +68,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		res_face_mag_el = 0.0; //initialize
 		bc_element_ID = boundary_cells[i];
 		computeFaceResidual((*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true);
+
+		//add values to arrays
 		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
 		res_face_mags[bc_element_ID] = res_face_mag_el;
 		_face_src_total += res_face_mag_el; //units of p / sec

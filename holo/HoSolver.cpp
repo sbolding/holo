@@ -101,6 +101,11 @@ void HoSolver::solveSystem(std::ostream & out)
 				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
 			}
 		}
+
+		//DEBUG 
+		std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
+		_mesh_controller->refineMesh();
+		_particle->computeResidualSource();
 	}	
 }
 

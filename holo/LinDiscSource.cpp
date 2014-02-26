@@ -21,6 +21,11 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 
 	for (; it_el != elements->end(); it_el++)
 	{
+		if ((*it_el)->hasChildren()) //This source is not implemented for cases with refinedmesh
+		{
+			std::cerr << "Standard LinDiscSource is not capable of operating on refined meshes, just use residual source\n";
+			exit(1);
+		}
 		try
 		{
 			//Map external source (and scattering source if ECMC) onto each element
