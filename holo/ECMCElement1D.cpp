@@ -138,7 +138,7 @@ void ECMCElement1D::refine(int last_element_id)
 		}
 
 		child_x_coor = _position_center + sgn_mu*child_h_mu*0.5;
-		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
+		child = new ECMCElement1D(child_id, _spatial_element, child_ds_elem,
 			child_dimens,child_coor,_refinement_level+1);  		//create first element in row
 		_children.push_back(child);
 		child_id++; //increment id
@@ -146,7 +146,7 @@ void ECMCElement1D::refine(int last_element_id)
 		//create second element in row
 		child_x_coor -= sgn_mu*child_h_mu;  //update x_coor
 		child_ds_elem = child; //the first child is downstream of the next one
-		child = new ECMCElement1D(child_id, child_ds_elem->getSpatialElement(), child_ds_elem,
+		child = new ECMCElement1D(child_id, _spatial_element, child_ds_elem,
 			child_dimens, child_coor, _refinement_level + 1);  		
 		_children.push_back(child);
 		child_id++;

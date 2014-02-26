@@ -64,6 +64,7 @@ public:
 	virtual std::vector<double> getScalarFluxNodalValues(void) const; //returns a vector of the scalar flux nodal values needed for HO solver
 	virtual void printLDScalarFluxValues(std::ostream &out) const; //Print out the LD scalar flux and nodes
 	virtual std::vector<double> getElementDimensions() const; //For 1D, return the width of the element
+	virtual std::vector<double> getNodalCoordinates(void) const; //returns a vector of the nodal coordinates of the element
 };
 
 #endif  //_ELEMENT1D_H

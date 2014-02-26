@@ -61,6 +61,7 @@ public:
 	std::vector<double> Element::getExtSourceNodalValues(void) const;
 	virtual std::vector<double> getScalarFluxNodalValues(void) const = 0; //returns a vector of the scalar flux nodal values needed for HO solver
 	virtual std::vector<double> getElementDimensions(void) const =0; //returns a vector of dimensional values in order: width, height, depth for 3D
+	virtual std::vector<double> getNodalCoordinates(void) const = 0; //returns a vector of the nodal coordinates of the element
 
 	//For constructing the system
 	virtual std::vector<int> getEqnNumbers(void) const = 0;		//Get the equation numbers corresponding to each DOF

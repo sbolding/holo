@@ -11,6 +11,7 @@
 
 
 #include "HoMesh.h"
+#include "GlobalConstants.h"
 
 HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 {
@@ -95,7 +96,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
 				spat_elem = (*spatial_elements)[it_el];
 				if (it_el == spatial_elements->size()-1) //Edge elements have a null pointer
 				{
-					x_center = x_center_start;
+					x_center = x_center_start+spat_elem->getElementDimensions()[0]; //start at ghost cell;
 					down_stream_element = NULL;
 				}
 				else
@@ -194,44 +195,25 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 		{
 			if (_elements[i]->getDownStreamElement() != NULL || last_element_ID == 0) // potential boundary element, id=0 case is for 1 cell geometry
 			{
-				boundary_cells.push_back(i);
+				//check if element is on edge of boundary
+				std::vector<double> x_edges;
+				x_edges = _elements[i]->getSpatialElement()->getNodalCoordinates();
+				double x_coor = _elements[i]->getSpatialCoordinate();
+				double h_x = _elements[i]->getSpatialWidth();
+				double edge_right = x_coor + 0.5*h_x;
+				double edge_left = x_coor - 0.5*h_x;
+				if ((std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE &&
+					_elements[i]->getAngularCoordinate()>0.0) 
+					|| (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE &&
+					_elements[i]->getAngularCoordinate()<0.0)) //cell has an edge on boundary
+				{
+					boundary_cells.push_back(i);
+				}
 			}
 		}
 	}
 	
-	//exclude boundary cells that have an upwind cell, i.e., cells that are down wind of another cell. This is for the refined case
-	//THIS CODE WORKS BUT REALLY NEEDS TO BE DONE IN A CLEANER MANNER
-	int down_wind_id = -9999;
-	ECMCElement1D* down_wind_el;
-	std::vector<int>::iterator exclusion_id;
-	std::vector<int> final_boundary_cells;
-	final_boundary_cells = boundary_cells; //copy over
-	for (int bc_id=0; bc_id < boundary_cells.size(); bc_id++)
-	{
-		down_wind_el = _elements[boundary_cells[bc_id]]->getDownStreamElement();
-		if (down_wind_el != NULL) //special case for when there is only one spatial element in LO mesh
-		{
-			down_wind_id = down_wind_el->getID();
-			if (down_wind_el->hasChildren()) //need to remove all children from options since they are not on boundary
-			{
-				std::vector<ECMCElement1D*> children = down_wind_el->getChildren();
-				for (int child = 0; child < children.size(); child++)
-				{
-					exclusion_id = std::find(final_boundary_cells.begin(), final_boundary_cells.end(), children[child]->getID()); //find if the downwind cell in boundary list
-					if (exclusion_id != final_boundary_cells.end())
-					{
-						final_boundary_cells.erase(exclusion_id); //found id, erase that memeber
-					}
-				}
-			}
-		} 
-		exclusion_id = std::find(final_boundary_cells.begin(), final_boundary_cells.end(), down_wind_id); //is the downwind cell in boundary list?
-		if (exclusion_id != final_boundary_cells.end()) 
-		{
-			final_boundary_cells.erase(exclusion_id); //found id, erase that memeber
-		}
-	}
-	return final_boundary_cells;
+	return boundary_cells;
 }
 
 std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const

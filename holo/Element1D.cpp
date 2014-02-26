@@ -321,5 +321,13 @@ void Element1D::printLDScalarFluxValues(std::ostream &out) const
 		out <<  flux_coordinates[i] << " " << setw(14) <<
 			setprecision(4) << scientific << flux_values[i] << endl;
 	}
+}
 
+std::vector<double> Element1D::getNodalCoordinates() const
+{
+	std::vector<double> locations;
+	locations.resize(2);
+	locations[0] = _nodes[0]->getX();
+	locations[1] = _nodes[1]->getX();
+	return locations;
 }
