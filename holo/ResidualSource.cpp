@@ -29,11 +29,17 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	res_element_mags.resize(n_elems);
 	_residual_element_LD_values.resize(n_elems);
 	_residual_face_LD_values.resize(n_elems);
+	std::vector<double> zeros(2, 0.0);
 
 	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
 	{
-		if ((*it_el)->hasChildren()) //children will be added in later
+		if ((*it_el)->hasChildren()) //children are in elements vector, so no need to add explicitly here
 		{
+			//currently zeros are stored for the abstract elements, using a map and 
+			_residual_element_LD_values[(*it_el)->getID()] = zeros;
+			_residual_face_LD_values[(*it_el)->getID()] = zeros;
+			res_face_mags[(*it_el)->getID()] = 0.0;
+			res_element_mags[(*it_el)->getID()] = 0.0;
 			continue; 
 		}
 
@@ -214,11 +220,7 @@ void ResidualSource::sampleElementSource()
 	}
 }
 
-inline double ResidualSource::evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu)
-{
-	return dof[0] + 2. / element->getSpatialWidth()*dof[1] * (x - element->getSpatialCoordinate())
-		+ 2. / element->getAngularWidth()*dof[2] * (mu - element->getAngularCoordinate());
-}
+
 
 void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	std::vector<double> & res_LD_values_el, double & res_mag)
@@ -263,7 +265,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	double r_left_minus = res_LD_values_el[0] - res_LD_values_el[1] - res_LD_values_el[2];
 
 
-	//this first block is for the speial cases to eliminate divide by zero errors
+	//this first block is for the special cases to eliminate divide by zero errors
 	if (std::abs(res_x/res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
 		if (std::abs(res_mu)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also

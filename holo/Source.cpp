@@ -1,5 +1,6 @@
 #include "Source.h"
 #include "Particle1D.h"
+#include "GlobalConstants.h"
 #include <iostream>
 
 Source::Source()
@@ -129,28 +130,44 @@ double Source::sampleLinDiscFunc1D(std::vector<double> nodal_values, double left
 void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el, double & tot_src_strength,
 	Element* spatial_element, ECMCElement1D* element)
 {
-	double angular_probability = 0.5*element->getAngularWidth();
+	double angular_probability = element->getAngularWidth()/GlobalConstants::FOUR_PI;
+	if (element->hasChildren())
+	{
+		std::cerr << "No abstract elements should reach this function, mapExtSrcToElement in Source.cpp\n";
+		exit(1);
+	}
 
-	total_src_nodal_values_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
+	//get the nodal values on the spatial element
+	std::vector<double> src_nodal_values_spat_el;
+
+	src_nodal_values_spat_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
 	if (_particle->_method == HoMethods::HOLO_ECMC || _particle->_method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 	{
 		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
 		std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
-		if (scat_src_nodal_values_el.size() != total_src_nodal_values_el.size())
+		if (scat_src_nodal_values_el.size() != src_nodal_values_spat_el.size())
 		{
 			std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
 			exit(0);
 		}
 		for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
 		{
-			total_src_nodal_values_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
+			src_nodal_values_spat_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
 		}
 	}
-	tot_src_strength = getAreaLinDiscFunction(total_src_nodal_values_el, spatial_element->getElementDimensions()[0])
-		* angular_probability; //fraction in this angular element, units of p / (sec-str)
+
+	//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
+	std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
+	double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
+	double x_right_el = x_left_el + element->getSpatialWidth();
+	total_src_nodal_values_el.resize(2);
+	total_src_nodal_values_el[0] = evalLinDiscFunc1D(src_nodal_values_spat_el, spatial_x_coors, x_left_el);
+	total_src_nodal_values_el[1] = evalLinDiscFunc1D(src_nodal_values_spat_el, spatial_x_coors, x_right_el);
+
+	tot_src_strength = getAreaLinDiscFunction(total_src_nodal_values_el, element->getSpatialWidth()* angular_probability); //fraction in this angular element, units of p / (sec-str)
 	for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //convert to per steradian
 	{
-		total_src_nodal_values_el[node] *= 0.5; //azimutthally integrated angular flux values
+		total_src_nodal_values_el[node] *= 0.5; //azimuthally integrated angular flux values
 	}
 }
 
