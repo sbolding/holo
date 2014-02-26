@@ -200,19 +200,25 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 				x_edges = _elements[i]->getSpatialElement()->getNodalCoordinates();
 				double x_coor = _elements[i]->getSpatialCoordinate();
 				double h_x = _elements[i]->getSpatialWidth();
-				double edge_right = x_coor + 0.5*h_x;
-				double edge_left = x_coor - 0.5*h_x;
-				if ((std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE &&
-					_elements[i]->getAngularCoordinate()>0.0) 
-					|| (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE &&
-					_elements[i]->getAngularCoordinate()<0.0)) //cell has an edge on boundary
+				if (_elements[i]->getAngularCoordinate() > 0.0)
 				{
-					boundary_cells.push_back(i);
+					double edge_left = x_coor - 0.5*h_x;
+					if (std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE) 
+					{ 
+						boundary_cells.push_back(i); //on left boundary face
+					}
+				}
+				else //negative flow
+				{
+					double edge_right = x_coor + 0.5*h_x;
+					if (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
+					{
+						boundary_cells.push_back(i); //on right boundary face
+					}
 				}
 			}
-		}
+		} 
 	}
-	
 	return boundary_cells;
 }
 
