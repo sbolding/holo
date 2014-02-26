@@ -199,3 +199,13 @@ ECMCElement1D*  ECMCElement1D::findChildEntered(double mu) const
 	//the elements are built upstream
 	return (mu < _mu_center) ? _children[1] : _children[3];	
 }
+
+ECMCElement1D* ECMCElement1D::getChild(int index) const
+{
+	if (index > _children.size() - 1)
+	{
+		std::cerr << "Tried to access a child outside of possible indices, in ECMCElement1D.cpp\n";
+		exit(1);
+	}
+	return _children[index];
+}

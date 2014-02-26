@@ -185,13 +185,35 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 
 	for (int i = 0; i < _n_elems; ++i)
 	{
-		spatial_ID = _elements[i]->getSpatialElement()->getID();
-		if ( spatial_ID == 0 || spatial_ID == last_element_ID) //on a boundary, need to make sure boudary is upwind
+		if (_elements[i]->hasChildren()) //skip parent cells
 		{
-			if (_elements[i]->getDownStreamElement() != NULL || last_element_ID == 0) //boundary cell, THIS DOES NOT WORK WITH MESH REFINEMENT
+			continue;
+		}
+		spatial_ID = _elements[i]->getSpatialElement()->getID();
+		if ( spatial_ID == 0 || spatial_ID == last_element_ID) //spatial cell on a boundary, need to make sure boundary is upwind
+		{
+			if (_elements[i]->getDownStreamElement() != NULL || last_element_ID == 0) // potential boundary element, id=0 case is for 1 cell geometry
 			{
 				boundary_cells.push_back(i);
 			}
+		}
+	}
+	
+	//exclude boundary cells that have an upwind cell, i.e., cells that are down wind of another cell. This is for the refined case
+	int down_wind_id = -9999;
+	ECMCElement1D* down_wind_el;
+	std::vector<int>::iterator exclusion_id;
+	for (int bc_id=0; bc_id < boundary_cells.size(); bc_id++)
+	{
+		down_wind_el = _elements[boundary_cells[bc_id]]->getDownStreamElement();
+		if (down_wind_el != NULL) //special case for when there is only one spatial element in LO mesh
+		{
+			down_wind_id = down_wind_el->getID();
+		} //else same as last time or intialized negative value, wont be found
+		exclusion_id = std::find(boundary_cells.begin(), boundary_cells.end(), down_wind_id); //is the downwind cell in boundary list
+		if (exclusion_id != boundary_cells.end()) 
+		{
+			boundary_cells.erase(exclusion_id); //found id, erase that memeber
 		}
 	}
 

@@ -32,11 +32,16 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
 	{
+		if ((*it_el)->hasChildren()) //children will be added in later
+		{
+			continue; 
+		}
+
 		//reset magnitudes just in case
 		res_face_mag_el = 0.0;
 		res_element_mag_el = 0.0;
 
-		//compute volume integrals //IF CELL IS ACTIVE
+		//compute volume integrals, for cells that have no children
 		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
 		_residual_element_LD_values[(*it_el)->getID()] = res_LD_values_el;
 		res_element_mags[(*it_el)->getID()] = res_element_mag_el;

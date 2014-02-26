@@ -59,6 +59,7 @@ public:
 	//adaptive refinement methods
 	virtual void refine(int last_element_id); //the id of the last element in the element vector, first refined element will be id+1
 	std::vector<ECMCElement1D*> getChildren() const;
+	ECMCElement1D* getChild(int index) const; //0 and 2 are downwind elements, 1 and 3 are most upwind elements, from -mu to +mu
 	ECMCElement1D* findChildEntered(double mu) const; //find the child element that a particle has entered based on the direction
 
 };

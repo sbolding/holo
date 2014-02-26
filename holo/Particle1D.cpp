@@ -150,7 +150,6 @@ void Particle1D::leaveElement()
 	scoreFaceTally();
 	if (_current_element->getDownStreamElement() == NULL) //Leaked out of the problem
 	{
-		//cout << "I have leaked from element " << _current_element_ID << endl;
 		if (HoController::PARTICLE_BALANCE)
 		{
 			_n_leak++;
@@ -160,7 +159,7 @@ void Particle1D::leaveElement()
 	else //move to the new element and update properties
 	{
 		_current_element = _current_element->getDownStreamElement(); //move to the downstream element
-		if (_current_element->hasChildren()) //new cell is more refined, need to find current cell
+		if (_current_element->hasChildren()) //new cell is more refined, need to find new cell
 		{
 			_current_element->findChildEntered(_mu);
 		}
