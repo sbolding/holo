@@ -34,7 +34,7 @@ protected:
 	void mapExtSrcToElement(std::vector<double> & tot_src_nodal_values_el, double & tot_src_strength,
 		Element* spatial_element, ECMCElement1D* element); //for computing tot src values on elements
 	void convertNodalValuesToMoments(std::vector<double> & nodal_values, std::vector<double> 
-		& ld_moments, bool nodal_values_isotropic = false); //convert LD nodal values to LD avg and moments
+		& ld_moments, bool nodal_values_isotropic = false); //convert LD nodal values to LD avg and moments, nodal_values has units of p/str-cm^3
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:
@@ -47,6 +47,21 @@ public:
 	{
 		return 0.5*(nodal_values[0] + nodal_values[1])*element_volume;
 	};
+	double evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu)
+	{
+		return dof[0] + 2. / element->getSpatialWidth()*dof[1] * (x - element->getSpatialCoordinate())
+			+ 2. / element->getAngularWidth()*dof[2] * (mu - element->getAngularCoordinate());
+	}
+	double evalLinDiscFunc1D(std::vector<double> nodal_values, std::vector<double> x_nodes, double x)
+	{
+		double width = x_nodes[1] - x_nodes[0];
+		if (width < 0.0)
+		{
+			std::cerr << "Error in evalLinDiscFunc1D, in Source.h\n";
+			exit(1);
+		}
+		return nodal_values[0] * (x_nodes[1] - x) / width + nodal_values[1] * (x - x_nodes[0]) / width;
+	}
 
 };
 

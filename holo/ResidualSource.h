@@ -40,7 +40,6 @@ protected:
 	//Functions for sampling position and direction
 	void sampleElementSource();
 	void sampleFaceSource();
-	double evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu); //evaluate based on dof and dimensions of particular element
 
 public:
 	~ResidualSource();

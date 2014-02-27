@@ -75,12 +75,20 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->runHistory();
 		}
 		//compute the new angular fluxes
+
+		//DEBUG 
+		if (batch == 1)
+		{
+			exit(1);
+		}
+
 		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
 
 		//debug outputs
 		if (HoController::PARTICLE_BALANCE)  _particle->printParticleBalance(_n_histories);
 		if (HoController::WRITE_ALL_ANGULAR_FLUXES) _ho_mesh->printAngularFluxes(out);
-		
+
+
 		if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
 		{
 			return;
@@ -102,7 +110,6 @@ void HoSolver::solveSystem(std::ostream & out)
 			}
 		}
 
-		//DEBUG 
 		std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
 		_mesh_controller->refineMesh();
 		_particle->computeResidualSource();

@@ -47,6 +47,7 @@ public:
 	//Access functions
 	std::vector<double> getElementDimensions() const;
 	std::vector<double> getAngularFluxDOF() const;
+	unsigned int getRefinementLevel() const;
 	int getID() const;
 	Element* getSpatialElement() const
 	{
