@@ -54,9 +54,16 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to the downwind cell
 		{
-			computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
-			_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
-			res_face_mags[(*it_el)->getDownStreamElement()->getID()] = res_face_mag_el;
+			if ((*it_el)->getDownStreamElement()->hasChildren())
+			{
+				//need to compute a face residual term for both down stream elements
+			}
+			else
+			{
+				computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
+				_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
+				res_face_mags[(*it_el)->getDownStreamElement()->getID()] = res_face_mag_el;
+			}
 		}
 
 		//add magnitudes to appropriate values,
@@ -382,19 +389,45 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	std::vector<double> psi_down; //downstream values
 	std::vector<double> psi_up; //upstream element values
 
-	if (on_boundary)
+	if (on_boundary) //for non isotropic boundary conditions this will not be true
 	{
 		psi_up = _bc_dof[_bc_element_to_dof_map[element->getID()]];
 		psi_down = element->getAngularFluxDOF();
 	}
 	else
-	{
-		psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
-		psi_up = element->getAngularFluxDOF(); //upstream element values		
+	{	
+		ECMCElement1D* ds_element = element->getDownStreamElement();
+		if (ds_element->hasChildren()) //downstream element is more refined
+		{
+
+
+		}
+		else if (ds_element->getRefinementLevel() == element->getRefinementLevel() - 1) //upstream element is less refined
+		{
+			std::vector<double> psi_child_minus = element->getChild(1)->getAngularFluxDOF(); //bottom child
+			std::vector<double> psi_child_plus = element->getChild(3)->getAngularFluxDOF(); //top child
+
+			//compute upstream values by averaging the upstream terms
+			psi_up[0] = 0.5*(psi_child_minus[0] + psi_child_plus[0]);
+			psi_up[1] = 0.5*(psi_child_minus[1] + psi_child_plus[1]);
+			psi_up[2] = 0.4;
+
+			psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
+		}
+		else if (ds_element->getRefinementLevel() == element->getRefinementLevel()) //same refinement
+		{
+			psi_up = element->getAngularFluxDOF(); //upstream element values	
+			psi_down = element->getDownStreamElement()->getAngularFluxDOF(); //downstream values
+		}
+		else
+		{
+			std::cerr << "Refinement is not regularized, one cell is more than 2 levels more refined than another, in ResidualSource::computeFaceResidual\n";
+			exit(1);
+		}
 	}
 
 	//mu_sgn*psi[1] tells you if on left or right face
-	//res_X is zero here, note that the residual here is -dpsi/dx, does not include mu term
+	//res_X is zero here, note that the residual here is -1.*dpsi/dx, and does not include mu term
 	res_avg = mu_sgn*((psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]));
 	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
 	

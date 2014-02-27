@@ -52,3 +52,8 @@ int ECMCElement::getID() const
 {
 	return _id;
 }
+
+unsigned int ECMCElement::getRefinementLevel() const
+{
+	return _refinement_level;
+}
