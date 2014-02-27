@@ -436,6 +436,11 @@ void ResidualSource::computeBCAngularFluxDof()
 		{
 			int el_id = bc_elem_IDs[id]; //id of current boundary element
 			element = _particle->_mesh->getElement(el_id);
+			if (element->hasChildren())
+			{
+				std::cerr << "Error in computeBC in ResidualSource, only active elements should be passed from findUpwindBoundaryCells\n";
+				exit(1);
+			}
 			if (element->getSpatialElement() != bcs[i_bc]->getElement()) //on the wrong face
 			{
 				continue;

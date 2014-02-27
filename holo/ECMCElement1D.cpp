@@ -62,6 +62,11 @@ void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, d
 
 void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_strength) 
 {
+	if (_has_children) //in the future may want to map from fine elements on to parent elements
+	{
+		return;
+	}
+
 	std::vector<double> spatial_moments = _tally->getSpatialMoments(n_histories); //0th and 1st spatial moment
 	double angular_moment = _tally->getAngularMoment(n_histories);
 	_psi_average += spatial_moments[0]*total_src_strength;
@@ -78,6 +83,12 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_stre
 void ECMCElement1D::printAngularFluxDOF(std::ostream &out) const
 {
 	using std::ios;
+
+	if (_has_children)
+	{
+		out << " Parent Element\n";
+		return;
+	}
 
 	out << " psi avg. = ";
 	out.setf(ios::scientific);
