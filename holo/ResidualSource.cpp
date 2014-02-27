@@ -57,6 +57,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 			if ((*it_el)->getDownStreamElement()->hasChildren())
 			{
 				//need to compute a face residual term for both down stream elements
+				std::cerr << "This is not implemented yet\n";
+				exit(1);
 			}
 			else
 			{
@@ -399,11 +401,14 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 		ECMCElement1D* ds_element = element->getDownStreamElement();
 		if (ds_element->hasChildren()) //downstream element is more refined
 		{
-
+			std::cerr << "this is not implemented yet\n";
+			exit(1);
 
 		}
 		else if (ds_element->getRefinementLevel() == element->getRefinementLevel() - 1) //upstream element is less refined
 		{
+			std::cerr << "this is not implemented yet\n";
+			exit(1);
 			std::vector<double> psi_child_minus = element->getChild(1)->getAngularFluxDOF(); //bottom child
 			std::vector<double> psi_child_plus = element->getChild(3)->getAngularFluxDOF(); //top child
 
