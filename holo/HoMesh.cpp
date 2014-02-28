@@ -13,7 +13,9 @@
 #include "HoMesh.h"
 #include "GlobalConstants.h"
 
-HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range)
+HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
+	_boundary_cells(),
+	_boundary_cells_need_update(true)
 {
 	_lo_mesh = lo_mesh; //stored for finding boundary cells
 
@@ -171,7 +173,7 @@ void HoMesh::printAngularFluxes(std::ostream &out)
 	}
 }
 
-std::vector<int> HoMesh::findUpwindBoundaryCells() const
+std::vector<int> HoMesh::findUpwindBoundaryCells() 
 {
 	if (_lo_mesh->getSpatialDimension() != 1)
 	{
@@ -179,8 +181,12 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 		system("pause");
 		exit(1);
 	}
+	if (!_boundary_cells_need_update)
+	{
+		return _boundary_cells;
+	}
 
-	std::vector<int> boundary_cells;
+	_boundary_cells.clear();
 	int spatial_ID;
 	int last_element_ID = _lo_mesh->getNumElems() - 1;
 
@@ -205,7 +211,7 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 					double edge_left = x_coor - 0.5*h_x;
 					if (std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE) 
 					{ 
-						boundary_cells.push_back(i); //on left boundary face
+						_boundary_cells.push_back(i); //on left boundary face
 					}
 				}
 				else //negative flow
@@ -213,16 +219,24 @@ std::vector<int> HoMesh::findUpwindBoundaryCells() const
 					double edge_right = x_coor + 0.5*h_x;
 					if (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
 					{
-						boundary_cells.push_back(i); //on right boundary face
+						_boundary_cells.push_back(i); //on right boundary face
 					}
 				}
 			}
 		} 
 	}
-	return boundary_cells;
+
+	//reset the boundary_cells flag and return new list of boundary cells
+	_boundary_cells_need_update = false;
+	return _boundary_cells;
 }
 
 std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
 {
 	return _lo_mesh->getDirichletBCs();
+}
+
+ECMCElement1D* findJustUpwindElement(int down_str_element_id)
+{
+	return NULL;
 }

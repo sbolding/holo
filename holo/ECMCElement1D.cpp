@@ -139,7 +139,7 @@ void ECMCElement1D::refine(int last_element_id)
 	{
 		//initialize to downstream element as less refined or NULL
 		child_ds_elem = _down_stream_element;
-		if (_down_stream_element != NULL) //nested because null cannot access hasChildren
+		if (_down_stream_element != NULL) 
 		{
 			if (_down_stream_element->hasChildren()) //downwind cell is refined, so get the up wind element of the row
 			{

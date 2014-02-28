@@ -51,6 +51,7 @@ protected:
 	//protected functions
 	void createConnectivityArray(); //go through the mesh and update the connectivity array
 	void computeJumpError(); //for determining where to refine the mesh
+	void refineElement(int elem_id);
 
 public:
 

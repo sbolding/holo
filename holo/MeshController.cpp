@@ -51,30 +51,14 @@ void MeshController::storeResidualNorm(double residual_norm)
 void MeshController::refineMesh()
 {
 	//Refine mesh
-	std::vector<ECMCElement1D*> new_elements;
-	_mesh->getElement(1)->refine(_mesh->_n_elems-1); //pass the id of last element made
-	//add the new elements to the list and update number of elements
-	new_elements = _mesh->getElement(1)->getChildren();
-	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
-	_mesh->_n_elems += new_elements.size();
+	refineElement(1);
+	refineElement(0);
+	refineElement(2);
+	refineElement(4);
+	refineElement(7);
 
-	_mesh->getElement(4)->refine(_mesh->_n_elems - 1); //pass the id of last element made
-	//add the new elements to the list and update number of elements
-	new_elements = _mesh->getElement(4)->getChildren();
-	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
-	_mesh->_n_elems += new_elements.size();
 
-	_mesh->getElement(7)->refine(_mesh->_n_elems - 1); //pass the id of last element made
-	//add the new elements to the list and update number of elements
-	new_elements = _mesh->getElement(7)->getChildren();
-	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
-	_mesh->_n_elems += new_elements.size();
 
-	_mesh->getElement(0)->refine(_mesh->_n_elems - 1); //pass the id of last element made
-	//add the new elements to the list and update number of elements
-	new_elements = _mesh->getElement(0)->getChildren();
-	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
-	_mesh->_n_elems += new_elements.size();
 
 	//update the connectivity array
 
@@ -111,4 +95,17 @@ bool MeshController::meshNeedsRefinement()
 			return false;
 		}
 	}
+}
+
+void MeshController::refineElement(int element_id)
+{
+	//probably better to have this function return the new elements made
+	std::vector<ECMCElement1D*> new_elements;
+	_mesh->getElement(element_id)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+	//add the new elements to the list and update number of elements
+	new_elements = _mesh->getElement(element_id)->getChildren();
+	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+	_mesh->_n_elems += new_elements.size();
+
+	//need to update pointers of the upstream element
 }
