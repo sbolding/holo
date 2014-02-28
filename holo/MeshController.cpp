@@ -107,5 +107,20 @@ void MeshController::refineElement(int element_id)
 	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
 	_mesh->_n_elems += new_elements.size();
 
-	//need to update pointers of the upstream element
+	//determine if the refined cell was on a boundary
+	std::vector<int>::iterator it_bound;
+	it_bound = std::find(_mesh->_boundary_cells.begin(), _mesh->_boundary_cells.end(), element_id);
+	if (it_bound != _mesh->_boundary_cells.end()) 
+	{
+		_mesh->_boundary_cells_need_update = true; //created cell was on a boundary, update boundary cells
+	}
+	
+	//Update pointers to the refined element if necessary
+	ECMCElement1D* upstream_el = _mesh->findJustUpwindElement(element_id);
+	if (upstream_el->getRefinementLevel() == new_elements[0]->getRefinementLevel())
+	{
+		upstream_el->getChild(0)->setDownStreamElement(new_elements[1]);
+		upstream_el->getChild(2)->setDownStreamElement(new_elements[3]);
+	}
+	
 }

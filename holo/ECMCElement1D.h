@@ -18,6 +18,8 @@
 #include "ECMCElement.h"
 #include <map>
 
+class MeshController;
+
 class ECMCElement1D : public ECMCElement
 {
 protected:
@@ -61,6 +63,7 @@ public:
 	std::vector<ECMCElement1D*> getChildren() const;
 	ECMCElement1D* getChild(int index) const; //0 and 2 are downwind elements, 1 and 3 are most upwind elements, from -mu to +mu
 	ECMCElement1D* findChildEntered(double mu) const; //find the child element that a particle has entered based on the direction
+	void setDownStreamElement(ECMCElement1D*); //set the downstream element, should only be used by MeshController
 
 };
 #endif  //_ECMCELEMENT1D_H

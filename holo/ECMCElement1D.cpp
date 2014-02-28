@@ -29,6 +29,11 @@ ECMCElement1D* ECMCElement1D::getDownStreamElement() const
 	return _down_stream_element;
 }
 
+void ECMCElement1D::setDownStreamElement(ECMCElement1D* new_ds_elem)
+{
+	_down_stream_element = new_ds_elem;
+}
+
 double ECMCElement1D::getSpatialWidth() const
 {
 	return _width_spatial;
