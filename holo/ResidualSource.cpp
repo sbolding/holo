@@ -59,12 +59,14 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 			if (ds_element->hasChildren()) //ds element more refined
 			{
 				//need to compute a face residual term for both down stream children
-				ECMCElement1D* child_minus = ds_element->getChild(1);
+				ECMCElement1D* child_minus = ds_element->findChildEntered(
+					ds_element->getAngularCoordinate() - 0.25*ds_element->getAngularWidth()); //get bottom child
 				computeFaceResidual(*it_el, child_minus, res_LD_values_face, res_face_mag_el, false);
 				_residual_face_LD_values[child_minus->getID()] = res_LD_values_face;
 				res_face_mags[child_minus->getID()] = res_face_mag_el;
 
-				ECMCElement1D* child_plus = ds_element->getChild(3);
+				ECMCElement1D* child_plus = ds_element->findChildEntered(
+					ds_element->getAngularCoordinate() + 0.25*ds_element->getAngularWidth()); //get top child
 				computeFaceResidual(*it_el, child_plus, res_LD_values_face, res_face_mag_el, false);
 				_residual_face_LD_values[child_plus->getID()] = res_LD_values_face;
 				res_face_mags[child_plus->getID()] = res_face_mag_el;
@@ -88,6 +90,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 				}
 				res_face_mags[ds_id] += res_face_mag_el; //construct total probability of being in ds cell
 
+				//add the bottom first, then the top (should be an it_el that comes after the bottom one, but forced to add in correct order)
 				int begin; //where to begin in vector, 0 for bottom cell, 0+dof.size() for top cell
 				begin = ((*it_el)->getAngularCoordinate() < ds_element->getAngularCoordinate() ?
 					0 : res_LD_values_face.size());
@@ -117,7 +120,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//add terms to the elements on the boundary
 		res_face_mag_el = 0.0; //initialize
 		bc_element_ID = boundary_cells[i];
-		computeFaceResidual(NULL,(*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true); //in this case the d.s. element is the boundary element
+		computeFaceResidual((*elements)[bc_element_ID],(*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true); //in this case the d.s. element is the boundary element
 
 		//add values to arrays
 		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
@@ -437,7 +440,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, ECMCElement1D* 
 {
 	//This function projects to the finest cell (between element and ds_element) and does computation based on those dimensions
 
-	if (element->getDownStreamElement() == NULL) 
+	if (ds_element == NULL) 
 	{
 		res_LD_values_face.clear();
 		res_mag = 0.;
@@ -508,23 +511,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, ECMCElement1D* 
 	res_avg = mu_sgn*((psi_up[0] + mu_sgn*psi_up[1]) - (psi_down[0] - mu_sgn*psi_down[1]));
 	res_mu = mu_sgn*(psi_up[2] - psi_down[2]);
 
-	//DEBUG CHECKING THE NEXT LINES OF CODE TO MATCH EVALDELTARESIDUALINTEGRAL
-	//compute magnitude of integral
-	if (std::abs(res_mu / res_avg) < GlobalConstants::RELATIVE_TOLERANCE)
-	{
-		res_mag = h_mu*std::abs(res_avg*dir_coor);
-	}
-	if (std::abs(res_avg / res_mu) < 1) //sign change
-	{
-		double ratio = res_avg / res_mu; //see Jake Peterson A&M thesis for terms, computation has been checked
-		res_mag = h_mu*std::abs(dir_coor*0.5*res_mu - h_mu*ratio*ratio*res_avg / 12. + dir_coor*0.5*ratio*ratio*res_mu
-			+ 0.25*h_mu*res_avg);
-	}
-	else //no sign change
-	{
-		res_mag = h_mu*std::abs(dir_coor*res_avg + h_mu*res_mu / 6.);
-	}
-
+    //compute magnitude of integral
 	res_mag = evalDeltaResidualIntegral(res_LD_values_face, h_mu, dir_coor);
 }
 

@@ -75,13 +75,6 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->runHistory();
 		}
 		//compute the new angular fluxes
-
-		//DEBUG 
-		if (batch == 1)
-		{
-			exit(1);
-		}
-
 		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
 
 		//debug outputs
@@ -102,19 +95,22 @@ void HoSolver::solveSystem(std::ostream & out)
 		_mesh_controller->storeResidualNorm(_particle->getTotalSourceStrength());
 		if (HoController::ADAPTIVE_REFINEMENT)
 		{
+			if (batch == 0)
+			{
+				std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
+				_mesh_controller->refineMesh();
+				_particle->computeResidualSource();
+				continue;
+			}
 			if (_mesh_controller->meshNeedsRefinement())
 			{
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
 			}
+
 		}
 
-		if (batch == 1)
-		{
-			std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
-			_mesh_controller->refineMesh();
-			_particle->computeResidualSource();
-		}
+
 	}	
 }
 
