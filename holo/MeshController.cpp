@@ -70,7 +70,11 @@ void MeshController::refineMesh()
 	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
 	_mesh->_n_elems += new_elements.size();
 
-
+	_mesh->getElement(0)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+	//add the new elements to the list and update number of elements
+	new_elements = _mesh->getElement(0)->getChildren();
+	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
+	_mesh->_n_elems += new_elements.size();
 
 	//update the connectivity array
 

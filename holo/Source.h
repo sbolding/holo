@@ -47,10 +47,11 @@ public:
 	{
 		return 0.5*(nodal_values[0] + nodal_values[1])*element_volume;
 	};
-	double evalLinDiscFunc2D(std::vector<double> dof, ECMCElement1D* element, double x, double mu)
+	double evalLinDiscFunc2D(std::vector<double> dof, std::vector<double> dimensions, 
+		std::vector<double>coors , double x, double mu)
 	{
-		return dof[0] + 2. / element->getSpatialWidth()*dof[1] * (x - element->getSpatialCoordinate())
-			+ 2. / element->getAngularWidth()*dof[2] * (mu - element->getAngularCoordinate());
+		return dof[0] + 2. / dimensions[0]*dof[1] * (x - coors[0])
+			+ 2. / dimensions[1]*dof[2] * (mu - coors[1]);
 	}
 	double evalLinDiscFunc1D(std::vector<double> nodal_values, std::vector<double> x_nodes, double x)
 	{
