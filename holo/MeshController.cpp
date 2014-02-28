@@ -24,7 +24,8 @@ MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_bat
 
 void MeshController::computeJumpError()
 {
-
+	//loop over active elements
+	//compute the jump integral for each face (that has an adjacent cell)
 }
 
 void MeshController::createConnectivityArray()
@@ -71,7 +72,7 @@ void MeshController::refineMesh()
 
 
 
-
+	//update the connectivity array
 
 
 

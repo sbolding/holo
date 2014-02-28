@@ -33,8 +33,8 @@ protected:
 
 	//Functions for building sampler
 	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 
-	void computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & residual_face_magnitude,
-		bool on_boundary = false); //special case for boundary cells
+	void computeFaceResidual(ECMCElement1D* element, ECMCElement1D* down_str_elem, std::vector<double> & res_LD_values_face, 
+		double & residual_face_magnitude, bool on_boundary = false); //special case for boundary cells, the up_stream_element is NULL
 	void computeBCAngularFluxDof(); //determine LD values for equivalent incident flux of boundary conditions and corresponding elements
 
 	//Functions for sampling position and direction

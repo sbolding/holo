@@ -54,18 +54,24 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add value to the downwind cell
 		{
+			computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 			if ((*it_el)->getDownStreamElement()->hasChildren())
 			{
 				//need to compute a face residual term for both down stream elements
 				std::cerr << "This is not implemented yet\n";
 				exit(1);
+				std::vector<double> bot_res_LD_values_face(res_LD_values_face.begin(), res_LD_values_face.begin() + 1);
+				_residual_face_LD_values[(*it_el)->getDownStreamElement()->getChild(1)->getID()] = bot_res_LD_values_face;
+				std::vector<double> top_res_LD_values_face(res_LD_values_face.begin()+2, res_LD_values_face.begin()+3);
+				_residual_face_LD_values[(*it_el)->getDownStreamElement()->getChild(3)->getID()] = top_res_LD_values_face;
 			}
 			else
 			{
-				computeFaceResidual(*it_el, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 				_residual_face_LD_values[(*it_el)->getDownStreamElement()->getID()] = res_LD_values_face;
 				res_face_mags[(*it_el)->getDownStreamElement()->getID()] = res_face_mag_el;
+				//need a special case for when the downstream element is less refined, based on the length of res_LD_values_face vector
 			}
+			
 		}
 
 		//add magnitudes to appropriate values,
@@ -79,10 +85,10 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	int bc_element_ID;
 	for (int i = 0; i < boundary_cells.size(); i++)
 	{
-		//add terms to the elements on the boundary (do not add to downwind element)
+		//add terms to the elements on the boundary
 		res_face_mag_el = 0.0; //initialize
 		bc_element_ID = boundary_cells[i];
-		computeFaceResidual((*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true);
+		computeFaceResidual(NULL,(*elements)[bc_element_ID], res_LD_values_face, res_face_mag_el, true); //in this case the d.s. element is the boundary element
 
 		//add values to arrays
 		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
@@ -229,8 +235,6 @@ void ResidualSource::sampleElementSource()
 	}
 }
 
-
-
 void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	std::vector<double> & res_LD_values_el, double & res_mag)
 {
@@ -369,9 +373,11 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	res_mag *= h_x*h_mu;
 }
 
-void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<double> & res_LD_values_face, double & res_mag,
+void ResidualSource::computeFaceResidual(ECMCElement1D* element, ECMCElement1D* ds_element, std::vector<double> & res_LD_values_face, double & res_mag,
 	bool on_boundary)
 {
+	//This function projects to the finest cell (between element and ds_element) and does computation based on those dimensions
+
 	if (element->getDownStreamElement() == NULL) 
 	{
 		res_LD_values_face.clear();
@@ -382,8 +388,8 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	//initialize variables
 	res_mag = 0.0;
 	res_LD_values_face.assign(3, 0.0);
-	double h_mu = element->getAngularWidth();
-	double dir_coor = element->getAngularCoordinate();
+	double h_mu;
+	double dir_coor;
 	double mu_sgn = dir_coor / std::abs(dir_coor); //negative or positive direction
 	double & res_avg = res_LD_values_face[0];
 	double & res_mu = res_LD_values_face[2]; 
@@ -394,7 +400,10 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 	if (on_boundary) //for non isotropic boundary conditions this will not be true
 	{
 		psi_up = _bc_dof[_bc_element_to_dof_map[element->getID()]];
-		psi_down = element->getAngularFluxDOF();
+		psi_down = ds_element->getAngularFluxDOF();
+		h_mu = ds_element->getAngularWidth();
+		dir_coor = ds_element->getAngularCoordinate();
+
 	}
 	else
 	{	
@@ -426,7 +435,7 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, std::vector<dou
 		}
 		else
 		{
-			std::cerr << "Refinement is not regularized, one cell is more than 2 levels more refined than another, in ResidualSource::computeFaceResidual\n";
+			std::cerr << "Refinement is not regularized, one cell is more than 1 level refined than an adjacent one, in ResidualSource::computeFaceResidual\n";
 			exit(1);
 		}
 	}
