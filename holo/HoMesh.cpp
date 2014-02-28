@@ -238,5 +238,8 @@ std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
 
 ECMCElement1D* findJustUpwindElement(int down_str_element_id)
 {
+	//find the boundary cell that is on the same mu level as current element
+	std::vector<int> boundary_cells = 
+	
 	return NULL;
 }
