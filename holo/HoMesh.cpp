@@ -199,31 +199,34 @@ std::vector<int> HoMesh::findUpwindBoundaryCells()
 		spatial_ID = _elements[i]->getSpatialElement()->getID();
 		if ( spatial_ID == 0 || spatial_ID == last_element_ID) //spatial cell on a boundary, need to make sure boundary is upwind
 		{
-			if (_elements[i]->getDownStreamElement() != NULL || last_element_ID == 0) // potential boundary element, id=0 case is for 1 cell geometry
+			//check if element is on edge of boundary
+			std::vector<double> x_edges;
+			x_edges = _elements[i]->getSpatialElement()->getNodalCoordinates();
+			double x_coor = _elements[i]->getSpatialCoordinate();
+			double h_x = _elements[i]->getSpatialWidth();
+			if (_elements[i]->getAngularCoordinate() > 0.0)
 			{
-				//check if element is on edge of boundary
-				std::vector<double> x_edges;
-				x_edges = _elements[i]->getSpatialElement()->getNodalCoordinates();
-				double x_coor = _elements[i]->getSpatialCoordinate();
-				double h_x = _elements[i]->getSpatialWidth();
-				if (_elements[i]->getAngularCoordinate() > 0.0)
+				double edge_left = x_coor - 0.5*h_x;
+				if (std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
 				{
-					double edge_left = x_coor - 0.5*h_x;
-					if (std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE) 
-					{ 
+					if (spatial_ID == 0)
+					{
 						_boundary_cells.push_back(i); //on left boundary face
 					}
 				}
-				else //negative flow
+			}
+			else //negative flow
+			{
+				double edge_right = x_coor + 0.5*h_x;
+				if (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
 				{
-					double edge_right = x_coor + 0.5*h_x;
-					if (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
+					if (spatial_ID == last_element_ID)
 					{
 						_boundary_cells.push_back(i); //on right boundary face
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	//reset the boundary_cells flag and return new list of boundary cells
@@ -240,7 +243,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 {
 	//find the boundary cell that is on the same mu level as current element
 	std::vector<int>::iterator it_bc_id;
-	findUpwindBoundaryCells(); //update just in case
+	findUpwindBoundaryCells(); //update, this can be removed to improve efficiency
 
 	double bc_mu_center;
 	double ds_mu_center = _elements[down_str_element_id]->getAngularCoordinate();

@@ -149,8 +149,9 @@ void MeshController::refineElement(int element_id)
 	{
 		if (upstream_el->hasChildren())
 		{
-			std::cerr << "I dont know why this would ever be called, in MeshController.cpp" << std::endl;
-			exit(1);
+			//This is called because the boundary cells are only being updated once per total refinement,
+			//but it is not a problem.  The findJustUpwind function works in this case, it just returns
+			//the parent element rather than the children because children are not listed as boundary cell yet
 			upstream_el->getChild(0)->setDownStreamElement(new_elements[1]);
 			upstream_el->getChild(2)->setDownStreamElement(new_elements[3]);
 		}

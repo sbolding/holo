@@ -153,14 +153,14 @@ void ECMCElement1D::refine(int last_element_id)
 			}
 		}
 
-		child_x_coor = _position_center + sgn_mu*child_h_mu*0.5;
+		child_x_coor = _position_center + sgn_mu*child_h_x*0.5;
 		child = new ECMCElement1D(child_id, _spatial_element, child_ds_elem,
 			child_dimens,child_coor,_refinement_level+1);  		//create first element in row
 		_children.push_back(child);
 		child_id++; //increment id
 		
 		//create second element in row
-		child_x_coor -= sgn_mu*child_h_mu;  //update x_coor
+		child_x_coor -= sgn_mu*child_h_x;  //update x_coor
 		child_ds_elem = child; //the first child is downstream of the next one
 		child = new ECMCElement1D(child_id, _spatial_element, child_ds_elem,
 			child_dimens, child_coor, _refinement_level + 1);  		
