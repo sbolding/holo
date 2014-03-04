@@ -113,6 +113,7 @@ void MeshController::refineElement(int element_id)
 	if (it_bound != _mesh->_boundary_cells.end()) 
 	{
 		_mesh->_boundary_cells_need_update = true; //created cell was on a boundary, update boundary cells
+		_mesh->findUpwindBoundaryCells(); //update the boundary list, won't cost any extra to do it now than later
 	}
 	
 	//Update pointers to the refined element if necessary

@@ -236,10 +236,75 @@ std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
 	return _lo_mesh->getDirichletBCs();
 }
 
-ECMCElement1D* findJustUpwindElement(int down_str_element_id)
+ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 {
 	//find the boundary cell that is on the same mu level as current element
-	std::vector<int> boundary_cells = 
+	std::vector<int>::iterator it_bc_id;
+	findUpwindBoundaryCells(); //update just in case
+
+	double bc_mu_center;
+	double ds_mu_center = _elements[down_str_element_id]->getAngularCoordinate();
+	double ds_h_mu = _elements[down_str_element_id]->getAngularWidth();
+	double ds_mu_minus = ds_mu_center - 0.5*ds_h_mu;
+	double ds_mu_plus = ds_mu_center + 0.5*ds_h_mu;
+
+	for (it_bc_id = _boundary_cells.begin(); it_bc_id != _boundary_cells.end(); it_bc_id++)
+	{
+		bc_mu_center = _elements[*it_bc_id]->getAngularCoordinate();
+		if (bc_mu_center > ds_mu_minus) //os abp
+		{
+			if (bc_mu_center < ds_mu_plus)
+			{
+				break;
+			}
+		}	
+	}
+	if (it_bc_id == _boundary_cells.end())
+	{
+		std::cerr << "Boundary element not found in findJusUpwindElement, HoMesh.cpp\n";
+		exit(1);
+	}
+
+	//make sure that the boundary element not a child of the ds element (if it has any), since the
+	//boundary cells have been updated before this function is called, children are active
+	//and thus in boundary cell list
+	if (_elements[down_str_element_id]->hasChildren())
+	{
+		std::vector<ECMCElement1D*> ds_element_children = _elements[down_str_element_id]->getChildren();
+		std::vector<ECMCElement1D*>::iterator it_children;
+		std::find(ds_element_children.begin(), ds_element_children.end(), it_children);
+		if (it_children != ds_element_children.end())
+		{
+			return NULL; //the element has children on the boundary
+		}
+	}
+	else
+	{
+		if (*it_bc_id == down_str_element_id)
+		{
+			return NULL; //the element is on a boundary
+		}
+	}
 	
-	return NULL;
+	//Else, there is an interior cell upwind of this element
+	//start on boundary and search to find the upwind element
+	ECMCElement1D* new_down_str_elem;
+	ECMCElement1D* up_str_elem = _elements[*it_bc_id]; //start on boundary
+	while (up_str_elem != NULL)
+	{
+		new_down_str_elem = up_str_elem->getDownStreamElement();
+		if (new_down_str_elem->getID() == down_str_element_id)
+		{
+			return up_str_elem;
+		}
+		else
+		{
+			up_str_elem = new_down_str_elem; //check next element
+		}
+	}
+	if (up_str_elem == NULL)
+	{
+		std::cerr << "Could not find downstream element, in HoMesh.cpp::finJustUpwind\n";
+		exit(1);
+	}
 }
