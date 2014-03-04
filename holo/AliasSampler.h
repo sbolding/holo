@@ -50,7 +50,7 @@ public:
 inline unsigned int AliasSampler::sampleBin(double random_number1, double random_number2)
 {
 	int bin = (int)(random_number1*_n_bins); //which bin are you in
-	return (random_number2 < _alias_data[bin].non_alias_probability ? bin : _alias_data[bin].alias_event); //Did you stay in that bin?
+	return (random_number2 < _alias_data[bin].non_alias_probability ? bin : _alias_data[bin].alias_event); //Did you stay in that bin, or go to Alias bin?
 }
 
 #endif //_ALIASSAMPLER_H

@@ -28,6 +28,7 @@ protected:
 	AliasSampler* _face_source;	    //Sampler to determine which face you are on
 	double _face_src_total; //magnitude of the face source total, vol src total is stored in base class
 
+	//The boundary conditions are only needed for computing the residual, the result is stored in the face source sampler
 	std::vector<std::vector<double>> _bc_dof; //dof for boundary conditions for elements, access using map, this could be done dynamically and deleted each time
 	std::map<int, int> _bc_element_to_dof_map;  //key: element, value: index in bc_dof array
 

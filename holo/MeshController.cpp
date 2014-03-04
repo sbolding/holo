@@ -51,18 +51,26 @@ void MeshController::storeResidualNorm(double residual_norm)
 void MeshController::refineMesh()
 {
 	//Refine mesh
+	/*
 	refineElement(1);
 	refineElement(0);
 	refineElement(2);
 	refineElement(4);
-	refineElement(7);
+	refineElement(7);*/
 
+	refineElement(1);
+	refineElement(0);
+	refineElement(2);
+	refineElement(3);
+	_batch_residual_norms.push_back(0);
 
 
 
 	//update the connectivity array
 
 
+	//update the boundary source
+	_mesh->findUpwindBoundaryCells();
 
 
 	//reset convergence rate criteria
@@ -115,7 +123,6 @@ void MeshController::refineElement(int element_id)
 	if (it_bound != _mesh->_boundary_cells.end()) 
 	{
 		_mesh->_boundary_cells_need_update = true; //created cell was on a boundary, update boundary cells
-		_mesh->findUpwindBoundaryCells(); //update the boundary list, won't cost any extra to do it now rather than later
 		return; //no upwind boundary poitners to update
 	}
 	

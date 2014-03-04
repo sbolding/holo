@@ -289,7 +289,10 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	}
 	
 	//Else, there is an interior cell upwind of this element
-	//start on boundary and search to find the upwind element
+	//start on boundary and search to find the upwind element, note 
+	//that this function will work correctly even if the upwind boundary elements
+	//have yet to be updated, this saves computing the new boundary elements every
+	//time you add a new element
 	ECMCElement1D* new_down_str_elem = NULL;
 	ECMCElement1D* up_str_elem = _elements[*it_bc_id]; //start on boundary
 	while (up_str_elem != NULL)
