@@ -102,6 +102,11 @@ void HoSolver::solveSystem(std::ostream & out)
 				_particle->computeResidualSource();
 				continue;
 			}
+			else
+			{
+				std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
+				continue;
+			}
 			if (_mesh_controller->meshNeedsRefinement())
 			{
 				_mesh_controller->refineMesh(); //this will refine if necessary

@@ -475,9 +475,13 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, ECMCElement1D* 
 			h_mu = ds_element->getAngularWidth();
 			double top_or_bottom_sgn = (dir_coor > element->getAngularCoordinate() ? 1. : -1.);
 
+			//map the upstream values to the ds scale
+			psi_up.resize(psi_up_big.size());
 			psi_up[1] = psi_up_big[1] * 0.5;
 			psi_up[2] = psi_up_big[2] * 0.5;
 			psi_up[0] = psi_up_big[0] + mu_sgn*psi_up[1] + top_or_bottom_sgn*psi_up[2]; //map to (top_or_bottom) (right: mu>0, left: mu<0);
+
+			psi_down = ds_element->getAngularFluxDOF();//set the ds element
 		}
 		else if (ds_element->getRefinementLevel() == element->getRefinementLevel() - 1) 
 		{
@@ -485,9 +489,13 @@ void ResidualSource::computeFaceResidual(ECMCElement1D* element, ECMCElement1D* 
 			std::vector<double> psi_down_big = ds_element->getAngularFluxDOF();
 			double top_or_bottom_sgn = (dir_coor > ds_element->getAngularCoordinate() ? 1. : -1.);
 
+			//map the downstream values to the upstream scale
+			psi_down.resize(psi_down_big.size());
 			psi_down[1] = psi_down_big[1] * 0.5;
 			psi_down[2] = psi_down_big[2] * 0.5;
 			psi_down[0] = psi_down_big[0] - mu_sgn*psi_down[1] + top_or_bottom_sgn*psi_down[2]; //map to (top_or_bottom) (left: mu>0, right: mu<0);
+
+			psi_up = element->getAngularFluxDOF();
 		}
 		else if (ds_element->getRefinementLevel() == element->getRefinementLevel()) //same refinement
 		{
