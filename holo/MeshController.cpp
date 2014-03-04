@@ -100,8 +100,10 @@ bool MeshController::meshNeedsRefinement()
 void MeshController::refineElement(int element_id)
 {
 	//probably better to have this function return the new elements made
+	ECMCElement1D* unrefined_element = _mesh->_elements[element_id];
 	std::vector<ECMCElement1D*> new_elements;
 	_mesh->getElement(element_id)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+
 	//add the new elements to the list and update number of elements
 	new_elements = _mesh->getElement(element_id)->getChildren();
 	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
@@ -113,15 +115,42 @@ void MeshController::refineElement(int element_id)
 	if (it_bound != _mesh->_boundary_cells.end()) 
 	{
 		_mesh->_boundary_cells_need_update = true; //created cell was on a boundary, update boundary cells
-		_mesh->findUpwindBoundaryCells(); //update the boundary list, won't cost any extra to do it now than later
+		_mesh->findUpwindBoundaryCells(); //update the boundary list, won't cost any extra to do it now rather than later
+		return; //no upwind boundary poitners to update
 	}
 	
 	//Update pointers to the refined element if necessary
 	ECMCElement1D* upstream_el = _mesh->findJustUpwindElement(element_id);
-	if (upstream_el->getRefinementLevel() == new_elements[0]->getRefinementLevel())
+	if (upstream_el->getRefinementLevel() == new_elements[0]->getRefinementLevel()) 
 	{
-		upstream_el->getChild(0)->setDownStreamElement(new_elements[1]);
-		upstream_el->getChild(2)->setDownStreamElement(new_elements[3]);
+		//the upstraem element is of same refinement, need to set the other daughter too
+		if (upstream_el->getAngularCoordinate() < unrefined_element->getAngularCoordinate()) //found bottom (minus mu) refined cell
+		{
+			upstream_el->setDownStreamElement(new_elements[1]);
+			upstream_el = _mesh->findJustUpwindElement(new_elements[3]->getID()); //get the top cell
+			upstream_el->setDownStreamElement(new_elements[3]); //set the top cells ds element
+		}
+		else //you found the top (plus mu) refined cell
+		{
+			//This case is not normally called, but it works and may happen in the event of round off
+			upstream_el->setDownStreamElement(new_elements[3]);
+			upstream_el = _mesh->findJustUpwindElement(new_elements[1]->getID());
+			upstream_el->setDownStreamElement(new_elements[1]);
+		}
 	}
-	
+	else if (upstream_el->getRefinementLevel() == unrefined_element->getRefinementLevel()) 
+	{
+		if (upstream_el->hasChildren())
+		{
+			std::cerr << "I dont know why this would ever be called, in MeshController.cpp" << std::endl;
+			exit(1);
+			upstream_el->getChild(0)->setDownStreamElement(new_elements[1]);
+			upstream_el->getChild(2)->setDownStreamElement(new_elements[3]);
+		}
+		else
+		{
+			//no ds elem pnters to update
+			return;
+		}
+	}
 }

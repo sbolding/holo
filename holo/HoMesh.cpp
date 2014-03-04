@@ -247,6 +247,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	double ds_h_mu = _elements[down_str_element_id]->getAngularWidth();
 	double ds_mu_minus = ds_mu_center - 0.5*ds_h_mu;
 	double ds_mu_plus = ds_mu_center + 0.5*ds_h_mu;
+	unsigned int ds_refinement_level = _elements[down_str_element_id]->getRefinementLevel();
 
 	for (it_bc_id = _boundary_cells.begin(); it_bc_id != _boundary_cells.end(); it_bc_id++)
 	{
@@ -261,7 +262,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	}
 	if (it_bc_id == _boundary_cells.end())
 	{
-		std::cerr << "Boundary element not found in findJusUpwindElement, HoMesh.cpp\n";
+		std::cerr << "Boundary element not found in findJustUpwindElement, HoMesh.cpp\n";
 		exit(1);
 	}
 
@@ -271,8 +272,9 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	if (_elements[down_str_element_id]->hasChildren())
 	{
 		std::vector<ECMCElement1D*> ds_element_children = _elements[down_str_element_id]->getChildren();
+		ECMCElement1D* up_str_element = _elements[*it_bc_id];
 		std::vector<ECMCElement1D*>::iterator it_children;
-		std::find(ds_element_children.begin(), ds_element_children.end(), it_children);
+		it_children = std::find(ds_element_children.begin(), ds_element_children.end(), up_str_element);
 		if (it_children != ds_element_children.end())
 		{
 			return NULL; //the element has children on the boundary
@@ -288,14 +290,36 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	
 	//Else, there is an interior cell upwind of this element
 	//start on boundary and search to find the upwind element
-	ECMCElement1D* new_down_str_elem;
+	ECMCElement1D* new_down_str_elem = NULL;
 	ECMCElement1D* up_str_elem = _elements[*it_bc_id]; //start on boundary
 	while (up_str_elem != NULL)
 	{
 		new_down_str_elem = up_str_elem->getDownStreamElement();
 		if (new_down_str_elem->getID() == down_str_element_id)
 		{
-			return up_str_elem;
+			break;
+		}
+		else if ( ds_refinement_level >new_down_str_elem->getRefinementLevel())
+		{
+			//need to move back down a refinement level when possible (at some point it will be possible)
+			if (new_down_str_elem->hasChildren())
+			{
+				new_down_str_elem = new_down_str_elem->findChildEntered(ds_mu_center + GlobalConstants::RELATIVE_TOLERANCE*ds_h_mu); //add tiny delta h to prevent roundoff errors in this function, shoudl be find though
+
+				//check that refined cell is not the droid you were looking for
+				if (new_down_str_elem->getID() == down_str_element_id)
+				{
+					break;
+				}
+				else
+				{
+					up_str_elem = new_down_str_elem;
+				}
+			}
+			else //a later cell will be able to go back to the correct refinement level
+			{
+				up_str_elem = new_down_str_elem;
+			}
 		}
 		else
 		{
@@ -307,4 +331,5 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 		std::cerr << "Could not find downstream element, in HoMesh.cpp::finJustUpwind\n";
 		exit(1);
 	}
+	return up_str_elem;
 }
