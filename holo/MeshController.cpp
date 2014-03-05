@@ -12,6 +12,11 @@
 
 #include "MeshController.h"
 
+bool compare_pairs_seconds(const std::pair<int, double> & left, const std::pair<int, double> & right)
+{
+	return (left.second < right.second);
+}
+
 MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
 	_required_conv_rate(exp_conv_constant),
 	_mesh(mesh), 
@@ -21,10 +26,11 @@ MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_bat
 	createConnectivityArray();
 }
 
-void MeshController::computeJumpError(int element_id)
+double MeshController::computeElementJumpError(int element_id)
 {
-	//loop over active elements
-	//compute the jump integral for each face (that has an adjacent cell)
+	
+
+	return 9000;
 }
 
 void MeshController::createConnectivityArray()
@@ -54,28 +60,15 @@ void MeshController::storeResidualNorm(double residual_norm)
 
 void MeshController::refineMesh()
 {
-	_newly_refined_elements.clear();
+	//compute the jump error for each active element
+	std::vector<std::pair<int,double>> jump_errors; //a list of the jump errors, indexed by map above
 
-	//Refine mesh
-	refineElement(1);
-	refineElement(0);
-	refineElement(2);
-	//have to update after each refinement
-	_mesh->findUpwindBoundaryCells();
-	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
-	{
-		updateConnectivityArray(_newly_refined_elements[el_id]);
-	}
-	_newly_refined_elements.clear(); //no need to keep this
 	
-	refineElement(4);
-	refineElement(7);
-	/*
-	refineElement(1);
-	refineElement(0);
-	refineElement(2);
-	refineElement(3);*/
-	_batch_residual_norms.push_back(0);
+	//loop over the element pointers
+	//if they are not active, fucked up somewhere
+	//
+
+
 
 	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
@@ -86,6 +79,9 @@ void MeshController::refineMesh()
 		updateConnectivityArray(_newly_refined_elements[el_id]);
 	}
 	_newly_refined_elements.clear(); //no need to keep this
+	
+	std::cout << "temporary for debugging meshcontroller\n";
+	_batch_residual_norms.push_back(0);
 
 	//reset convergence rate criteria
 	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
@@ -198,6 +194,7 @@ ElementNeighbors MeshController::findNeighbors(int element_id)
 	double el_x_right = el_x_coor + 0.5*element->getSpatialWidth();
 
 	//Set the downstream and upstream element values, based on flow direction
+	_mesh->findUpwindBoundaryCells(); //must have boundary cells for this function to work
 	ECMCElement1D* up_str_element = _mesh->findJustUpwindElement(element_id);
 	ECMCElement1D*  ds_element = element->getDownStreamElement();
 	if (el_mu_coor > 0)
