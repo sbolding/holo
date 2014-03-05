@@ -61,10 +61,6 @@ void HoSolver::solveSystem(std::ostream & out)
 {
 	std::cout << "Solving the HO system..." << std::endl;
 
-	_particle->computeResidualSource();
-	_mesh_controller->refineMesh();
-	_particle->computeResidualSource();
-
 	for (int batch = 0; batch < _n_batches; batch++)
 	{
 		std::cout << "\nRunning batch " << batch + 1 << " of " << _n_batches << "...\n";
