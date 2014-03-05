@@ -19,6 +19,9 @@
 #include <vector>
 #include <map>
 #include "ECMCElement1D.h"
+#include "Controller.h"
+#include "GlobalConstants.h"
+#include <cmath>
 
 struct ElementNeighbors
 {
@@ -28,13 +31,25 @@ struct ElementNeighbors
 	ECMCElement1D* & _right; //element to the right of current element (in positive x)
 	ECMCElement1D* & _plus; //element above the current element
 
-	ElementNeighbors() : 
-		_element_pntrs(4, NULL), //currently 4, so only really works for 1D
+	//can make more general by having the constructor take an argument for 
+	//the size, and based on size only initialize appropriate elements, set
+	//rest to nulls.  Also, could use element id's instead of pointers, would
+	//need to change the way that findNeighbors is implemented to handle ID's
+	//and case of NULL ds_elements
+
+	ElementNeighbors() :
+		_element_pntrs(4,NULL), //currently 4, so only really works for 1D
 		_left(_element_pntrs[0]),
 		_minus(_element_pntrs[1]),
 		_right(_element_pntrs[2]),
 		_plus(_element_pntrs[3])
 	{}
+
+	ElementNeighbors& operator = (const ElementNeighbors& copy)
+	{
+		_element_pntrs = copy._element_pntrs;
+		return *this;
+	}
 };
 
 class MeshController
@@ -45,14 +60,17 @@ protected:
 	double _required_conv_rate;	//Required exponential convergence rate alpha, i.e., e^-alpha*batch_number
 	int _n_batches_to_check; //how many batches to keep and average for checking convergence, default of 3
 	std::map<int, ElementNeighbors> _connectivity_array; //for each cell that does NOT have children, which cells are on its face (for 1D 4 cells), indexed by ID so that this can be used for LoElements more easily
+	std::vector<int> _newly_refined_elements; //a list of elements that were refined this iteration, needed for updating connectivity array
 	HoMesh* _mesh; //ho Mesh
 	MeshController(); //don't use
 
 	//protected functions
 	void createConnectivityArray(); //go through the mesh and update the connectivity array
-	void computeJumpError(); //for determining where to refine the mesh
+	void computeJumpError(int elem_id); //compute jump errors for a single, active, element
 	void refineElement(int elem_id);
-
+	void updateConnectivityArray(int refined_element_id); //will find new neighbors list for refined element, as well as all elements it points to 
+	ElementNeighbors findNeighbors(int elem_id); //find the neighbors of an element, sets to NULL if they don't exist
+	
 public:
 
 	MeshController(HoMesh* mesh, double exp_convergence_rate, int n_batches_to_check); //n_batches_to_check is how many batches to check convergence on 

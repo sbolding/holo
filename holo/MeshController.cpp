@@ -11,7 +11,6 @@
 
 
 #include "MeshController.h"
-#include <cmath>
 
 MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
 	_required_conv_rate(exp_conv_constant),
@@ -22,7 +21,7 @@ MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_bat
 	createConnectivityArray();
 }
 
-void MeshController::computeJumpError()
+void MeshController::computeJumpError(int element_id)
 {
 	//loop over active elements
 	//compute the jump integral for each face (that has an adjacent cell)
@@ -30,12 +29,17 @@ void MeshController::computeJumpError()
 
 void MeshController::createConnectivityArray()
 {
-	//loop over elements
+	//loop parameters
 	std::vector<ECMCElement1D*>* elements = _mesh->getElements();
 	std::vector<ECMCElement1D*>::iterator it_el;
+
 	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
 	{
-		//TODO create the connectivity array
+		if ((*it_el)->hasChildren())
+		{
+			continue;
+		}	
+		_connectivity_array[(*it_el)->getID()] = findNeighbors((*it_el)->getID());
 	}
 }
 
@@ -50,12 +54,20 @@ void MeshController::storeResidualNorm(double residual_norm)
 
 void MeshController::refineMesh()
 {
+	_newly_refined_elements.clear();
+
 	//Refine mesh
 	refineElement(1);
 	refineElement(0);
 	refineElement(2);
 	//have to update after each refinement
 	_mesh->findUpwindBoundaryCells();
+	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
+	{
+		updateConnectivityArray(_newly_refined_elements[el_id]);
+	}
+	_newly_refined_elements.clear(); //no need to keep this
+	
 	refineElement(4);
 	refineElement(7);
 	/*
@@ -65,14 +77,15 @@ void MeshController::refineMesh()
 	refineElement(3);*/
 	_batch_residual_norms.push_back(0);
 
-
-
-	//update the connectivity array
-
-
-	//update the boundary source
+	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
 
+	//update the connectivity array for all the new elements and their neighbors
+	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
+	{
+		updateConnectivityArray(_newly_refined_elements[el_id]);
+	}
+	_newly_refined_elements.clear(); //no need to keep this
 
 	//reset convergence rate criteria
 	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
@@ -108,6 +121,9 @@ bool MeshController::meshNeedsRefinement()
 
 void MeshController::refineElement(int element_id)
 {
+	//add refined elements to the array
+	_newly_refined_elements.push_back(element_id);
+
 	//probably better to have this function return the new elements made
 	ECMCElement1D* unrefined_element = _mesh->_elements[element_id];
 	std::vector<ECMCElement1D*> new_elements;
@@ -127,7 +143,7 @@ void MeshController::refineElement(int element_id)
 		return; //no upwind boundary poitners to update
 	}
 	
-	//Update pointers to the refined element if necessary
+	//Update downstream element pointers to the refined elements if necessary
 	ECMCElement1D* upstream_el = _mesh->findJustUpwindElement(element_id);
 	if (upstream_el->getRefinementLevel() == new_elements[0]->getRefinementLevel()) 
 	{
@@ -159,7 +175,156 @@ void MeshController::refineElement(int element_id)
 		else
 		{
 			//no ds elem pnters to update
-			return;
 		}
 	}
+}
+
+ElementNeighbors MeshController::findNeighbors(int element_id)
+{
+	ElementNeighbors neighbors;
+
+	//loop parameters
+	std::vector<ECMCElement1D*>* elements = _mesh->getElements();
+	std::vector<ECMCElement1D*>::iterator it_el;
+	
+	//reference element parameters
+	ECMCElement1D* element = _mesh->getElement(element_id);
+	int el_refinement = (int)element->getRefinementLevel();
+	double el_mu_coor = element->getAngularCoordinate();
+	double el_mu_minus = el_mu_coor - 0.5*element->getAngularWidth();
+	double el_mu_plus = el_mu_coor + 0.5*element->getAngularWidth();
+	double el_x_coor = element->getSpatialCoordinate();
+	double el_x_left = el_x_coor - 0.5*element->getSpatialWidth();
+	double el_x_right = el_x_coor + 0.5*element->getSpatialWidth();
+
+	//Set the downstream and upstream element values, based on flow direction
+	ECMCElement1D* up_str_element = _mesh->findJustUpwindElement(element_id);
+	ECMCElement1D*  ds_element = element->getDownStreamElement();
+	if (el_mu_coor > 0)
+	{
+		neighbors._right = ds_element;
+		neighbors._left = up_str_element;
+	}
+	else
+	{
+		neighbors._right = up_str_element;
+		neighbors._left = ds_element;
+	}
+
+	//find the top (plus mu) and bottom (minus mu) elements
+	bool top_found = false;
+	bool bottom_found = false;
+	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
+	{
+		//check that still have elements to find
+		if (bottom_found) 
+		{
+			if (top_found)
+			{
+				break;
+			}
+		}
+
+		//don't compare to itself
+		if (*it_el == element) continue;
+
+		//make sure element is a possible match, based on refinement
+		int it_refinement_level = (int)(*it_el)->getRefinementLevel();
+		if (std::abs(it_refinement_level - el_refinement) > 1)
+		{
+			continue;
+		}
+
+		double it_x_coor = (*it_el)->getSpatialCoordinate();
+		double it_h_x = (*it_el)->getSpatialWidth();
+
+		if (std::abs(el_x_coor - it_x_coor) < it_h_x) //element matches vertically
+		{
+			double it_mu_coor = (*it_el)->getAngularCoordinate();
+			double it_h_mu = (*it_el)->getAngularWidth();
+			double it_mu_minus = it_mu_coor - 0.5*it_h_mu;
+			double it_mu_plus = it_mu_coor + 0.5*it_h_mu;
+
+			if (std::abs(el_mu_plus - it_mu_minus) < GlobalConstants::RELATIVE_TOLERANCE)
+			{
+				//check that refinement level isnt greater, if that is the case then the parent cell is top cell and will be found elsewhere
+				if (it_refinement_level > el_refinement)
+				{
+					continue;
+				}
+				else //found top cell
+				{
+					neighbors._plus = (*it_el);
+					top_found = true;
+				}
+			}
+			else if (std::abs(el_mu_minus - it_mu_plus) < GlobalConstants::RELATIVE_TOLERANCE)
+			{
+				//check that refinement level isnt greater, if that is the case then the parent cell of it_el is bot cell and will be found elsewhere in loop
+				if (it_refinement_level > el_refinement)
+				{
+					continue;
+				}
+				else //found top cell
+				{
+					neighbors._minus = (*it_el);
+					bottom_found = true;
+				}
+			}
+			else
+			{
+				continue;
+			}
+		}
+	}
+
+	if (! HoController::REFINE_ACROSS_MU_ZERO)
+	{
+		//check that element does not have a mu edge on zero
+		if (std::abs(el_mu_minus) < GlobalConstants::RELATIVE_TOLERANCE)
+		{
+			neighbors._minus = NULL;
+		}
+		else if (std::abs(el_mu_plus) < GlobalConstants::RELATIVE_TOLERANCE)
+		{
+			neighbors._plus = NULL;
+		}
+	}
+	
+	return neighbors;
+}
+
+void MeshController::updateConnectivityArray(int refined_element_id)
+{
+	//Check all neighbors to see if they need updating before you update the actual elements
+	ElementNeighbors neighbors = _connectivity_array[refined_element_id];
+	for (int i = 0; i<neighbors._element_pntrs.size(); ++i)
+	{
+		ECMCElement1D* neighbor = neighbors._element_pntrs[i];
+		if (neighbor != NULL)
+		{
+			if (neighbor->hasChildren()) //need to update pntrs for its children, else pointers still point to the parent of refined_element_id, so ok
+			{
+				std::vector<ECMCElement1D*> children(neighbor->getChildren());
+				std::vector<ECMCElement1D*>::iterator it_child;
+				for (it_child = children.begin(); it_child != children.end(); it_child++)
+				{
+					int child_id = (*it_child)->getID();
+					_connectivity_array[child_id] = findNeighbors(child_id);
+				}
+			}
+		}
+	}
+
+	//Now update the connectivity array for the children of this element
+	std::vector<ECMCElement1D*> children = _mesh->_elements[refined_element_id]->getChildren();
+	std::vector<ECMCElement1D*>::iterator it_child;
+	for (it_child = children.begin(); it_child != children.end(); it_child++)
+	{
+		int child_id = (*it_child)->getID();
+		_connectivity_array[child_id] = findNeighbors(child_id);
+	}
+
+	//Delete the parent cells member in map
+	_connectivity_array.erase(refined_element_id);
 }

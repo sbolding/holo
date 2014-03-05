@@ -15,7 +15,8 @@ namespace LoController
 
 namespace HoController
 {
-	const bool PARTICLE_BALANCE = true;
+	const bool REFINE_ACROSS_MU_ZERO = false;
+	const bool PARTICLE_BALANCE = false;
 	const bool ADAPTIVE_REFINEMENT = true;
 	const double FRACTION_CELLS_TO_REFINE = 0.4;
 	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch

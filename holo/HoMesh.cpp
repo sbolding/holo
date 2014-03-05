@@ -244,7 +244,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	//find the boundary cell that is on the same mu level as current element
 	std::vector<int>::iterator it_bc_id;
 
-	double bc_mu_center;
+	double bc_mu_center, bc_h_mu;
 	double ds_mu_center = _elements[down_str_element_id]->getAngularCoordinate();
 	double ds_h_mu = _elements[down_str_element_id]->getAngularWidth();
 	double ds_mu_minus = ds_mu_center - 0.5*ds_h_mu;
@@ -254,12 +254,11 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	for (it_bc_id = _boundary_cells.begin(); it_bc_id != _boundary_cells.end(); it_bc_id++)
 	{
 		bc_mu_center = _elements[*it_bc_id]->getAngularCoordinate();
-		if (bc_mu_center > ds_mu_minus) //os abp
+		bc_h_mu = _elements[*it_bc_id]->getAngularWidth();
+
+		if (std::abs(bc_mu_center - ds_mu_center) < 0.5*bc_h_mu)
 		{
-			if (bc_mu_center < ds_mu_plus)
-			{
-				break;
-			}
+			break;
 		}	
 	}
 	if (it_bc_id == _boundary_cells.end())
