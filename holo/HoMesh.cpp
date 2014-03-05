@@ -243,7 +243,6 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 {
 	//find the boundary cell that is on the same mu level as current element
 	std::vector<int>::iterator it_bc_id;
-	findUpwindBoundaryCells(); //update, this can be removed to improve efficiency
 
 	double bc_mu_center;
 	double ds_mu_center = _elements[down_str_element_id]->getAngularCoordinate();

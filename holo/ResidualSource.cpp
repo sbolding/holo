@@ -154,6 +154,8 @@ void ResidualSource::sampleSourceParticle()
 	//Sample if face or element source
 	if (_rng->rand_num() < (_vol_src_total / (_vol_src_total + _face_src_total))) //element source
 	{
+		//FOR STRATIFIED SAMPLING NEED A FUNCTION FOR CHOOSE ELEMENT AND CHOOSE FACE THAT CAN BE OVERWRITTEN
+		//MAKE AN initResidualSource function so I dont have to rewrite all this stuff
 		_particle->_current_element_ID = _element_source->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
 		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
 		_particle->updateElementProperties();
