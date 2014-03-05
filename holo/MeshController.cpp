@@ -51,17 +51,18 @@ void MeshController::storeResidualNorm(double residual_norm)
 void MeshController::refineMesh()
 {
 	//Refine mesh
+	refineElement(1);
+	refineElement(0);
+	refineElement(2);
+	//have to update after each refinement
+	_mesh->findUpwindBoundaryCells();
+	refineElement(4);
+	refineElement(7);
 	/*
 	refineElement(1);
 	refineElement(0);
 	refineElement(2);
-	refineElement(4);
-	refineElement(7);*/
-
-	refineElement(1);
-	refineElement(0);
-	refineElement(2);
-	refineElement(3);
+	refineElement(3);*/
 	_batch_residual_norms.push_back(0);
 
 
