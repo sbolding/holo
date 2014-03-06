@@ -67,12 +67,15 @@ void HoSolver::solveSystem(std::ostream & out)
 		//loop over the number of histories
 		for (int hist = 0; hist < _n_histories; hist++)
 		{
-			if ((hist + 1) % (_n_histories / 10) == 0)
-			{
-				std::cout << (int)((hist + 1) / (float)_n_histories * 100) << "% of " <<
-					_n_histories << " histories complete..." << std::endl;
-			}
 			_particle->runHistory();
+			if (HoController::WRITE_HISTORIES_COMPLETE)
+			{
+				if ((hist + 1) % (_n_histories / 10) == 0)
+				{
+					std::cout << (int)((hist + 1) / (float)_n_histories * 100) << "% of " <<
+						_n_histories << " histories complete..." << std::endl;
+				}
+			}
 		}
 		//compute the new angular fluxes
 		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
@@ -91,8 +94,18 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->computeResidualSource();
 		}
 
+		//store and print residual norm
+		double resid_L1_norm = _particle->getTotalSourceStrength();
+		_mesh_controller->storeResidualNorm(resid_L1_norm);
+		if (HoController::WRITE_RESIDUAL_NORMS)
+		{
+			out.setf(ios::scientific);
+			out.precision(15);
+			out << "Residual L1 Norm: " << resid_L1_norm;
+		}
+
+
 		//if necessary refine solution
-		_mesh_controller->storeResidualNorm(_particle->getTotalSourceStrength());
 		if (HoController::ADAPTIVE_REFINEMENT)
 		{
 			if (batch == 0)
