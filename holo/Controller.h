@@ -15,17 +15,14 @@ namespace LoController
 
 namespace HoController
 {
-	const bool PARTICLE_BALANCE = false;
-	const bool ADAPTIVE_REFINEMENT = false;
+	//Mesh refinement stuff 
+	const bool ADAPTIVE_REFINEMENT = true;
 	const double FRACTION_CELLS_TO_REFINE = 0.4;
+	const bool REFINE_ACROSS_MU_ZERO = false;
+	const bool USE_MAX_JUMP_ERROR = true; //use the max jump error on a cell as the jump error
 
-	//output stuff
+	const bool PARTICLE_BALANCE = false;
 	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch
-	const bool WRITE_RESIDUAL_NORMS = true;
-	const bool WRITE_HISTORIES_COMPLETE = false;
-
-
-	//Sampling stuff
 	const int INPUT_SEED = 73907;
 	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
 }
