@@ -216,6 +216,50 @@ ECMCElement1D*  ECMCElement1D::findChildEntered(double mu) const
 	return (mu < _mu_center) ? _children[1] : _children[3];	
 }
 
+ECMCElement1D* ECMCElement1D::getChild(double x, double mu)
+{
+	//find child based on an x and mu coordinate
+	if ((std::abs(mu - _mu_center) > _width_angle*0.5) ||
+		(std::abs(x - _position_center) > _width_spatial*0.5))
+	{
+		std::cerr << "Passed in x and mu that are not within this element, in ECMCElement1D::getChild(x,mu)\n";
+		exit(1);
+	}
+
+	int row, column;
+	if (mu < _mu_center) //On bottom
+	{
+		row = 0;
+	}
+	else
+	{
+		row = 1;
+	}
+	if (x <= _position_center) //on left side
+	{
+		if (_mu_center > 0.0)
+		{
+			column = 1;
+		}
+		else
+		{
+			column = 0;
+		}
+	}
+	else //on right side
+	{
+		if (_mu_center > 0.0)
+		{
+			column = 0;
+		}
+		else
+		{
+			column = 1;
+		}
+	}
+	return _children[2 * row + column];
+}
+
 ECMCElement1D* ECMCElement1D::getChild(int index) const
 {
 	if (index > _children.size() - 1)

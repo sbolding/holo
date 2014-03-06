@@ -22,6 +22,7 @@
 #include "Controller.h"
 #include "GlobalConstants.h"
 #include <cmath>
+#include <algorithm>
 
 struct ElementNeighbors
 {
@@ -67,6 +68,7 @@ protected:
 	//protected functions
 	void createConnectivityArray(); //go through the mesh and update the connectivity array
 	double computeElementJumpError(int elem_id); //compute jump errors for a single, active, element
+	double computeJumpIntegral(std::vector<double> avg_slope_1, std::vector<double> avg_slope_2, double width); //DOF are avg, then slope, along face
 	void refineElement(int elem_id);
 	void updateConnectivityArray(int refined_element_id); //will find new neighbors list for refined element, as well as all elements it points to 
 	ElementNeighbors findNeighbors(int elem_id); //find the neighbors of an element, sets to NULL if they don't exist

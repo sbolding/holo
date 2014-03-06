@@ -12,10 +12,15 @@
 
 #include "MeshController.h"
 
-bool compare_pairs_seconds(const std::pair<int, double> & left, const std::pair<int, double> & right)
+//Functor for comparing pairs, needed for sorting jump errors
+class CompareBySecond
 {
-	return (left.second < right.second);
-}
+public:
+	bool operator () (const std::pair<int, double> & left, const std::pair<int, double> & right)
+	{
+		return (left.second > right.second);
+	}
+};
 
 MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
 	_required_conv_rate(exp_conv_constant),
@@ -26,11 +31,137 @@ MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_bat
 	createConnectivityArray();
 }
 
+double MeshController::computeJumpIntegral(std::vector<double> avg_slope_1, std::vector<double> avg_slope_2, double width)
+{
+	if (avg_slope_1.size() != 2 && avg_slope_2.size() != 2)
+	{
+		std::cerr << "MeshController::computeJumpIntegral only implemented for 1D\n";
+		exit(12);
+	}
+
+	//define coefficients for integral
+	double diff_avgs = std::abs(avg_slope_2[0] - avg_slope_1[0]);
+	double diff_slopes = std::abs(avg_slope_2[1] - avg_slope_2[1]);
+
+	//check if there is a sign change
+	if (diff_avgs > diff_slopes || diff_slopes/diff_avgs < GlobalConstants::RELATIVE_TOLERANCE) 
+	{
+		return width*diff_avgs;
+	}
+	else //sign change occured, integral becomes:
+	{
+		return 0.5*width*(diff_avgs*diff_avgs/diff_slopes + diff_slopes);
+	}
+}
+
 double MeshController::computeElementJumpError(int element_id)
 {
+	//Returnable values
+	std::vector<double> element_jump_errors;
+
+	//Get element information
+	ECMCElement1D* element = _mesh->getElement(element_id);
+	std::vector<double> dimens = element->getElementDimensions();
+	std::vector<double> coords = element->getElementCoordinates();
+	double & mu = coords[1];
+	double & x = coords[0];
+	double & h_x = dimens[0];
+	double & h_mu = dimens[1];
+	unsigned int refinement_lev = element->getRefinementLevel();
+	std::vector<double> el_dof = element->getAngularFluxDOF();
+	std::vector<double> el_face_dof(2, 0.0);
+
+	//Initialize adjacent element information
+	ECMCElement1D* adj_element;
+	std::vector<double> adj_dimens(2,0.);
+	std::vector<double> adj_coords(2,0.);
+	double & adj_mu = adj_coords[1];
+	double & adj_x = adj_coords[0];
+	double & adj_h_x = adj_dimens[0];
+	double & adj_h_mu = adj_dimens[1];
+	std::vector<double> adj_dof;
+	std::vector<double> adj_face_dof(2,0.0);
+	
+	//loop over neighbors
+	ElementNeighbors neighbors_struct = _connectivity_array[element_id];
+	std::vector<ECMCElement1D*> neighbors = _connectivity_array[element_id]._element_pntrs;
+	double avg_mu_val, avg_x_val;
+	double slope_mu_val, slope_x_val;
+	for (int i_nbr = 0; i_nbr < neighbors.size(); i_nbr++)
+	{
+		adj_element = neighbors[i_nbr];
+		if (adj_element == NULL)
+		{
+			continue;
+		}
+		
+		//Set values to map fluxes to the correct faces
+		if (adj_element == neighbors_struct._left)
+		{
+			avg_mu_val = 0.0;
+			avg_x_val = -1.;
+			slope_mu_val = 1.;
+			slope_x_val = 0.0;
+		}
+		else if (adj_element == neighbors_struct._right)
+		{
+			avg_mu_val = 0.0;
+			avg_x_val = 1.;
+			slope_mu_val = 1.;
+			slope_x_val = 0.0;
+		}
+		else if (adj_element == neighbors_struct._minus)
+		{
+			avg_mu_val = -1.0;
+			avg_x_val = 0.0;
+			slope_mu_val = 0.0;
+			slope_x_val = 1.0;
+		}
+		else if (adj_element == neighbors_struct._plus)
+		{
+			avg_mu_val = 1.0;
+			avg_x_val = 0.0;
+			slope_mu_val = 0.0;
+			slope_x_val = 1.0;
+		}
+		else //neighbors list doesnt compute
+		{
+			std::cerr << "Logic Error in compute jump error in MeshController";
+		}
+
+		//Compute integrals based on relative refinement levels
+		if (adj_element->getRefinementLevel() == refinement_lev)
+		{
+			adj_dof = adj_element->getAngularFluxDOF(); 
+
+			//set average values on face
+			el_face_dof[0] = el_dof[0] + avg_x_val*el_dof[1] + avg_mu_val*el_dof[2];
+			adj_face_dof[0] = adj_dof[0] - avg_x_val*adj_dof[1] - avg_mu_val*adj_dof[2];
+			
+			//set slope values on face;
+			el_face_dof[1] = slope_x_val*el_dof[1] + slope_mu_val*el_dof[2];
+			adj_face_dof[1] = slope_x_val*adj_dof[1] + slope_mu_val*adj_dof[2];
+
+			element_jump_errors.push_back(computeJumpIntegral(el_face_dof, adj_face_dof, h_x));
+		}
+		else
+		{
+			element_jump_errors.push_back(9000.*i_nbr);
+		}
+
+
+	}
 	
 
-	return 9000;
+	if (HoController::USE_MAX_JUMP_ERROR)
+	{
+		return *(std::max_element(element_jump_errors.begin(), element_jump_errors.end()));
+	}
+	else
+	{
+		std::cerr << "Only max jump error indicator implemented, in MeshController.cpp\n";
+		exit(1);
+	}
 }
 
 void MeshController::createConnectivityArray()
@@ -59,17 +190,75 @@ void MeshController::storeResidualNorm(double residual_norm)
 }
 
 void MeshController::refineMesh()
-{
+{ 
+	//Create elements temporarily
+	std::cout << "FORCED REFINEMENT in MeshController.cpp\n";
+	_newly_refined_elements.clear();
+
+	//Refine mesh
+	refineElement(1);
+	refineElement(0);
+	refineElement(2);
+	//have to update after each refinement
+	_mesh->findUpwindBoundaryCells();
+	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
+	{
+		updateConnectivityArray(_newly_refined_elements[el_id]);
+	}
+	_newly_refined_elements.clear(); //no need to keep this
+
+	refineElement(4);
+	refineElement(7);
+	/*
+	refineElement(1);
+	refineElement(0);
+	refineElement(2);
+	refineElement(3);*/
+	_batch_residual_norms.push_back(0);
+
+	//update the boundary cells if needed
+	_mesh->findUpwindBoundaryCells();
+
+	//update the connectivity array for all the new elements and their neighbors
+	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
+	{
+		updateConnectivityArray(_newly_refined_elements[el_id]);
+	}
+	_newly_refined_elements.clear(); //no need to keep this
+
+
+
+
+
 	//compute the jump error for each active element
-	std::vector<std::pair<int,double>> jump_errors; //a list of the jump errors, indexed by map above
+	std::vector<std::pair<int,double>> jump_errors; //a vector of <cell_id, jump_error_value>
+	jump_errors.resize(_connectivity_array.size()); //initialize to the number of active elements
 
+	std::vector<ECMCElement1D*>::iterator it_el;
+	size_t index = 0;
+	for (it_el = _mesh->_elements.begin(); it_el != _mesh->_elements.end(); it_el++)
+	{
+		if ((*it_el)->hasChildren()) //element is inactive
+		{
+			continue;
+		}
+		else
+		{
+			int element_id = (*it_el)->getID();
+			jump_errors[index].first = element_id;
+			jump_errors[index].second = computeElementJumpError(element_id);
+			index++;
+		}
+	}
+
+	//sort jump errors, biggest to smallest
+	std::sort(jump_errors.begin(), jump_errors.end(), CompareBySecond());
+
+	//Determine number of new elements to create
+	int n_new_elements = std::ceil(HoController::FRACTION_CELLS_TO_REFINE*(double)_mesh->_n_elems); //round up so always at least one
 	
-	//loop over the element pointers
-	//if they are not active, fucked up somewhere
-	//
-
-
-
+	//Refine elements, and neighboring elements as needed
+	
 	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
 
@@ -104,7 +293,7 @@ bool MeshController::meshNeedsRefinement()
 		alpha_avg /= (float)_n_batches_to_check;
 
 		//check convergence
-		if (alpha_avg < _required_conv_rate) //if error increases, alpha will be negative and go back up
+		if (alpha_avg < _required_conv_rate) //if error increases, alpha will be negative, and thus less than required rate
 		{
 			return true;
 		}
@@ -119,6 +308,8 @@ void MeshController::refineElement(int element_id)
 {
 	//add refined elements to the array
 	_newly_refined_elements.push_back(element_id);
+
+	//Check that all neighbors are at least same level of refinement, if not, refine those elements, recursively this should work
 
 	//probably better to have this function return the new elements made
 	ECMCElement1D* unrefined_element = _mesh->_elements[element_id];
