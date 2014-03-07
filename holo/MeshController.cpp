@@ -41,10 +41,10 @@ double MeshController::computeJumpIntegral(std::vector<double> avg_slope_1, std:
 
 	//define coefficients for integral
 	double diff_avgs = std::abs(avg_slope_2[0] - avg_slope_1[0]);
-	double diff_slopes = std::abs(avg_slope_2[1] - avg_slope_2[1]);
+	double diff_slopes = std::abs(avg_slope_2[1] - avg_slope_1[1]);
 
 	//check if there is a sign change
-	if (diff_avgs > diff_slopes || diff_slopes/diff_avgs < GlobalConstants::RELATIVE_TOLERANCE) 
+	if (diff_avgs > diff_slopes || diff_slopes < GlobalConstants::RELATIVE_TOLERANCE)  //no slope, or no jump
 	{
 		return width*diff_avgs;
 	}
@@ -56,7 +56,7 @@ double MeshController::computeJumpIntegral(std::vector<double> avg_slope_1, std:
 
 double MeshController::computeElementJumpError(int element_id)
 {
-	//Returnable values
+	//Computed values
 	std::vector<double> element_jump_errors;
 
 	//Get element information
@@ -75,18 +75,17 @@ double MeshController::computeElementJumpError(int element_id)
 	ECMCElement1D* adj_element;
 	std::vector<double> adj_dimens(2,0.);
 	std::vector<double> adj_coords(2,0.);
-	double & adj_mu = adj_coords[1];
-	double & adj_x = adj_coords[0];
-	double & adj_h_x = adj_dimens[0];
-	double & adj_h_mu = adj_dimens[1];
 	std::vector<double> adj_dof;
 	std::vector<double> adj_face_dof(2,0.0);
 	
+	//Values of -1,1,or 0 for mapping to correct faces in a general way
+	double avg_mu_val, avg_x_val;
+	double slope_mu_val, slope_x_val;
+	double edge_width;
+
 	//loop over neighbors
 	ElementNeighbors neighbors_struct = _connectivity_array[element_id];
 	std::vector<ECMCElement1D*> neighbors = _connectivity_array[element_id]._element_pntrs;
-	double avg_mu_val, avg_x_val;
-	double slope_mu_val, slope_x_val;
 	for (int i_nbr = 0; i_nbr < neighbors.size(); i_nbr++)
 	{
 		adj_element = neighbors[i_nbr];
@@ -102,6 +101,7 @@ double MeshController::computeElementJumpError(int element_id)
 			avg_x_val = -1.;
 			slope_mu_val = 1.;
 			slope_x_val = 0.0;
+			edge_width = h_mu;
 		}
 		else if (adj_element == neighbors_struct._right)
 		{
@@ -109,6 +109,7 @@ double MeshController::computeElementJumpError(int element_id)
 			avg_x_val = 1.;
 			slope_mu_val = 1.;
 			slope_x_val = 0.0;
+			edge_width = h_mu;
 		}
 		else if (adj_element == neighbors_struct._minus)
 		{
@@ -116,6 +117,7 @@ double MeshController::computeElementJumpError(int element_id)
 			avg_x_val = 0.0;
 			slope_mu_val = 0.0;
 			slope_x_val = 1.0;
+			edge_width = h_x;
 		}
 		else if (adj_element == neighbors_struct._plus)
 		{
@@ -123,15 +125,63 @@ double MeshController::computeElementJumpError(int element_id)
 			avg_x_val = 0.0;
 			slope_mu_val = 0.0;
 			slope_x_val = 1.0;
+			edge_width = h_x;
 		}
-		else //neighbors list doesnt compute
+		else //neighbors list has extra term
 		{
 			std::cerr << "Logic Error in compute jump error in MeshController";
 		}
 
 		//Compute integrals based on relative refinement levels
-		if (adj_element->getRefinementLevel() == refinement_lev)
+		if (adj_element->hasChildren())
 		{
+			//adj_element is more refined, compute jump error for both children on the face
+			double jump_error = 0.0;
+			edge_width *= 0.5;
+
+			//map el_dof slopes to smaller element
+			el_dof[1] *= 0.5;
+			el_dof[2] *= 0.5;
+
+			//Initialize to the bottom element, for horizontal edges will be "left" child
+			el_dof[0] = el_dof[0] + slope_mu_val*el_dof[1] + slope_x_val*el_dof[1] - (slope_mu_val*el_dof[2] + slope_x_val*el_dof[1]); //map to smaller element, i know this works, but very convoluted
+
+			//Initialize the location of the child element
+			adj_coords = adj_element->getElementCoordinates();
+			adj_dimens = adj_element->getElementDimensions();
+			double & adj_mu = adj_coords[1];
+			double & adj_x = adj_coords[0];
+			double & adj_h_x = adj_dimens[0];
+			double & adj_h_mu = adj_dimens[1];
+			double child_x = adj_x - 0.25*adj_h_x*avg_x_val;
+			double child_mu = adj_mu - 0.25*adj_h_mu*avg_mu_val;
+			
+			for (int i_child = 0; i_child < 2; i_child++)
+			{
+				//get the child element values
+				ECMCElement1D* child = adj_element->getChild(child_x, child_mu);
+				adj_dof = child->getAngularFluxDOF();
+
+				//set average values on face
+				el_face_dof[0] = el_dof[0] + avg_x_val*el_dof[1] + avg_mu_val*el_dof[2];
+				adj_face_dof[0] = adj_dof[0] - avg_x_val*adj_dof[1] - avg_mu_val*adj_dof[2];
+
+				//set slope values on face;
+				el_face_dof[1] = slope_x_val*el_dof[1] + slope_mu_val*el_dof[2];
+				adj_face_dof[1] = slope_x_val*adj_dof[1] + slope_mu_val*adj_dof[2];
+
+				jump_error += computeJumpIntegral(el_face_dof, adj_face_dof, edge_width);
+
+				//move el_dof to the second element values (either top or right element)
+				el_dof[0] = el_dof[0] + el_dof[2] * slope_mu_val + el_dof[1] * slope_x_val;
+		/*		child_x += slope_mu_val*0.5*adj_h_x;
+				child_mu += slope_x_val*0.5*adj_h_mu;*/
+			}
+			element_jump_errors.push_back(0.0);
+		}
+		else if (adj_element->getRefinementLevel() == refinement_lev)
+		{
+			//same refinement level
 			adj_dof = adj_element->getAngularFluxDOF(); 
 
 			//set average values on face
@@ -142,17 +192,41 @@ double MeshController::computeElementJumpError(int element_id)
 			el_face_dof[1] = slope_x_val*el_dof[1] + slope_mu_val*el_dof[2];
 			adj_face_dof[1] = slope_x_val*adj_dof[1] + slope_mu_val*adj_dof[2];
 
-			element_jump_errors.push_back(computeJumpIntegral(el_face_dof, adj_face_dof, h_x));
+			element_jump_errors.push_back(computeJumpIntegral(el_face_dof, adj_face_dof, edge_width));
+		}
+		else if (adj_element->getRefinementLevel() == refinement_lev - 1) //adjacent element is less refined
+		{
+			//map adj_element dof to smaller element
+			adj_dof = adj_element->getAngularFluxDOF();
+			adj_coords = adj_element->getElementCoordinates();
+			double & adj_mu = adj_coords[1];
+			double & adj_x = adj_coords[0];
+			double & adj_h_x = adj_dimens[0];
+			double & adj_h_mu = adj_dimens[1];
+			adj_dof[1] *= 0.5; //slope is half on smaller element
+			adj_dof[2] *= 0.5;
+
+			//determine if the "top" or "bottom" element, for horizontal edges will be "right" or "left"
+			double top_or_bottom = (mu*slope_mu_val + x*slope_x_val > adj_mu*slope_mu_val + adj_x*slope_x_val ? 1. : -1.);
+			adj_dof[0] = adj_dof[0] + slope_mu_val*adj_dof[1] + slope_x_val*adj_dof[1] + top_or_bottom*(slope_mu_val*adj_dof[2] + slope_x_val*adj_dof[1]); //map to smaller element, i know this works, but very convoluted
+
+			//set average values on face
+			el_face_dof[0] = el_dof[0] + avg_x_val*el_dof[1] + avg_mu_val*el_dof[2];
+			adj_face_dof[0] = adj_dof[0] - avg_x_val*adj_dof[1] - avg_mu_val*adj_dof[2];
+
+			//set slope values on face;
+			el_face_dof[1] = slope_x_val*el_dof[1] + slope_mu_val*el_dof[2];
+			adj_face_dof[1] = slope_x_val*adj_dof[1] + slope_mu_val*adj_dof[2];
+
+			element_jump_errors.push_back(computeJumpIntegral(el_face_dof, adj_face_dof, edge_width));
 		}
 		else
 		{
-			element_jump_errors.push_back(9000.*i_nbr);
+			std::cerr << "Refinement logic error in MesHController.cpp::computeElementJumpError()\n";
+			exit(1);
 		}
-
-
 	}
 	
-
 	if (HoController::USE_MAX_JUMP_ERROR)
 	{
 		return *(std::max_element(element_jump_errors.begin(), element_jump_errors.end()));
@@ -197,8 +271,6 @@ void MeshController::refineMesh()
 
 	//Refine mesh
 	refineElement(1);
-	refineElement(0);
-	refineElement(2);
 	//have to update after each refinement
 	_mesh->findUpwindBoundaryCells();
 	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
@@ -226,10 +298,6 @@ void MeshController::refineMesh()
 	}
 	_newly_refined_elements.clear(); //no need to keep this
 
-
-
-
-
 	//compute the jump error for each active element
 	std::vector<std::pair<int,double>> jump_errors; //a vector of <cell_id, jump_error_value>
 	jump_errors.resize(_connectivity_array.size()); //initialize to the number of active elements
@@ -255,10 +323,23 @@ void MeshController::refineMesh()
 	std::sort(jump_errors.begin(), jump_errors.end(), CompareBySecond());
 
 	//Determine number of new elements to create
-	int n_new_elements = std::ceil(HoController::FRACTION_CELLS_TO_REFINE*(double)_mesh->_n_elems); //round up so always at least one
+	int n_refinements = std::ceil(HoController::FRACTION_CELLS_TO_REFINE*(double)_mesh->_n_elems); //round up so always at least one
 	
 	//Refine elements, and neighboring elements as needed
-	
+	index = 0;  //which element to refine
+	while (true)
+	{
+		refineElement(jump_errors[index].first);
+		if (_newly_refined_elements.size() >= n_refinements) //limit on number of refinements, including extra refinements to keep mesh regular
+		{
+			break;
+		}
+		else
+		{
+			index++;
+		}
+	}
+
 	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
 
@@ -274,7 +355,6 @@ void MeshController::refineMesh()
 
 	//reset convergence rate criteria
 	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
-
 }
 
 bool MeshController::meshNeedsRefinement()
@@ -309,12 +389,31 @@ void MeshController::refineElement(int element_id)
 	//add refined elements to the array
 	_newly_refined_elements.push_back(element_id);
 
-	//Check that all neighbors are at least same level of refinement, if not, refine those elements, recursively this should work
-
 	//probably better to have this function return the new elements made
 	ECMCElement1D* unrefined_element = _mesh->_elements[element_id];
+	unsigned int refinement_level = unrefined_element->getRefinementLevel();
 	std::vector<ECMCElement1D*> new_elements;
-	_mesh->getElement(element_id)->refine(_mesh->_n_elems - 1); //pass the id of last element made
+
+	//Check that all neighbors are at least same level of refinement, if not, refine those elements recursively
+	std::vector<ECMCElement1D*> element_neighbors(_connectivity_array[element_id]._element_pntrs);
+	std::vector<ECMCElement1D*>::iterator it_nbr;
+	for (it_nbr = element_neighbors.begin(); it_nbr != element_neighbors.end(); it_nbr++)
+	{
+		if (*it_nbr != NULL)
+		{
+			if ((*it_nbr)->getRefinementLevel() < refinement_level)
+			{
+				if (!(*it_nbr)->hasChildren()) //this will handle case that this elemetn has already been refined but neighbor list hasnt been updated yet
+				{
+					refineElement((*it_nbr)->getID());
+					updateConnectivityArray((*it_nbr)->getID());
+				}
+			}
+		}
+	}
+
+	//refine the element
+	unrefined_element->refine(_mesh->_n_elems - 1); //pass the id of last element made
 
 	//add the new elements to the list and update number of elements
 	new_elements = _mesh->getElement(element_id)->getChildren();

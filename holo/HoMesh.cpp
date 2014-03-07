@@ -256,7 +256,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 		bc_mu_center = _elements[*it_bc_id]->getAngularCoordinate();
 		bc_h_mu = _elements[*it_bc_id]->getAngularWidth();
 
-		if (std::abs(bc_mu_center - ds_mu_center) < 0.5*bc_h_mu)
+		if (std::abs(bc_mu_center - ds_mu_center) <= (0.5+GlobalConstants::RELATIVE_TOLERANCE)*bc_h_mu)
 		{
 			break;
 		}	
