@@ -261,4 +261,7 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Z:\TAMU_Research\HOLO\RunningTODOlist.txt" />
+  </ItemGroup>
 </Project>
