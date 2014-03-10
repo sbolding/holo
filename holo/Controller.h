@@ -23,7 +23,7 @@ namespace HoController
 
 	//output
 	const bool PARTICLE_BALANCE = false;
-	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch
+	const bool WRITE_ALL_ANGULAR_FLUXES = false; //print out angular fluxes after each batch
 	const bool WRITE_RESIDUAL_NORMS = true;
 	const bool WRITE_HISTORIES_COMPLETE = false;
 

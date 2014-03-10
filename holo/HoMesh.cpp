@@ -128,6 +128,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
 
 
 	_n_elems = _elements.size();
+	_n_active_elements = _elements.size();
 }
 
 ECMCElement1D* HoMesh::getElement(int element_id) const
@@ -143,6 +144,11 @@ int HoMesh::getNumElems() const
 		exit(1);
 	}
 	return _n_elems;
+}
+
+unsigned int HoMesh::getNumActiveElements() const
+{
+	return _n_active_elements;
 }
 
 std::vector<ECMCElement1D* >* HoMesh::getElements(void)

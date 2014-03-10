@@ -63,7 +63,7 @@ void HoSolver::solveSystem(std::ostream & out)
 
 	for (int batch = 0; batch < _n_batches; batch++)
 	{
-		std::cout << "\nRunning batch " << batch + 1 << " of " << _n_batches << "...\n";
+		std::cout << "\nRunning batch " << batch + 1 << " of " << _n_batches;
 		//loop over the number of histories
 		for (int hist = 0; hist < _n_histories; hist++)
 		{
@@ -101,7 +101,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			out.setf(ios::scientific);
 			out.precision(15);
-			out << "Residual L1 Norm: " << resid_L1_norm;
+			out << ", Residual L1 Norm: " << resid_L1_norm;
 		}
 
 		//if necessary refine solution
@@ -109,16 +109,13 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			if (_mesh_controller->meshNeedsRefinement())
 			{
+				std::cout << "\nRefining mesh...";
 				int n_elems_before_refinement = _ho_mesh->getNumElems();
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
-				_n_histories = (int)(_n_histories*_ho_mesh->getNumElems() / (double)n_elems_before_refinement);
-
+				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement);
 			}
-
 		}
-
-
 	}	
 }
 

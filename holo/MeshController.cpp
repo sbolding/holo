@@ -23,7 +23,7 @@ public:
 };
 
 MeshController::MeshController(HoMesh* mesh, double exp_conv_constant, int n_batches_to_check):
-	_required_conv_rate(exp_conv_constant),
+	_required_conv_rate(std::fmax(0.0,exp_conv_constant)), //error must at least stay constant
 	_mesh(mesh), 
 	_n_batches_to_check(n_batches_to_check),
 	_batch_residual_norms()
@@ -258,46 +258,13 @@ void MeshController::storeResidualNorm(double residual_norm)
 {
 	if (_batch_residual_norms.size() == (_n_batches_to_check+1)) //one extra since you need ratios to check refinement
 	{
-		_batch_residual_norms.erase(_batch_residual_norms.begin()); //remove the oldest element
+		_batch_residual_norms.erase(_batch_residual_norms.begin()); //remove the oldest element (first in)
 	}
 	_batch_residual_norms.push_back(residual_norm);
 }
 
 void MeshController::refineMesh()
 { 
-	//Create elements temporarily
-	std::cout << "FORCED REFINEMENT in MeshController.cpp\n";
-	_newly_refined_elements.clear();
-
-	//Refine mesh
-	refineElement(1);
-	//have to update after each refinement
-	_mesh->findUpwindBoundaryCells();
-	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
-	{
-		updateConnectivityArray(_newly_refined_elements[el_id]);
-	}
-	_newly_refined_elements.clear(); //no need to keep this
-
-	refineElement(4);
-	refineElement(7);
-	/*
-	refineElement(1);
-	refineElement(0);
-	refineElement(2);
-	refineElement(3);*/
-	_batch_residual_norms.push_back(0);
-
-	//update the boundary cells if needed
-	_mesh->findUpwindBoundaryCells();
-
-	//update the connectivity array for all the new elements and their neighbors
-	for (int el_id = 0; el_id < _newly_refined_elements.size(); el_id++)
-	{
-		updateConnectivityArray(_newly_refined_elements[el_id]);
-	}
-	_newly_refined_elements.clear(); //no need to keep this
-
 	//compute the jump error for each active element
 	std::vector<std::pair<int,double>> jump_errors; //a vector of <cell_id, jump_error_value>
 	jump_errors.resize(_connectivity_array.size()); //initialize to the number of active elements
@@ -350,9 +317,6 @@ void MeshController::refineMesh()
 	}
 	_newly_refined_elements.clear(); //no need to keep this
 	
-	std::cout << "temporary for debugging meshcontroller\n";
-	_batch_residual_norms.push_back(0);
-
 	//reset convergence rate criteria
 	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
 }
@@ -419,6 +383,9 @@ void MeshController::refineElement(int element_id)
 	new_elements = _mesh->getElement(element_id)->getChildren();
 	_mesh->_elements.insert(_mesh->_elements.end(), new_elements.begin(), new_elements.end());
 	_mesh->_n_elems += new_elements.size();
+
+	//update the number of active elements
+	_mesh->_n_active_elements += new_elements.size() - 1; //subtract one for the element you just refined
 
 	//determine if the refined cell was on a boundary
 	std::vector<int>::iterator it_bound;
