@@ -113,6 +113,7 @@ void HoSolver::solveSystem(std::ostream & out)
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
 				_n_histories = (int)(_n_histories*_ho_mesh->getNumElems() / (double)n_elems_before_refinement);
+
 			}
 
 		}
