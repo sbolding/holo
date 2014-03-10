@@ -474,7 +474,7 @@ ElementNeighbors MeshController::findNeighbors(int element_id)
 	std::vector<ECMCElement1D*>::iterator it_el;
 	
 	//reference element parameters
-	ECMCElement1D* element = _mesh->getElement(element_id);
+	ECMCElement1D* element = (*elements)[element_id];
 	int el_refinement = (int)element->getRefinementLevel();
 	double el_mu_coor = element->getAngularCoordinate();
 	double el_mu_minus = el_mu_coor - 0.5*element->getAngularWidth();
@@ -590,14 +590,21 @@ void MeshController::updateConnectivityArray(int refined_element_id)
 		ECMCElement1D* neighbor = neighbors._element_pntrs[i];
 		if (neighbor != NULL)
 		{
-			if (neighbor->hasChildren()) //need to update pntrs for its children, else pointers still point to the parent of refined_element_id, so ok
+			if (neighbor->hasChildren()) //need to update pntrs for its children, else pointers still point to the parent of refined_element_id which is ok
 			{
 				std::vector<ECMCElement1D*> children(neighbor->getChildren());
 				std::vector<ECMCElement1D*>::iterator it_child;
 				for (it_child = children.begin(); it_child != children.end(); it_child++)
 				{
-					int child_id = (*it_child)->getID();
-					_connectivity_array[child_id] = findNeighbors(child_id);
+					if ((*it_child)->hasChildren()) //since the neighbors lists can be outdated, it is possible some refined elements are still in list
+					{
+						_connectivity_array.erase((*it_child)->getID());
+					}
+					else
+					{
+						int child_id = (*it_child)->getID();
+						_connectivity_array[child_id] = findNeighbors(child_id);
+					}
 				}
 			}
 		}

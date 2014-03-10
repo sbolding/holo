@@ -104,22 +104,9 @@ void HoSolver::solveSystem(std::ostream & out)
 			out << "Residual L1 Norm: " << resid_L1_norm;
 		}
 
-
 		//if necessary refine solution
 		if (HoController::ADAPTIVE_REFINEMENT)
 		{
-			if (batch == 0)
-			{
-				std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
-				_mesh_controller->refineMesh();
-				_particle->computeResidualSource();
-				continue;
-			}
-			else
-			{
-				std::cout << "Temporarily forcing refinement for debugging...HoSolver.cpp\n";
-				continue;
-			}
 			if (_mesh_controller->meshNeedsRefinement())
 			{
 				int n_elems_before_refinement = _ho_mesh->getNumElems();
