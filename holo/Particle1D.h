@@ -88,7 +88,7 @@ protected:
 	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods
-	void sampleSourceParticle();	//base method, called to create a source particle
+	void sampleSourceParticle();	//this function initializes the particles weight etc., then calls the 
 	void initializeSamplingSource(); //initialize method that determines where to put the particle
 
 	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime

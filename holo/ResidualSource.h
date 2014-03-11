@@ -33,8 +33,8 @@ protected:
 	//Elementwise information
 	std::vector<std::vector<double>> _residual_element_LD_values; //each member contains average, slope x, slope mu;
 	std::vector<std::vector<double>> _residual_face_LD_values; //each memeber contains average, slope x (always zero), and slope in mu for sampling
-	std::vector<double> _res_element_mags;  //magnitue of residual source over elements, these are only stored temporarily for derived classes to use, must carefully free the memory
-	std::vector<double> _res_face_mags; //magnitude of the residual for each face, only stored temporarily for derived classes to use, must carefully free the memory
+	std::vector<double> _res_element_mags;  //magnitue of residual source over elements, these may be deleted in derived classes
+	std::vector<double> _res_face_mags; //magnitude of the residual for each face, these may be deleted in derived classes
 
 	//Functions for building sampler
 	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 

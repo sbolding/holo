@@ -39,7 +39,7 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	//create adaptive refinement class
 	_mesh_controller = new MeshController(_ho_mesh,exp_convg_constant,n_batches_to_avg);
 
-	//creat esource!!
+	//create source
 	
 }
 

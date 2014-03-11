@@ -18,7 +18,6 @@
 #include <iostream>
 #include "Particle1D.h"
 #include "Source.h"
-#include "SourceConstant.h"
 #include "RNG.h"
 #include "Controller.h"
 #include "AverageCosineData.h"
@@ -31,6 +30,7 @@ protected:
 	Mesh* _lo_mesh;	//pointer to the mesh to be used
 	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
 	MeshController* _mesh_controller; //For adapting the high order mesh, dynamic because it is based on ho_mesh object
+	Source* _source; 
 
 	//other problem parameters
 	int _n_histories;	//number of histories
