@@ -15,13 +15,9 @@
 #include "Source.h"
 #include "LinDiscSource.h"
 #include "ResidualSource.h"
+#include "StandardResidualSource.h"
 
-Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
-	std::vector<CurrentFaceTally*>& current_face_tallies,
-	std::vector<CurrentElementTally*>& current_element_tallies,
-	std::vector<FluxFaceTally*>& flux_face_tallies,
-	std::vector<FluxElementTally*>& flux_element_tallies
-	)
+Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str, string sampling_method)
 {
 	_rng = rng;
 	_mesh = mesh;
@@ -42,15 +38,10 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 		_n_terminations=0;
 	}
 
-	//store the tallies correctly
-	_current_face_tallies = current_face_tallies;
-	_current_element_tallies = current_element_tallies;
-	_flux_face_tallies = flux_face_tallies;
-	_flux_element_tallies = flux_element_tallies;
-
 	//Initialize the data needed for source sampling, must call this routine last because it contains a pointer to itself!!!
-	_sampling_method = "standard";
-	initializeSamplingSource(_sampling_method);
+	_sampling_method = sampling_method;
+	_sampling_method_index = HoMethods::sampling_map.at(sampling_method); //unsigned int that can be compared against global constants
+	initializeSamplingSource();
 }
 
 inline double Particle1D::samplePathLength()
@@ -108,10 +99,10 @@ void Particle1D::sampleCollision()
 
 }
 
-void Particle1D::initializeSamplingSource(string sampling_method)
+void Particle1D::initializeSamplingSource()
 {
 	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(this, sampling_method); //"this" is a complete pointer to particle
+	_source = new LinDiscSource(this, _sampling_method); //"this" is a complete pointer to particle
 	//_source = new ResidualSource(this, sampling_method); 
 }
 
@@ -130,7 +121,10 @@ void Particle1D::computeResidualSource()
 	}
 
 	//create new source
-	_source = new ResidualSource(this, _sampling_method);
+	if (_sampling_method_index == HoMethods::STANDARD_SAMPLING)
+	{
+		_source = new StandardResidualSource(this);
+	}
 }
 
 void Particle1D::sampleSourceParticle()
@@ -322,9 +316,13 @@ inline void Particle1D::initializeHistory()
 
 inline void Particle1D::scoreFaceTally()
 {
+	return;
+	//Currently inactive, if you wanted to do standard MC you would need to add these back in
+
+
 	//The face tally is scored before you have left the cell, so everything is
 	//based on the cell you are leaving, not the cell you are entering
-
+	/*
 	//determine face based on direction
 	int face_id = 0; //Leaving to the left
 	if (_mu >= 0.0) //Leaving to the right
@@ -336,6 +334,7 @@ inline void Particle1D::scoreFaceTally()
 	int face_index = _spatial_element->getID()+face_id;
 	_current_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0); //for one-d, per cm sq
 	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
+	*/ 
 }
 
 double Particle1D::getTotalSourceStrength()

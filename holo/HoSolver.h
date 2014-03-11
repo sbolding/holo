@@ -16,12 +16,6 @@
 #include "Mesh.h"
 #include <vector>
 #include <iostream>
-#include "FaceTally.h"
-#include "CurrentElementTally.h"
-#include "CurrentFaceTally.h"
-#include "FluxElementTally.h"
-#include "FluxFaceTally.h"
-#include "ElementTally.h"
 #include "Particle1D.h"
 #include "Source.h"
 #include "SourceConstant.h"
@@ -38,12 +32,6 @@ protected:
 	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
 	MeshController* _mesh_controller; //For adapting the high order mesh, dynamic because it is based on ho_mesh object
 
-	//Tallies
-	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face current tallies, indexed using connectivity array
-	std::vector<CurrentElementTally*> _current_element_tallies; //vector of element current tallies 
-	std::vector<FluxElementTally*> _flux_element_tallies; //vector of all the flux volume tallies, indexed using connectivity array
-	std::vector<FluxFaceTally*> _flux_face_tallies; //vector of all the flux face tallies
-
 	//other problem parameters
 	int _n_histories;	//number of histories
 	int _n_batches; //number of batches for ECMC simulations
@@ -55,15 +43,13 @@ protected:
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
-	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, double required_exp_convg_constant, 
-		int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
+	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, string sampling_method,
+		double required_exp_convg_constant, int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
 	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
 	void updateSystem(); //compute the angular fluxes and compute new residual source
 
 	//reader, printer, and interface functions
 	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;
-	void printFaceTally(int face_id, std::ostream &out) const;
-	void printElementTally(int element_id, std::ostream &out) const;
 	void printAllTallies(std::ostream &out) const;
 	//methods for data transfer
 	//double getFaceTally(int element_id, int rel_face_id, int angular_bin, int spatial_moment);

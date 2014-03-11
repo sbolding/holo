@@ -13,11 +13,10 @@ Source::~Source()
 	//do nothing
 }
 
-Source::Source(Particle1D* particle, string sampling_method)
+Source::Source(Particle1D* particle)
 {
 	_particle = particle;
 	_rng = particle->_rng; 
-	_sampling_method = HoMethods::sampling_map.at(sampling_method);
 	_vol_src_total = 0.0;
 	_BC_src_total = 0.0;
 }

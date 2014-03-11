@@ -26,7 +26,7 @@ namespace HoMethods
 	const unsigned int HOLO_STANDARD_MC = 2;
 	const unsigned int STANDARD_MC = 3;
 	const unsigned int STRATIFIED_SAMPLING = 2; //2 for stratified, 1 for regular alias sampling
-	const unsigned int STANDARD_SAMPLING = 1;
+	const unsigned int STANDARD_SAMPLING = 1; //Currently this map is not used
 
 	//map these methods to their ints
 	//either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'

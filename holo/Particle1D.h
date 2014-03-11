@@ -16,12 +16,6 @@
 #include <string>
 #include "HoMesh.h"
 #include "RNG.h"
-#include "FaceTally.h"
-#include "ElementTally.h"
-#include "CurrentElementTally.h"
-#include "CurrentFaceTally.h"
-#include "FluxElementTally.h"
-#include "FluxFaceTally.h"
 #include "GlobalConstants.h"
 #include "AliasSampler.h"
 
@@ -29,6 +23,8 @@
 class Source; 
 class LinDiscSource;
 class ResidualSource;
+class StandardResidualSource;
+class StratifiedResidualSource;
 
 class Particle1D
 {
@@ -42,8 +38,11 @@ protected:
 	friend class Source;
 	friend class LinDiscSource;
 	friend class ResidualSource;
+	friend class StandardResidualSource;
+	friend class StratifiedResidualSource;
 	Source* _source;
 	string _sampling_method; 
+	unsigned int _sampling_method_index;
 
 	//general particle properties
 	double _position_mfp;
@@ -73,12 +72,6 @@ protected:
 	size_t _n_elements;		//for sampling which element a particle is born in
 	bool _is_dead;		 //for terminating particle history
 
-	//tally arrays, will eventually be removed
-	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<CurrentElementTally*> _current_element_tallies; //vector of all the volume tallies, indexed using connectivity array
-	std::vector<FluxFaceTally*> _flux_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<FluxElementTally*> _flux_element_tallies; //vector of all the volume tallies, indexed using connectivity array
-
 	//protected methods
 	//---------------------------------------------
 	//Streaming and collision methods
@@ -96,21 +89,16 @@ protected:
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//base method, called to create a source particle
-	void initializeSamplingSource(string sampling_method); //initialize method that determines where to put the particle
+	void initializeSamplingSource(); //initialize method that determines where to put the particle
 
 	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime
 	
 public:
 
 	//constructors
-	Particle1D(HoMesh* mesh, RNG* rng, string method_str,
-		std::vector<CurrentFaceTally*>& current_face_tallies,
-		std::vector<CurrentElementTally*>& current_element_tallies,
-		std::vector<FluxFaceTally*>& flux_face_tallies,
-		std::vector<FluxElementTally*>& _flux_element_tallies
-	); //Standard constructor, pass a pointer for rng to make sure 
+	Particle1D(HoMesh* mesh, RNG* rng, string method_str, string sampling_method); //Standard constructor, pass a pointer for rng to make sure 
 	//you dont resample random numbers, method_str is which method
-	//to use from HoSolver, all the tallies are currently passed in seperately
+	//to use from HoSolver, sampling method for stratified or not
 	
 	//public functions
 	double getRandNum();
