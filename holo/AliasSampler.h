@@ -29,6 +29,7 @@ struct AliasData
 namespace HistogramUtilities
 {
 	void normalizeDiscreteDistribution(std::vector<double> & bin_probabilities); //will return a normalized pdf, overwrites bin_probabilities
+	void scaleDiscreteDistribution(std::vector<double> & bin_probablities, double scalar); //multiply all members of pdf by constant
 }
 
 class AliasSampler

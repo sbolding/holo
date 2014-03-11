@@ -3,7 +3,7 @@
 #include "Particle1D.h"
 #include "Controller.h"
 
-LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Source(particle)
+LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 {
 	//need to initialize alias sampler
 	//get the area of the source, and the total external source nodal values
@@ -44,16 +44,8 @@ LinDiscSource::LinDiscSource(Particle1D* particle, string sampling_method) : Sou
 		}
 	}
 
-	if (HoMethods::sampling_map.at(sampling_method) == HoMethods::STANDARD_SAMPLING) //standard source sampling
-	{
-		//Create sampler with alias sampling, let it normalize, delete unneccessary data
-		_alias_sampler = new AliasSampler(source_strength_per_cell, false);
-	}
-	else
-	{
-		std::cerr << "No other sampling methods are implemented yet" << std::endl;
-		exit(1);
-	}
+	//Create sampler with alias sampling, let it normalize, delete unneccessary data
+	_alias_sampler = new AliasSampler(source_strength_per_cell, false);
 
 	//Create boundary condition source info
 	std::vector<DirichletBC1D*> bcs = _particle->_mesh->getDirichletBCs();

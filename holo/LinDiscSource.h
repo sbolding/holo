@@ -32,7 +32,7 @@ private:
 	std::map<int, int> _bc_element_map;  //maps alias sampler return result to the correct element ID
 	
 public:
-	LinDiscSource(Particle1D * particle, string sampling_method);
+	LinDiscSource(Particle1D * particle);
 	~LinDiscSource();
 	virtual void sampleSourceParticle();
 	virtual double getTotalSourceStrength();

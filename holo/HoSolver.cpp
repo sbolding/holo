@@ -184,7 +184,8 @@ void HoSolver::computeResidualSource()
 	}
 	else if (_sampling_method_index == HoMethods::STRATIFIED_SAMPLING)
 	{
-		_source = new StratifiedResidualSource(_particle);
+		//This function will increase the number of histories slightly to make sure that an even number of particles can be sampled from each element
+		_source = new StratifiedResidualSource(_particle, _n_histories);
 	}
 	else
 	{
@@ -196,9 +197,6 @@ void HoSolver::computeResidualSource()
 void HoSolver::initializeSamplingSource()
 {
 	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(_particle, _sampling_method); //"this" is a complete pointer to particle
-	//_source = new ResidualSource(this, sampling_method); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check
-
-	//update particles source pointer
-
+	_source = new LinDiscSource(_particle); //uses standard sampling, no stratified available for LinDiscSource
+	//_source = new ResidualSource(_particle); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check
 }
