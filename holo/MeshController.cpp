@@ -350,7 +350,16 @@ bool MeshController::meshNeedsRefinement()
 
 void MeshController::refineElement(int element_id)
 {
-	//add refined elements to the array
+
+	//Check that the element to be refined has not already been refined to maintain mesh regularity, in this case another call to this function has already refined the cell
+	std::vector<int>::iterator it_refined = std::find(_newly_refined_elements.begin(),
+		_newly_refined_elements.end(), element_id);
+	if (it_refined != _newly_refined_elements.end())
+	{
+		return;
+	}
+
+	//add refined element to the array
 	_newly_refined_elements.push_back(element_id);
 
 	//probably better to have this function return the new elements made
@@ -400,6 +409,8 @@ void MeshController::refineElement(int element_id)
 	ECMCElement1D* upstream_el = _mesh->findJustUpwindElement(element_id);
 	if (upstream_el->getRefinementLevel() == new_elements[0]->getRefinementLevel()) 
 	{
+		std::cerr << "This is old code when findJustUpwindElement used to return the refined cells, it should never be called, except for potentially on a boundary cell, in MeshController::refineElement()\n";
+		exit(1);
 		//the upstraem element is of same refinement, need to set the other daughter too
 		if (upstream_el->getAngularCoordinate() < unrefined_element->getAngularCoordinate()) //found bottom (minus mu) refined cell
 		{

@@ -105,7 +105,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		}
 
 		//if necessary refine solution
-		if (HoController::ADAPTIVE_REFINEMENT)
+		if (HoController::ADAPTIVE_REFINEMENT && batch < (_n_batches -1) )
 		{
 			if (_mesh_controller->meshNeedsRefinement())
 			{

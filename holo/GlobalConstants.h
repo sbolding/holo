@@ -11,7 +11,7 @@ namespace GlobalConstants
 	const long double PI = 3.141592653589793238L;
 	//const long double FOUR_PI = 4.0L * PI;
 	const long double FOUR_PI = 2.0L;
-	const double RELATIVE_TOLERANCE = 100. * std::numeric_limits<double>::epsilon(); //smallest number that can be added to 1 (effectively anything smaller is ignored, assuming everything is scaled to 1)
+	const double RELATIVE_TOLERANCE = 1000. * std::numeric_limits<double>::epsilon(); //smallest number that can be added to 1 (effectively anything smaller is ignored, assuming everything is scaled to 1)
 }
 
 namespace HoConstants
