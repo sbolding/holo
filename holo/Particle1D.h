@@ -40,9 +40,7 @@ protected:
 	friend class ResidualSource;
 	friend class StandardResidualSource;
 	friend class StratifiedResidualSource;
-	Source* _source;
-	string _sampling_method; 
-	unsigned int _sampling_method_index;
+	Source* _source; //This may be NULL initialy, it is the source's constructors responsibility to set this pointer correctly
 
 	//general particle properties
 	double _position_mfp;
@@ -89,24 +87,20 @@ protected:
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//this function initializes the particles weight etc., then calls the 
-	void initializeSamplingSource(); //initialize method that determines where to put the particle
-
 	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime
 	
 public:
 
 	//constructors
-	Particle1D(HoMesh* mesh, RNG* rng, string method_str, string sampling_method); //Standard constructor, pass a pointer for rng to make sure 
-	//you dont resample random numbers, method_str is which method
-	//to use from HoSolver, sampling method for stratified or not
+	Particle1D(HoMesh* mesh, Source* src, RNG* rng, string method_str); //Standard constructor, pass a pointer for rng to make sure 
+	//you dont resample random numbers, method_str is which solution method from HoSolver (ECMC etc.).  Source is passed by pointer
+	//because the source has most likely not been constructed yet
 	
 	//public functions
 	double getRandNum();
-	void runHistory();
-	void printParticleBalance(int n_histories);
-	void computeResidualSource();
-	double getTotalSourceStrength(); //get the total source strength from the source
-
+	void runHistory();  //sample source, then stream particle til history termination
+	void printParticleBalance(int n_histories, bool reset_balances = true); //after printing particle balance (if turned on), then reset the balances if desired
+	void resetParticleBalance(); //zero out the particle balance counters 
 
 };
 

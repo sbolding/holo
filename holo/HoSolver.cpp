@@ -22,7 +22,7 @@ HoSolver::HoSolver()
 HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	int n_ang_bins_half_range, string method, string sampling_method,
 	double exp_convg_constant, int n_batches, int n_batches_to_avg) :
-	_rng()
+	_rng(), _source()
 {
 	_n_batches = n_batches;
 	_lo_mesh = mesh;
@@ -33,14 +33,18 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	//Create high order mesh
 	_ho_mesh = new HoMesh(_lo_mesh, n_ang_bins_half_range);
 
-	//initialize particle class
-	_particle = new Particle1D(_ho_mesh, &_rng, method, sampling_method);
+	//initialize particle class with pointer to NULL source
+	_particle = new Particle1D(_ho_mesh, NULL, &_rng, method);
+
+	//Initialize the data needed for source sampling
+	_sampling_method = sampling_method;
+	_sampling_method_index = HoMethods::sampling_map.at(sampling_method); //unsigned int that can be compared against global constants
+
+	//create source based on full particle class, the source constructor will update the particle class pointer
+	initializeSamplingSource();
 
 	//create adaptive refinement class
 	_mesh_controller = new MeshController(_ho_mesh,exp_convg_constant,n_batches_to_avg);
-
-	//create source
-	
 }
 
 void HoSolver::solveSystem(std::ostream & out)
@@ -64,7 +68,7 @@ void HoSolver::solveSystem(std::ostream & out)
 			}
 		}
 		//compute the new angular fluxes
-		_ho_mesh->computeAngularFluxes(_n_histories, _particle->getTotalSourceStrength());
+		_ho_mesh->computeAngularFluxes(_n_histories, _source->getTotalSourceStrength());
 
 		//debug outputs
 		if (HoController::PARTICLE_BALANCE)  _particle->printParticleBalance(_n_histories);
@@ -77,11 +81,11 @@ void HoSolver::solveSystem(std::ostream & out)
 		else //ECMC method
 		{
 			//compute new residual source
-			_particle->computeResidualSource();
+			computeResidualSource();
 		}
 
 		//store and print residual norm
-		double resid_L1_norm = _particle->getTotalSourceStrength();
+		double resid_L1_norm = _source->getTotalSourceStrength();
 		_mesh_controller->storeResidualNorm(resid_L1_norm);
 		if (HoController::WRITE_RESIDUAL_NORMS)
 		{
@@ -98,8 +102,8 @@ void HoSolver::solveSystem(std::ostream & out)
 				std::cout << "\nRefining mesh...";
 				int n_elems_before_refinement = _ho_mesh->getNumElems();
 				_mesh_controller->refineMesh(); //this will refine if necessary
-				_particle->computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
-				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement);
+				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement); //update number of histories before computing new residual
+				computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
 			}
 		}
 	}	
@@ -166,4 +170,35 @@ void HoSolver::updateSystem()
 {
 	//update angular fluxes
 	_ho_mesh->computeAngularFluxes(_n_histories);
+}
+
+void HoSolver::computeResidualSource()
+{
+	//Free memory for old source (whether old residual or standard MC source)
+	delete _source;
+
+	//create new source
+	if (_sampling_method_index == HoMethods::STANDARD_SAMPLING)
+	{
+		_source = new StandardResidualSource(_particle);
+	}
+	else if (_sampling_method_index == HoMethods::STRATIFIED_SAMPLING)
+	{
+		_source = new StratifiedResidualSource(_particle);
+	}
+	else
+	{
+		std::cerr << "Sampling method not implemented in HoSolver::computeResidualSource()\n";
+		exit(1);
+	}
+}
+
+void HoSolver::initializeSamplingSource()
+{
+	//Initially source is always a standard mc source of some kind
+	_source = new LinDiscSource(_particle, _sampling_method); //"this" is a complete pointer to particle
+	//_source = new ResidualSource(this, sampling_method); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check
+
+	//update particles source pointer
+
 }

@@ -22,6 +22,9 @@
 #include "Controller.h"
 #include "AverageCosineData.h"
 #include "MeshController.h"
+#include "StratifiedResidualSource.h"
+#include "StandardResidualSource.h"
+#include "LinDiscSource.h"
 
 class HoSolver
 {
@@ -30,7 +33,7 @@ protected:
 	Mesh* _lo_mesh;	//pointer to the mesh to be used
 	HoMesh* _ho_mesh; //pointer to the ho mesh to be created;
 	MeshController* _mesh_controller; //For adapting the high order mesh, dynamic because it is based on ho_mesh object
-	Source* _source; 
+	Source* _source; //pointer to the source to be used for the problem, the source will get recomputed often
 
 	//other problem parameters
 	int _n_histories;	//number of histories
@@ -39,10 +42,19 @@ protected:
 	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
 	Particle1D* _particle;	//One particle that has all the methods to stream, cross interfaces, etc.
 	RNG _rng; //random number generator
+
+	//source parameters
+	string _sampling_method;
+	unsigned int _sampling_method_index;  //corresponding value in HoMethods related to the sampling method string
+
+	//residual source handling functions
+	void computeResidualSource();
+	void initializeSamplingSource();
 	
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
+	~HoSolver();
 	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, string sampling_method,
 		double required_exp_convg_constant, int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
 	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
@@ -52,8 +64,6 @@ public:
 	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;
 	void printAllTallies(std::ostream &out) const;
 	//methods for data transfer
-	//double getFaceTally(int element_id, int rel_face_id, int angular_bin, int spatial_moment);
-
 };
 
 #endif  //_HOSOLVER_H

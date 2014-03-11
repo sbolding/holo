@@ -19,6 +19,9 @@ Source::Source(Particle1D* particle)
 	_rng = particle->_rng; 
 	_vol_src_total = 0.0;
 	_BC_src_total = 0.0;
+
+	//make sure particle's pointer is to this source
+	_particle->_source = this;
 }
 
 void Source::sampleAngleIsotropic()

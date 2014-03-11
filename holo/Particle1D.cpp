@@ -17,7 +17,8 @@
 #include "ResidualSource.h"
 #include "StandardResidualSource.h"
 
-Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str, string sampling_method)
+Particle1D::Particle1D(HoMesh* mesh, Source* src, RNG* rng, string method_str) :
+_source(src) //source may be passed a NULL, to be set later
 {
 	_rng = rng;
 	_mesh = mesh;
@@ -37,11 +38,6 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str, string samplin
 		_n_scat = 0;
 		_n_terminations=0;
 	}
-
-	//Initialize the data needed for source sampling, must call this routine last because it contains a pointer to itself!!!
-	_sampling_method = sampling_method;
-	_sampling_method_index = HoMethods::sampling_map.at(sampling_method); //unsigned int that can be compared against global constants
-	initializeSamplingSource();
 }
 
 inline double Particle1D::samplePathLength()
@@ -99,31 +95,14 @@ void Particle1D::sampleCollision()
 
 }
 
-void Particle1D::initializeSamplingSource()
-{
-	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(this, _sampling_method); //"this" is a complete pointer to particle
-	//_source = new ResidualSource(this, sampling_method); 
-}
-
-void Particle1D::computeResidualSource()
-{
-	//Free memory for old source (whether last residual or standard MC source)
-	delete _source;
-
-	//reset debug variables
+void Particle1D::resetParticleBalance()
+{	//reset debug variables
 	if (HoController::PARTICLE_BALANCE)
 	{
 		_n_abs = 0;
 		_n_leak = 0;
 		_n_scat = 0;
 		_n_terminations = 0;
-	}
-
-	//create new source
-	if (_sampling_method_index == HoMethods::STANDARD_SAMPLING)
-	{
-		_source = new StandardResidualSource(this);
 	}
 }
 
@@ -296,7 +275,7 @@ inline void Particle1D::terminateHistory()
 	_is_dead = true;
 }
 
-void Particle1D::printParticleBalance(int n_hist)
+void Particle1D::printParticleBalance(int n_hist, bool reset_particle_balance)
 {
 	cout << "---------------------------------------------------\n"
 		<< "               Particle balance\n"
@@ -306,6 +285,12 @@ void Particle1D::printParticleBalance(int n_hist)
 		<< "      Number Leaked: " << _n_leak << endl
 		<< "    Number Scatters: " << _n_scat << endl
 		<< "  Number Terminated: " << _n_terminations << endl;	
+
+	//optionally reset the particle balances, this is true by default
+	if (reset_particle_balance)
+	{
+		resetParticleBalance();
+	}
 }
 
 inline void Particle1D::initializeHistory()
@@ -337,7 +322,3 @@ inline void Particle1D::scoreFaceTally()
 	*/ 
 }
 
-double Particle1D::getTotalSourceStrength()
-{
-	return _source->getTotalSourceStrength();
-}
