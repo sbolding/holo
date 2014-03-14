@@ -56,7 +56,7 @@ void Particle1D::sampleCollision()
 	{
 		return;
 	}
-	if ( (_method == HoMethods::HOLO_ECMC) || (_method == HoMethods::HOLO_STANDARD_MC) ) //then a pure absorber problem, end the history
+	else if ( (_method == HoMethods::HOLO_ECMC) || (_method == HoMethods::HOLO_STANDARD_MC) ) //then a pure absorber problem, end the history
 	{
 		terminateHistory();
 		if (HoController::PARTICLE_BALANCE)
@@ -108,7 +108,7 @@ void Particle1D::resetParticleBalance()
 
 void Particle1D::sampleSourceParticle()
 {
-	initializeHistory();
+	initializeHistory(); //Reset the basic parameters
 	_source->sampleSourceParticle();
 }
 
@@ -150,58 +150,16 @@ void Particle1D::leaveElement()
 
 void Particle1D::runHistory()
 {
-	//TODO need to pull the streaming stuff out into its own function again so it will be easier to implement the derived classes
-	//and to allow for super duper efficient ray tracing
-	//cout << "starting history..." << endl;
 	//start history
-	initializeHistory(); //Reset the basic parameters
-	sampleSourceParticle();
+	sampleSourceParticle(); //samples position, direction, and initalizes weight
 
 	double path_length_mfp;  
-	double displacement_mfp;
-	double new_position_mfp;
 
 	while (true) //stream the particle until it is absorbed or leaks
 	{
-		//sample a pathlength
-		path_length_mfp = samplePathLengthMFP();
-
-		//determine horizontal displacement
-		displacement_mfp = path_length_mfp*_mu;
-		new_position_mfp = displacement_mfp + _position_mfp;
-
-		//determine if the particle has left the cell, or not
-		while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
-		{
-			//tally variables, corresponding to path across current cell
-			double path_start = _position_mfp; 
-			double path_end;
-
-			//Determine the number of mean free paths remaining to stream after entering new cell
-			if (_mu >= 0.0) //streaming to the right
-			{
-				displacement_mfp += (_position_mfp - _element_width_mfp);
-				path_end = _element_width_mfp; //leaves to the right
-			}
-			else //streaming to the left
-			{
-				displacement_mfp += _position_mfp;
-				path_end = 0.0; //leaves to the left
-			}
-			scoreElementTally(path_start, path_end);
-			leaveElement(); //move to the next element
-
-			if (_is_dead) //then particle has leaked, do not score anything else
-			{
-				return;
-			}
-			new_position_mfp = _position_mfp + displacement_mfp; //determine where the particle would be now
-		}
-
-		//Now position is within the current cell
-		scoreElementTally(_position_mfp, new_position_mfp);
-		_position_mfp = new_position_mfp;
-		sampleCollision();
+		path_length_mfp = samplePathLengthMFP(); //sample a pathlength
+		streamToNextEvent(path_length_mfp); //stream to leakage or interaction
+		sampleCollision(); //if particle is already dead, this will return dead
 		if (_is_dead)
 		{
 			return;
@@ -322,3 +280,44 @@ inline void Particle1D::scoreFaceTally()
 	*/ 
 }
 
+void Particle1D::streamToNextEvent(double path_length_mfp)
+{
+	double displacement_mfp;
+	double new_position_mfp;
+
+	//determine horizontal displacement
+	displacement_mfp = path_length_mfp*_mu;
+	new_position_mfp = displacement_mfp + _position_mfp;
+
+	//determine if the particle has left the current element, or not
+	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
+	{
+		//tally variables, corresponding to path across current cell
+		double path_start = _position_mfp;
+		double path_end;
+
+		//Determine the number of mean free paths remaining to stream after entering new cell
+		if (_mu >= 0.0) //streaming to the right
+		{
+			displacement_mfp += (_position_mfp - _element_width_mfp);
+			path_end = _element_width_mfp; //leaves to the right
+		}
+		else //streaming to the left
+		{
+			displacement_mfp += _position_mfp;
+			path_end = 0.0; //leaves to the left
+		}
+		scoreElementTally(path_start, path_end);
+		leaveElement(); //move to the next element
+
+		if (_is_dead) //then particle has leaked, do not score anything else
+		{
+			return;
+		}
+		new_position_mfp = _position_mfp + displacement_mfp; //determine where the particle would be now
+	}
+
+	//Now position is within the current cell
+	scoreElementTally(_position_mfp, new_position_mfp);
+	_position_mfp = new_position_mfp;
+}

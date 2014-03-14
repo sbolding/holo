@@ -77,13 +77,14 @@ protected:
 	double samplePathLengthMFP();   //Sample a path length in units of number of MFP, useful for streaming through many cells
 	double sampleAngleIsotropic();	//returns a cosine sampled from uniform distribution
 	void sampleCollision();  //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on solver method
+	void streamToNextEvent(double path_length_mfp); //stream from current position to next interaction or leakage, this is it's own class for the sake of virtual overriding for derived particle classes
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
 
 	//tallies
 	void scoreFaceTally(); //this doesnt make sense in ECMC context, just for verifying particles are being tracked properly
-	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
+	virtual void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//this function initializes the particles weight etc., then calls the 

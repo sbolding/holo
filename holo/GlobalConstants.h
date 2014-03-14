@@ -18,17 +18,21 @@ namespace HoConstants
 {
 	const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
 	const double COSINE_SUBSTITUTE_VALUE = 0.5*COSINE_CUTOFF; //half of the cutoff value by default
+
+	//exponential atenuation information
+	const double MAX_STREAMING_MFP = 5.0; //how many mfp to exponentially attenuate weight before switching to standard MC pathlength sampling
 }
 
 namespace HoMethods
 {
+	//at some point should replace these with enums
 	const unsigned int HOLO_ECMC = 1;
 	const unsigned int HOLO_STANDARD_MC = 2;
 	const unsigned int STANDARD_MC = 3;
 	const unsigned int STRATIFIED_SAMPLING = 2; //2 for stratified, 1 for regular alias sampling
 	const unsigned int STANDARD_SAMPLING = 1; //Currently this map is not used
 
-	//map these methods to their ints
+	//map these methods to their corresponding const ints
 	//either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
 	const std::map<std::string, int> method_map = { { "holo-ecmc", HOLO_ECMC }, { "holo-standard-mc", HOLO_STANDARD_MC },
 		{ "standard-mc", STANDARD_MC } };
