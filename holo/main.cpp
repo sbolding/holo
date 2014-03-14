@@ -34,7 +34,7 @@ int main()
 	int n_batches = 20;
 	double exp_convg_rate = 0.0;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
-	string sampling_method = "standard";
+	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 0.4, 0.0);
 
