@@ -12,7 +12,7 @@ StratifiedResidualSource::StratifiedResidualSource(Particle1D* particle, int & n
 	{
 		n_histories++;
 	}
-	_n_samples_per_element = n_histories / _particle->_mesh->getNumActiveElements();
+	_n_samples_per_element = n_histories / (int)n_active_elements;
 
 	//initialize the element id, the next two lines will lead to starting on the 0th element the first time through
 	_current_element_id = -1; //always start at the first element, if inactive it will be determined later
@@ -41,17 +41,20 @@ void StratifiedResidualSource::sampleSourceParticle()
 		_current_element_id++;
 		while (true)
 		{
-			if (_res_element_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE)
+			if (_res_element_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE ||
+				(_res_face_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE))
 			{
 				//in current implementation, these are both zero for inactive elemetns, but if they are zero anyways you dont need to sample them either.  In future
 				//may replace this with a check of the mesh for inactive elements
-				if (_res_face_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE)
-				{
+
 					_n_sampled_from_current_element = 0; //reset counter
 					_curr_el_face_probability = _res_face_mags[_current_element_id];
 					_curr_el_element_probability = _res_element_mags[_current_element_id];
 					break;
-				}
+			}
+			else
+			{
+				_current_element_id++;
 			}
 		}
 	}  //else, stay on the current element

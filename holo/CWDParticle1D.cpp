@@ -35,6 +35,8 @@ void CWDParticle1D::scoreElementTally(double path_start_mfp, double path_end_mfp
 		double weight_deposited = weight_new - _weight;
 
 		//ScoreECMCTallies, using a normalized direction cosine to ensure positive tallies
+		std::cout << "This does not work yet, in CWDParticle1D.cpp\n";
+		exit(1);
 		_current_element->incrementTallyScores(weight_deposited, _mfp_tot,
 			_mu, normalized_position);
 

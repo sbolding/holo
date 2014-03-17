@@ -17,9 +17,9 @@ namespace HoController
 {
 	//Mesh refinement stuff 
 	const bool ADAPTIVE_REFINEMENT = true;
-	const double FRACTION_CELLS_TO_REFINE = 0.4;
+	const double FRACTION_CELLS_TO_REFINE = 0.2;
 	const bool REFINE_ACROSS_MU_ZERO = false;
-	const bool USE_MAX_JUMP_ERROR = true; //use the max jump error on a cell as the jump error
+	const bool USE_MAX_JUMP_ERROR = true; //use the max jump error of all sides as error indicator for refinement
 
 	//output
 	const bool PARTICLE_BALANCE = false;
@@ -32,7 +32,7 @@ namespace HoController
 	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
 
 	//Particle type stuff
-	const bool CONT_WGT_DEPOSITION_PARTICLES = true; //no aborptions take place, the particle weight is just attenuated exponentially
+	const bool CONT_WGT_DEPOSITION_PARTICLES = false; //CURRENTLY DOESNT WORK, no aborptions take place, the particle weight is just attenuated exponentially
 }
 
 #endif
