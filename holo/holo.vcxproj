@@ -143,9 +143,6 @@
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tally.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="Z:\TAMU_Research\HOLO\RunningTODOlist.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
