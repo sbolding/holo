@@ -279,9 +279,4 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="Z:\TAMU_Research\HOLO\RunningTODOlist.txt">
-      <Filter>Header Files</Filter>
-    </Text>
-  </ItemGroup>
 </Project>
