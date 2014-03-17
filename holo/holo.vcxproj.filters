@@ -159,6 +159,9 @@
     <ClInclude Include="StandardResidualSource.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="CWDParticle1D.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -270,6 +273,9 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="StandardResidualSource.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CWDParticle1D.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>

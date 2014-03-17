@@ -159,7 +159,7 @@ void Particle1D::runHistory()
 	{
 		path_length_mfp = samplePathLengthMFP(); //sample a pathlength
 		streamToNextEvent(path_length_mfp); //stream to leakage or interaction
-		sampleCollision(); //if particle is already dead, this will return dead
+		sampleCollision(); //if particle is already dead, this will return so
 		if (_is_dead)
 		{
 			return;

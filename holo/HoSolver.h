@@ -25,6 +25,7 @@
 #include "StratifiedResidualSource.h"
 #include "StandardResidualSource.h"
 #include "LinDiscSource.h"
+#include "CWDParticle1D.h"
 
 class HoSolver
 {

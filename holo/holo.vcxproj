@@ -71,6 +71,7 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="CurrentElementTally.h" />
     <ClInclude Include="CurrentFaceTally.h" />
+    <ClInclude Include="CWDParticle1D.h" />
     <ClInclude Include="DataTransfer.h" />
     <ClInclude Include="DirichletBC1D.h" />
     <ClInclude Include="Dof.h" />
@@ -113,6 +114,7 @@
     <ClCompile Include="AliasSampler.cpp" />
     <ClCompile Include="CurrentElementTally.cpp" />
     <ClCompile Include="CurrentFaceTally.cpp" />
+    <ClCompile Include="CWDParticle1D.cpp" />
     <ClCompile Include="DataTransfer.cpp" />
     <ClCompile Include="DirichletBC1D.cpp" />
     <ClCompile Include="Dof.cpp" />

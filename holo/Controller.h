@@ -32,7 +32,7 @@ namespace HoController
 	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
 
 	//Particle type stuff
-	const bool EXP_ATT_WGT_PARTICLE = true; //no aborptions take place, the particle weight is just attenuated exponentially
+	const bool CONT_WGT_DEPOSITION_PARTICLES = true; //no aborptions take place, the particle weight is just attenuated exponentially
 }
 
 #endif

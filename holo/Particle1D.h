@@ -84,7 +84,7 @@ protected:
 
 	//tallies
 	void scoreFaceTally(); //this doesnt make sense in ECMC context, just for verifying particles are being tracked properly
-	virtual void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
+	virtual void scoreElementTally(double path_start_mfp, double path_end_mfp); //passed where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods
 	void sampleSourceParticle();	//this function initializes the particles weight etc., then calls the 
@@ -95,11 +95,12 @@ public:
 	//constructors
 	Particle1D(HoMesh* mesh, Source* src, RNG* rng, string method_str); //Standard constructor, pass a pointer for rng to make sure 
 	//you dont resample random numbers, method_str is which solution method from HoSolver (ECMC etc.).  Source is passed by pointer
-	//because the source has most likely not been constructed yet
+	//because the source has most likely not been constructed yet.  It is the source constructor's responsibility to set Particle1D
+	//'s src pointer to the newly created source!!!!!
 	
 	//public functions
 	double getRandNum();
-	void runHistory();  //sample source, then stream particle til history termination
+	virtual void runHistory();  //sample source, then stream particle til history termination
 	void printParticleBalance(int n_histories, bool reset_balances = true); //after printing particle balance (if turned on), then reset the balances if desired
 	void resetParticleBalance(); //zero out the particle balance counters 
 

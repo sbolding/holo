@@ -34,7 +34,14 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	_ho_mesh = new HoMesh(_lo_mesh, n_ang_bins_half_range);
 
 	//initialize particle class with pointer to NULL source
-	_particle = new Particle1D(_ho_mesh, NULL, &_rng, method);
+	if (HoController::CONT_WGT_DEPOSITION_PARTICLES)
+	{
+		_particle = new CWDParticle1D(_ho_mesh, NULL, &_rng, method);
+	}
+	else
+	{
+		_particle = new Particle1D(_ho_mesh, NULL, &_rng, method);
+	}
 
 	//Initialize the data needed for source sampling
 	_sampling_method = sampling_method;
