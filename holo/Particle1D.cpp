@@ -15,13 +15,10 @@
 #include "Source.h"
 #include "LinDiscSource.h"
 #include "ResidualSource.h"
+#include "StandardResidualSource.h"
 
-Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
-	std::vector<CurrentFaceTally*>& current_face_tallies,
-	std::vector<CurrentElementTally*>& current_element_tallies,
-	std::vector<FluxFaceTally*>& flux_face_tallies,
-	std::vector<FluxElementTally*>& flux_element_tallies
-	)
+Particle1D::Particle1D(HoMesh* mesh, Source* src, RNG* rng, string method_str) :
+_source(src) //source may be passed a NULL, to be set later
 {
 	_rng = rng;
 	_mesh = mesh;
@@ -41,16 +38,6 @@ Particle1D::Particle1D(HoMesh* mesh, RNG* rng, string method_str,
 		_n_scat = 0;
 		_n_terminations=0;
 	}
-
-	//store the tallies correctly
-	_current_face_tallies = current_face_tallies;
-	_current_element_tallies = current_element_tallies;
-	_flux_face_tallies = flux_face_tallies;
-	_flux_element_tallies = flux_element_tallies;
-
-	//Initialize the data needed for source sampling, must call this routine last because it contains a pointer to itself!!!
-	_sampling_method = "standard";
-	initializeSamplingSource(_sampling_method);
 }
 
 inline double Particle1D::samplePathLength()
@@ -69,7 +56,7 @@ void Particle1D::sampleCollision()
 	{
 		return;
 	}
-	if ( (_method == HoMethods::HOLO_ECMC) || (_method == HoMethods::HOLO_STANDARD_MC) ) //then a pure absorber problem, end the history
+	else if ( (_method == HoMethods::HOLO_ECMC) || (_method == HoMethods::HOLO_STANDARD_MC) ) //then a pure absorber problem, end the history
 	{
 		terminateHistory();
 		if (HoController::PARTICLE_BALANCE)
@@ -108,19 +95,8 @@ void Particle1D::sampleCollision()
 
 }
 
-void Particle1D::initializeSamplingSource(string sampling_method)
-{
-	//Initially source is always a standard mc source of some kind
-	_source = new LinDiscSource(this, sampling_method); //"this" is a complete pointer to particle
-	//_source = new ResidualSource(this, sampling_method); 
-}
-
-void Particle1D::computeResidualSource()
-{
-	//Free memory for old source (whether last residual or standard MC source)
-	delete _source;
-
-	//reset debug variables
+void Particle1D::resetParticleBalance()
+{	//reset debug variables
 	if (HoController::PARTICLE_BALANCE)
 	{
 		_n_abs = 0;
@@ -128,14 +104,11 @@ void Particle1D::computeResidualSource()
 		_n_scat = 0;
 		_n_terminations = 0;
 	}
-
-	//create new source
-	_source = new ResidualSource(this, _sampling_method);
 }
 
 void Particle1D::sampleSourceParticle()
 {
-	initializeHistory();
+	initializeHistory(); //Reset the basic parameters
 	_source->sampleSourceParticle();
 }
 
@@ -177,58 +150,16 @@ void Particle1D::leaveElement()
 
 void Particle1D::runHistory()
 {
-	//TODO need to pull the streaming stuff out into its own function again so it will be easier to implement the derived classes
-	//and to allow for super duper efficient ray tracing
-	//cout << "starting history..." << endl;
 	//start history
-	initializeHistory(); //Reset the basic parameters
-	sampleSourceParticle();
+	sampleSourceParticle(); //samples position, direction, and initalizes weight
 
 	double path_length_mfp;  
-	double displacement_mfp;
-	double new_position_mfp;
 
 	while (true) //stream the particle until it is absorbed or leaks
 	{
-		//sample a pathlength
-		path_length_mfp = samplePathLengthMFP();
-
-		//determine horizontal displacement
-		displacement_mfp = path_length_mfp*_mu;
-		new_position_mfp = displacement_mfp + _position_mfp;
-
-		//determine if the particle has left the cell, or not
-		while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
-		{
-			//tally variables, corresponding to path across current cell
-			double path_start = _position_mfp; 
-			double path_end;
-
-			//Determine the number of mean free paths remaining to stream after entering new cell
-			if (_mu >= 0.0) //streaming to the right
-			{
-				displacement_mfp += (_position_mfp - _element_width_mfp);
-				path_end = _element_width_mfp; //leaves to the right
-			}
-			else //streaming to the left
-			{
-				displacement_mfp += _position_mfp;
-				path_end = 0.0; //leaves to the left
-			}
-			scoreElementTally(path_start, path_end);
-			leaveElement(); //move to the next element
-
-			if (_is_dead) //then particle has leaked, do not score anything else
-			{
-				return;
-			}
-			new_position_mfp = _position_mfp + displacement_mfp; //determine where the particle would be now
-		}
-
-		//Now position is within the current cell
-		scoreElementTally(_position_mfp, new_position_mfp);
-		_position_mfp = new_position_mfp;
-		sampleCollision();
+		path_length_mfp = samplePathLengthMFP(); //sample a pathlength
+		streamToNextEvent(path_length_mfp); //stream to leakage or interaction
+		sampleCollision(); //if particle is already dead, this will return dead
 		if (_is_dead)
 		{
 			return;
@@ -302,7 +233,7 @@ inline void Particle1D::terminateHistory()
 	_is_dead = true;
 }
 
-void Particle1D::printParticleBalance(int n_hist)
+void Particle1D::printParticleBalance(int n_hist, bool reset_particle_balance)
 {
 	cout << "---------------------------------------------------\n"
 		<< "               Particle balance\n"
@@ -312,6 +243,12 @@ void Particle1D::printParticleBalance(int n_hist)
 		<< "      Number Leaked: " << _n_leak << endl
 		<< "    Number Scatters: " << _n_scat << endl
 		<< "  Number Terminated: " << _n_terminations << endl;	
+
+	//optionally reset the particle balances, this is true by default
+	if (reset_particle_balance)
+	{
+		resetParticleBalance();
+	}
 }
 
 inline void Particle1D::initializeHistory()
@@ -322,9 +259,13 @@ inline void Particle1D::initializeHistory()
 
 inline void Particle1D::scoreFaceTally()
 {
+	return;
+	//Currently inactive, if you wanted to do standard MC you would need to add these back in
+
+
 	//The face tally is scored before you have left the cell, so everything is
 	//based on the cell you are leaving, not the cell you are entering
-
+	/*
 	//determine face based on direction
 	int face_id = 0; //Leaving to the left
 	if (_mu >= 0.0) //Leaving to the right
@@ -336,9 +277,47 @@ inline void Particle1D::scoreFaceTally()
 	int face_index = _spatial_element->getID()+face_id;
 	_current_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0); //for one-d, per cm sq
 	_flux_face_tallies[face_index]->incrementScore(_weight, _mu, 1.0);
+	*/ 
 }
 
-double Particle1D::getTotalSourceStrength()
+void Particle1D::streamToNextEvent(double path_length_mfp)
 {
-	return _source->getTotalSourceStrength();
+	double displacement_mfp;
+	double new_position_mfp;
+
+	//determine horizontal displacement
+	displacement_mfp = path_length_mfp*_mu;
+	new_position_mfp = displacement_mfp + _position_mfp;
+
+	//determine if the particle has left the current element, or not
+	while ((new_position_mfp < 0.) || (new_position_mfp > _element_width_mfp)) //particle has left the cell
+	{
+		//tally variables, corresponding to path across current cell
+		double path_start = _position_mfp;
+		double path_end;
+
+		//Determine the number of mean free paths remaining to stream after entering new cell
+		if (_mu >= 0.0) //streaming to the right
+		{
+			displacement_mfp += (_position_mfp - _element_width_mfp);
+			path_end = _element_width_mfp; //leaves to the right
+		}
+		else //streaming to the left
+		{
+			displacement_mfp += _position_mfp;
+			path_end = 0.0; //leaves to the left
+		}
+		scoreElementTally(path_start, path_end);
+		leaveElement(); //move to the next element
+
+		if (_is_dead) //then particle has leaked, do not score anything else
+		{
+			return;
+		}
+		new_position_mfp = _position_mfp + displacement_mfp; //determine where the particle would be now
+	}
+
+	//Now position is within the current cell
+	scoreElementTally(_position_mfp, new_position_mfp);
+	_position_mfp = new_position_mfp;
 }

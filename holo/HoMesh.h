@@ -31,6 +31,7 @@ class HoMesh
 protected:
 	std::vector<ECMCElement1D*> _elements; //I think this can be generalized to ECMCElements by using a virtual destructor and dynamic_cast in particle1D class
 	int _n_elems;
+	unsigned int _n_active_elements;
 	Mesh* _lo_mesh;
 	HoMesh(); //don't use
 	ECMCElement1D* findJustUpwindElement(int down_str_element_id); //Finds which element has a downstream element wiht ds_element_id
@@ -42,6 +43,7 @@ public:
 	HoMesh(Mesh* mesh, int n_ang_cells_half_range); //how much to divide the angular cells into
 	ECMCElement1D* getElement(int element_id) const; 
 	int getNumElems() const;
+	unsigned int getNumActiveElements() const; //get the number of elements that do not have children
 	std::vector<ECMCElement1D* >* getElements(void);
 
 	//computing angular flux

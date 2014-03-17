@@ -153,6 +153,12 @@
     <ClInclude Include="MeshController.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="StratifiedResidualSource.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardResidualSource.h">
+      <Filter>Header Files\Ho Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -258,6 +264,12 @@
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
     <ClCompile Include="MeshController.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StratifiedResidualSource.cpp">
+      <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardResidualSource.cpp">
       <Filter>Source Files\Ho Files</Filter>
     </ClCompile>
   </ItemGroup>

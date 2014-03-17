@@ -16,12 +16,6 @@
 #include <string>
 #include "HoMesh.h"
 #include "RNG.h"
-#include "FaceTally.h"
-#include "ElementTally.h"
-#include "CurrentElementTally.h"
-#include "CurrentFaceTally.h"
-#include "FluxElementTally.h"
-#include "FluxFaceTally.h"
 #include "GlobalConstants.h"
 #include "AliasSampler.h"
 
@@ -29,6 +23,8 @@
 class Source; 
 class LinDiscSource;
 class ResidualSource;
+class StandardResidualSource;
+class StratifiedResidualSource;
 
 class Particle1D
 {
@@ -42,8 +38,9 @@ protected:
 	friend class Source;
 	friend class LinDiscSource;
 	friend class ResidualSource;
-	Source* _source;
-	string _sampling_method; 
+	friend class StandardResidualSource;
+	friend class StratifiedResidualSource;
+	Source* _source; //This may be NULL initialy, it is the source's constructors responsibility to set this pointer correctly
 
 	//general particle properties
 	double _position_mfp;
@@ -73,12 +70,6 @@ protected:
 	size_t _n_elements;		//for sampling which element a particle is born in
 	bool _is_dead;		 //for terminating particle history
 
-	//tally arrays, will eventually be removed
-	std::vector<CurrentFaceTally*> _current_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<CurrentElementTally*> _current_element_tallies; //vector of all the volume tallies, indexed using connectivity array
-	std::vector<FluxFaceTally*> _flux_face_tallies;  //vector of all the face tallies, indexed using connectivity array
-	std::vector<FluxElementTally*> _flux_element_tallies; //vector of all the volume tallies, indexed using connectivity array
-
 	//protected methods
 	//---------------------------------------------
 	//Streaming and collision methods
@@ -86,39 +77,31 @@ protected:
 	double samplePathLengthMFP();   //Sample a path length in units of number of MFP, useful for streaming through many cells
 	double sampleAngleIsotropic();	//returns a cosine sampled from uniform distribution
 	void sampleCollision();  //Determine if a scatter or an absorption, and then do teh appropriate behavior after that, depending on solver method
+	void streamToNextEvent(double path_length_mfp); //stream from current position to next interaction or leakage, this is it's own class for the sake of virtual overriding for derived particle classes
 	void updateElementProperties();
 	void leaveElement();	//Called when leaving an element and moving into next geometrical region
 	void terminateHistory(); //kill particle, do other appropriate things
 
 	//tallies
 	void scoreFaceTally(); //this doesnt make sense in ECMC context, just for verifying particles are being tracked properly
-	void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
+	virtual void scoreElementTally(double path_start_mfp, double path_end_mfp); //where the track begin and ended, in terms of x-coordinate
 
 	//Sampling the source methods
-	void sampleSourceParticle();	//base method, called to create a source particle
-	void initializeSamplingSource(string sampling_method); //initialize method that determines where to put the particle
-
+	void sampleSourceParticle();	//this function initializes the particles weight etc., then calls the 
 	inline void initializeHistory(); //This is in the particle class to ensure it is called everytime
 	
 public:
 
 	//constructors
-	Particle1D(HoMesh* mesh, RNG* rng, string method_str,
-		std::vector<CurrentFaceTally*>& current_face_tallies,
-		std::vector<CurrentElementTally*>& current_element_tallies,
-		std::vector<FluxFaceTally*>& flux_face_tallies,
-		std::vector<FluxElementTally*>& _flux_element_tallies
-	); //Standard constructor, pass a pointer for rng to make sure 
-	//you dont resample random numbers, method_str is which method
-	//to use from HoSolver, all the tallies are currently passed in seperately
+	Particle1D(HoMesh* mesh, Source* src, RNG* rng, string method_str); //Standard constructor, pass a pointer for rng to make sure 
+	//you dont resample random numbers, method_str is which solution method from HoSolver (ECMC etc.).  Source is passed by pointer
+	//because the source has most likely not been constructed yet
 	
 	//public functions
 	double getRandNum();
-	void runHistory();
-	void printParticleBalance(int n_histories);
-	void computeResidualSource();
-	double getTotalSourceStrength(); //get the total source strength from the source
-
+	void runHistory();  //sample source, then stream particle til history termination
+	void printParticleBalance(int n_histories, bool reset_balances = true); //after printing particle balance (if turned on), then reset the balances if desired
+	void resetParticleBalance(); //zero out the particle balance counters 
 
 };
 

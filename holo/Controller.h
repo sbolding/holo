@@ -23,13 +23,16 @@ namespace HoController
 
 	//output
 	const bool PARTICLE_BALANCE = false;
-	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch
+	const bool WRITE_ALL_ANGULAR_FLUXES = false; //print out angular fluxes after each batch
 	const bool WRITE_RESIDUAL_NORMS = true;
 	const bool WRITE_HISTORIES_COMPLETE = false;
 
 	//Sampling stuff
 	const int INPUT_SEED = 73907;
 	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
+
+	//Particle type stuff
+	const bool EXP_ATT_WGT_PARTICLE = true; //no aborptions take place, the particle weight is just attenuated exponentially
 }
 
 #endif

@@ -17,7 +17,6 @@ protected:
 	Particle1D* _particle; //pointer to the particle class, source is a friend of particle class
 	Source(); //Never use the default constructor
 	RNG* _rng;	//pointer to particles random number generator
-	unsigned int _sampling_method; //0 for alias sampling, 1 for stratified sampling
 	double _vol_src_total; //The total volumetric source (p/sec)
 	double _BC_src_total; //The total BC source (p/sec)
 
@@ -38,7 +37,7 @@ protected:
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:
-	Source(Particle1D* particle, string sampling_method);
+	Source(Particle1D* particle);
 	~Source();
 
 	virtual void sampleSourceParticle() = 0; //samples a source particle direction and location

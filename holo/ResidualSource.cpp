@@ -2,7 +2,7 @@
 #include "Particle1D.h"
 #include <cmath>
 
-ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : Source(particle, sampling_method)
+ResidualSource::ResidualSource(Particle1D* particle) : Source(particle)
 {
 	//member variables initialize
 	_face_src_total = 0.0;
@@ -13,8 +13,6 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 	elements = _particle->_mesh->getElements();
 	double res_element_mag_el;		         //mag of element residual
 	double res_face_mag_el;					//magnitude of residaul on face
-	std::vector<double> res_element_mags;  //magnitue of residual source over elements
-	std::vector<double> res_face_mags; //magnitude of the residual for each face
 
 	//Local variables to prevent repeated accessing of particle class
 	std::vector<double> res_LD_values_el; //the dof of the residual for a particular element
@@ -25,8 +23,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 	//initialize res vectors
 	int n_elems = _particle->_mesh->getNumElems();
-	res_face_mags.resize(n_elems);
-	res_element_mags.resize(n_elems);
+	_res_face_mags.resize(n_elems);
+	_res_element_mags.resize(n_elems);
 	_residual_element_LD_values.resize(n_elems);
 	_residual_face_LD_values.resize(n_elems);
 	std::vector<double> zeros(2, 0.0);
@@ -39,8 +37,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 			//currently zeros are stored for the abstract elements
 			_residual_element_LD_values[(*it_el)->getID()] = zeros;
 			_residual_face_LD_values[(*it_el)->getID()] = zeros;
-			res_face_mags[(*it_el)->getID()] = 0.0;
-			res_element_mags[(*it_el)->getID()] = 0.0;
+			_res_face_mags[(*it_el)->getID()] = 0.0;
+			_res_element_mags[(*it_el)->getID()] = 0.0;
 			continue;
 		}
 
@@ -51,7 +49,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 		//compute volume integrals, for cells that have no children
 		computeElementResidual(*it_el, res_LD_values_el, res_element_mag_el);
 		_residual_element_LD_values[(*it_el)->getID()] = res_LD_values_el;
-		res_element_mags[(*it_el)->getID()] = res_element_mag_el;
+		_res_element_mags[(*it_el)->getID()] = res_element_mag_el;
 
 		if ((*it_el)->getDownStreamElement() != NULL) //in this case there is a down wind cell to add delta residual to
 		{
@@ -63,19 +61,19 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 					ds_element->getAngularCoordinate() - 0.25*ds_element->getAngularWidth()); //get bottom child
 				computeFaceResidual(*it_el, child_minus, res_LD_values_face, res_face_mag_el, false);
 				_residual_face_LD_values[child_minus->getID()] = res_LD_values_face;
-				res_face_mags[child_minus->getID()] = res_face_mag_el;
+				_res_face_mags[child_minus->getID()] = res_face_mag_el;
 
 				ECMCElement1D* child_plus = ds_element->findChildEntered(
 					ds_element->getAngularCoordinate() + 0.25*ds_element->getAngularWidth()); //get top child
 				computeFaceResidual(*it_el, child_plus, res_LD_values_face, res_face_mag_el, false);
 				_residual_face_LD_values[child_plus->getID()] = res_LD_values_face;
-				res_face_mags[child_plus->getID()] = res_face_mag_el;
+				_res_face_mags[child_plus->getID()] = res_face_mag_el;
 			}
 			else if (ds_element->getRefinementLevel() == (*it_el)->getRefinementLevel()) //same refinement
 			{
 				computeFaceResidual(*it_el, ds_element, res_LD_values_face, res_face_mag_el, false); //for non boundary cells
 				_residual_face_LD_values[ds_element->getID()] = res_LD_values_face;
-				res_face_mags[ds_element->getID()] = res_face_mag_el;
+				_res_face_mags[ds_element->getID()] = res_face_mag_el;
 			}
 			else if (ds_element->getRefinementLevel() == (*it_el)->getRefinementLevel() - 1) //ds less refined
 			{
@@ -85,10 +83,10 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 				computeFaceResidual(*it_el, ds_element, res_LD_values_face, res_face_mag_el, false);
 				if (_residual_face_LD_values[ds_id].size() == 0) //need to initialize
 				{
-					res_face_mags[ds_id] = 0.0; //force initialization in case of dictionary
+					_res_face_mags[ds_id] = 0.0; //force initialization in case of dictionary
 					_residual_face_LD_values[ds_id].resize(res_LD_values_face.size() * 2); //for bottom and top cells
 				}
-				res_face_mags[ds_id] += res_face_mag_el; //construct total probability of being in ds cell
+				_res_face_mags[ds_id] += res_face_mag_el; //construct total probability of being in ds cell
 
 				//add the bottom first, then the top (should be an it_el that comes after the bottom one, but forced to add in correct order)
 				int begin; //where to begin in vector, 0 for bottom cell, 0+dof.size() for top cell
@@ -124,20 +122,8 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 		//add values to arrays
 		_residual_face_LD_values[bc_element_ID] = res_LD_values_face;
-		res_face_mags[bc_element_ID] = res_face_mag_el;
+		_res_face_mags[bc_element_ID] = res_face_mag_el;
 		_face_src_total += res_face_mag_el; //units of p / sec
-	}
-
-	if (_sampling_method == HoMethods::STANDARD_SAMPLING) //standard source sampling
-	{
-		//Create sampler with alias sampling, let it normalize, delete unneccessary data
-		_element_source = new AliasSampler(res_element_mags, false);
-		_face_source = new AliasSampler(res_face_mags, false);
-	}
-	else
-	{
-		std::cerr << "No other sampling methods are implemented yet" << std::endl;
-		exit(1);
 	}
 
 	//No BC source, it is implicitly included in the face residual calculations
@@ -145,33 +131,7 @@ ResidualSource::ResidualSource(Particle1D* particle, string sampling_method) : S
 
 ResidualSource::~ResidualSource()
 {
-	delete _element_source;
-	delete _face_source;
-}
-
-void ResidualSource::sampleSourceParticle()
-{
-	//Sample if face or element source
-	if (_rng->rand_num() < (_vol_src_total / (_vol_src_total + _face_src_total))) //element source
-	{
-		//FOR STRATIFIED SAMPLING NEED A FUNCTION FOR CHOOSE ELEMENT AND CHOOSE FACE THAT CAN BE OVERWRITTEN
-		//MAKE AN initResidualSource function so I dont have to rewrite all this stuff
-		_particle->_current_element_ID = _element_source->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
-		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
-		_particle->updateElementProperties();
-
-		//determine location and direction within element using rejection method
-		sampleElementSource();
-	}
-	else //face source
-	{
-		_particle->_current_element_ID = _face_source->sampleBin(_rng->rand_num(), _rng->rand_num()); //sample bin location
-		_particle->_current_element = _particle->_mesh->getElement(_particle->_current_element_ID); //update bin
-		_particle->updateElementProperties();
-
-		//determine location and direction within element using rejection method
-		sampleFaceSource();
-	}
+	//No dynamic memory
 }
 
 void ResidualSource::sampleFaceSource()

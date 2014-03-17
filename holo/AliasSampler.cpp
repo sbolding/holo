@@ -1,6 +1,7 @@
 #include "AliasSampler.h"
 #include <vector>
 #include <numeric>
+#include <algorithm>
 #include <limits>
 
 AliasSampler::AliasSampler(std::vector<double> bin_probabilities, bool normalized)
@@ -135,5 +136,13 @@ void HistogramUtilities::normalizeDiscreteDistribution(std::vector<double> & bin
 	for (int i = 0; i < bin_probabilities.size(); ++i)
 	{
 		bin_probabilities[i] *= inv_sum;
+	}
+}
+
+void HistogramUtilities::scaleDiscreteDistribution(std::vector<double> & bin_probabilities, double scalar)
+{
+	for (int i = 0; i < bin_probabilities.size(); ++i)
+	{
+		bin_probabilities[i] *= scalar;
 	}
 }

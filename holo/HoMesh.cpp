@@ -128,6 +128,7 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
 
 
 	_n_elems = _elements.size();
+	_n_active_elements = _elements.size();
 }
 
 ECMCElement1D* HoMesh::getElement(int element_id) const
@@ -143,6 +144,11 @@ int HoMesh::getNumElems() const
 		exit(1);
 	}
 	return _n_elems;
+}
+
+unsigned int HoMesh::getNumActiveElements() const
+{
+	return _n_active_elements;
 }
 
 std::vector<ECMCElement1D* >* HoMesh::getElements(void)
@@ -241,6 +247,9 @@ std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
 
 ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 {
+	//WARNING: this function only works on refined elements, you cannot call it
+	//on parent elements because it generally will not work
+
 	//find the boundary cell that is on the same mu level as current element
 	std::vector<int>::iterator it_bc_id;
 
@@ -250,6 +259,10 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	double ds_mu_minus = ds_mu_center - 0.5*ds_h_mu;
 	double ds_mu_plus = ds_mu_center + 0.5*ds_h_mu;
 	unsigned int ds_refinement_level = _elements[down_str_element_id]->getRefinementLevel();
+	if (down_str_element_id == 5000)
+	{
+		std::cout << "cool\n";
+	}
 
 	for (it_bc_id = _boundary_cells.begin(); it_bc_id != _boundary_cells.end(); it_bc_id++)
 	{
@@ -290,10 +303,7 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	}
 	
 	//Else, there is an interior cell upwind of this element
-	//start on boundary and search to find the upwind element, note 
-	//that this function will work correctly even if the upwind boundary elements
-	//have yet to be updated, this saves computing the new boundary elements every
-	//time you add a new element
+	//start on boundary and search to find the upwind element, 
 	ECMCElement1D* new_down_str_elem = NULL;
 	ECMCElement1D* up_str_elem = _elements[*it_bc_id]; //start on boundary
 	while (up_str_elem != NULL)
@@ -334,6 +344,29 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	{
 		std::cerr << "Could not find downstream element, in HoMesh.cpp::finJustUpwind\n";
 		exit(1);
+	}
+
+	//Check if the upstream element is more refined, if it is then you need to find it's parent cell to get the upwind element
+	if (up_str_elem->getRefinementLevel() > ds_refinement_level)
+	{
+		int up_str_id = up_str_elem->getID();
+		for (int i = 0; i < _n_elems; ++i)
+		{
+			if (_elements[i]->hasChildren())
+			{
+				//only need to check the most downwind children, since children are built upwind from -mu to +mu, 0 and 2
+				if ( (_elements[i]->getChild(0)->getID() == up_str_id) || 
+					(_elements[i]->getChild(2)->getID() == up_str_id) )
+				{
+					up_str_elem = _elements[i];
+					break;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
 	}
 	return up_str_elem;
 }

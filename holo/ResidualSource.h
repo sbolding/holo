@@ -17,23 +17,24 @@
 #define _RESIDUALSOURCE_H
 
 #include "Source.h"
-#include "AliasSampler.h"
 #include <vector>
 #include <map>
 
 class ResidualSource : public Source
 {
 protected:
-	AliasSampler* _element_source;  //Sampler to determine which source you are in
-	AliasSampler* _face_source;	    //Sampler to determine which face you are on
+
 	double _face_src_total; //magnitude of the face source total, vol src total is stored in base class
 
 	//The boundary conditions are only needed for computing the residual, the result is stored in the face source sampler
 	std::vector<std::vector<double>> _bc_dof; //dof for boundary conditions for elements, access using map, this could be done dynamically and deleted each time
 	std::map<int, int> _bc_element_to_dof_map;  //key: element, value: index in bc_dof array
 
+	//Elementwise information
 	std::vector<std::vector<double>> _residual_element_LD_values; //each member contains average, slope x, slope mu;
 	std::vector<std::vector<double>> _residual_face_LD_values; //each memeber contains average, slope x (always zero), and slope in mu for sampling
+	std::vector<double> _res_element_mags;  //magnitue of residual source over elements, these may be deleted in derived classes
+	std::vector<double> _res_face_mags; //magnitude of the residual for each face, these may be deleted in derived classes
 
 	//Functions for building sampler
 	void computeElementResidual(ECMCElement1D* element, std::vector<double> & residual_LD_values_el, double & residual_element_magnitude); 
@@ -47,9 +48,10 @@ protected:
 	void sampleFaceSource();
 
 public:
+
 	~ResidualSource();
-	ResidualSource(Particle1D* particle, string sampling_method);
-	virtual void sampleSourceParticle();
+	ResidualSource(Particle1D* particle);
+	virtual void sampleSourceParticle() = 0;
 	virtual double getTotalSourceStrength();
 
 };

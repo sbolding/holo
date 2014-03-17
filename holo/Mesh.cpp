@@ -81,8 +81,8 @@ Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* materia
 		//TODO Hard coded boundary condition values
 		//*******************************************************************
 		std::vector<DirichletBC1D *> dirichlet_bcs;
-		dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], 0.0));// 1.25));
-		dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], 0.0));//1.25));
+		dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], 1.25));
+		dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], 1.25));
 		_dirichlet_bcs = dirichlet_bcs;
 		_n_dirichlet_bc = dirichlet_bcs.size();
 	}	
