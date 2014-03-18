@@ -82,6 +82,7 @@
     <ClInclude Include="Element1D.h" />
     <ClInclude Include="ElementTally.h" />
     <ClInclude Include="FaceTally.h" />
+    <ClInclude Include="FEMUtilities.h" />
     <ClInclude Include="FluxElementTally.h" />
     <ClInclude Include="FluxFaceTally.h" />
     <ClInclude Include="GlobalConstants.h" />
@@ -125,6 +126,7 @@
     <ClCompile Include="Element1D.cpp" />
     <ClCompile Include="ElementTally.cpp" />
     <ClCompile Include="FaceTally.cpp" />
+    <ClCompile Include="FEMUtilties.cpp" />
     <ClCompile Include="FluxElementTally.cpp" />
     <ClCompile Include="FluxFaceTally.cpp" />
     <ClCompile Include="HoMesh.cpp" />
