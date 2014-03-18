@@ -178,6 +178,9 @@ void HoSolver::updateSystem()
 {
 	//update angular fluxes
 	_ho_mesh->computeAngularFluxes(_n_histories);
+
+	//calculate projected fluxes
+	computeProjectedAngularFlux();
 }
 
 void HoSolver::computeResidualSource()
@@ -217,7 +220,8 @@ void HoSolver::computeProjectedAngularFlux()
 	_psi_plus_dof.resize(n_spatial_elems);
 
 	//resize dof vectors, initialize to zeros
-	size_t dof_size = _ho_mesh->getElement(0)->getElementDimensions().size(); //how many DOF per element
+	size_t dof_size = _ho_mesh->getElement(0)->getElementDimensions().size()+1; //how many DOF per element, 1 extra for 
+	size_t n_dimens = dof_size - 1; //how many dimensions, spatial and angular
 	for (int i = 0; i < n_spatial_elems; i++)
 	{
 		_psi_minus_dof[i].assign(dof_size, 0.0);
@@ -231,8 +235,20 @@ void HoSolver::computeProjectedAngularFlux()
 	//loop variables
 	int spatial_id;
 	GaussQuadrature quad;
-	std::vector<double> wgts = quad.getQuadratureWeights();
+	int n_qps = quad.getNumPoints();
+	std::vector<double> x_wgts, mu_wgts, x_pnts, mu_pnts;
+	std::vector<double> sp_nodes; //nodeal cordinates of spatial element
+	std::vector<double> sp_coors(n_dimens); //the coords of the half range flux element
+	std::vector<double> sp_dimens(n_dimens); //the dimensions of the half range flux element
+	std::vector<double> el_coors;	//cooridnates of current ECMC element
+	std::vector<double> el_dimens;  //dimensions of current ECMC element;
+	std::vector<double> el_dof; //angular flux dof for current element
+	
+	//the half range fluxes always have the same angular width;
+	sp_dimens[1] = 1.0;
 
+	//To perform integral over half range of spatial elements, sum integrals over all active elements for a particular spatial element.  
+	//This is done by looping over all high order elements and adding to the appropriate spatial elements integrals
 	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
 	{
 		if ((*it_el)->hasChildren())
@@ -241,12 +257,54 @@ void HoSolver::computeProjectedAngularFlux()
 		}
 		else
 		{
-			//add values to correct spatial element
-			spatial_id = (*it_el)->getSpatialElement()->getID();
-			//compute the integrals for each basis function
-			//loop over gauss points, add term for each basis function
-			
+			//get the spatial element information
+			Element* sp_elem = (*it_el)->getSpatialElement();
+			spatial_id = sp_elem->getID();
+			sp_nodes = sp_elem->getNodalCoordinates();
+			sp_dimens[0] = (sp_nodes[1] - sp_nodes[0])*0.5;
+			sp_coors[0] = (sp_nodes[1] + sp_nodes[0])*0.5;
+			sp_coors[1] = ((*it_el)->getAngularCoordinate() > 0.0) ? 0.5 : -0.5;
 
+			//get ECMC element information
+			el_coors = (*it_el)->getElementCoordinates();
+			el_dimens = (*it_el)->getElementDimensions();
+			el_dof = (*it_el)->getAngularFluxDOF();
+
+			//get quadrature information based on ECMC element, which you are integrating over
+			x_pnts = quad.getQuadraturePoints((*it_el)->getSpatialCoordinate(), (*it_el)->getSpatialWidth());
+			x_wgts = quad.getQuadratureWeights((*it_el)->getSpatialCoordinate(), (*it_el)->getSpatialWidth());
+			mu_pnts = quad.getQuadraturePoints((*it_el)->getAngularCoordinate(), (*it_el)->getAngularWidth());
+			mu_wgts = quad.getQuadratureWeights((*it_el)->getAngularCoordinate(), (*it_el)->getAngularWidth());
+			
+			std::vector<double> sp_sum(dof_size, 0.0); //temp vector for storing calculations
+			for (int i_qp=0; i_qp < n_qps; ++i_qp) //x_qps
+			{
+				for (int j_qp = 0; j_qp < n_qps; ++j_qp) //mu_qps
+				{
+					//1/(h_x*h_mu)*psi(x,mu))
+					double derp = FEMUtilties::evalLinDiscFunc2D(el_dof, el_dimens, el_coors, x_pnts[i_qp], mu_pnts[j_qp]);
+					double psi_avg= x_wgts[i_qp] * mu_wgts[j_qp] / (sp_dimens[0] * sp_dimens[1])*
+						FEMUtilties::evalLinDiscFunc2D(el_dof, el_dimens, el_coors, x_pnts[i_qp], mu_pnts[j_qp]); //compute contribution to average flux moment
+					
+					//compute the integrals for each basis function
+					sp_sum[0] += psi_avg;
+					sp_sum[1] += 6.0*psi_avg*(x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]; //these two lines could be replaced by a for loop if x,mu pnts in one vector
+					sp_sum[2] += 6.0*psi_avg*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]; //basis function is based on unrefined half range element, because that is what we are projecting to
+				}
+			}
+
+			//add sp_sum values to the appropriate spatial element
+			for (int i_dof=0; i_dof < dof_size; i_dof++)
+			{
+				if (el_coors[1] > 0.0)
+				{
+					_psi_plus_dof[spatial_id][i_dof] += sp_sum[i_dof];
+				}
+				else
+				{
+					_psi_minus_dof[spatial_id][i_dof] += sp_sum[i_dof];
+				}
+			}
 		}
 	}
 	
