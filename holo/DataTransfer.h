@@ -20,10 +20,12 @@ class DataTransfer
 protected:
 	Mesh* _mesh;
 	HoSolver* _ho_solver;
+
 public:
 	DataTransfer(HoSolver* HoSolver, Mesh* mesh);
 	void updateLoSystem(); //Calculate the new LoData based on the Hodata.
-//	virtual void calculateLoData(LoData1D & lo_data, int element_id);	//calculate the LoData parameters based on tallies of Ho solver;
+    void calculateLoData(LoData1D & lo_data, int element_id);	//calculate the LoData parameters based on tallies of Ho solver;
+
 };
 
 #endif  //_DATATRANSFER_H

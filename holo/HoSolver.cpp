@@ -12,6 +12,7 @@
 
 #include "HoSolver.h"
 #include "GlobalConstants.h"
+#include "FEMUtilities.h"
 
 HoSolver::HoSolver()
 {
@@ -22,7 +23,7 @@ HoSolver::HoSolver()
 HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	int n_ang_bins_half_range, string method, string sampling_method,
 	double exp_convg_constant, int n_batches, int n_batches_to_avg) :
-	_rng(), _source()
+	_rng(), _source(), _psi_minus_dof(), _psi_plus_dof()
 {
 	_n_batches = n_batches;
 	_lo_mesh = mesh;
@@ -206,4 +207,47 @@ void HoSolver::initializeSamplingSource()
 	//Initially source is always a standard mc source of some kind
 	_source = new LinDiscSource(_particle); //uses standard sampling, no stratified available for LinDiscSource
 	//_source = new ResidualSource(_particle); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check
+}
+
+void HoSolver::computeProjectedAngularFlux()
+{
+	//initialize vectors to proper size
+	int n_spatial_elems = _lo_mesh->getNumElems();
+	_psi_minus_dof.resize(n_spatial_elems);
+	_psi_plus_dof.resize(n_spatial_elems);
+
+	//resize dof vectors, initialize to zeros
+	size_t dof_size = _ho_mesh->getElement(0)->getElementDimensions().size(); //how many DOF per element
+	for (int i = 0; i < n_spatial_elems; i++)
+	{
+		_psi_minus_dof[i].assign(dof_size, 0.0);
+		_psi_plus_dof[i].assign(dof_size, 0.0);
+	}
+
+	//loop over ECMC elements and add active values to teh appropriate DOF
+	std::vector<ECMCElement1D*>::iterator it_el;
+	std::vector<ECMCElement1D*>* elements = _ho_mesh->getElements();
+
+	//loop variables
+	int spatial_id;
+	GaussQuadrature quad;
+	std::vector<double> wgts = quad.getQuadratureWeights();
+
+	for (it_el = elements->begin(); it_el != elements->end(); it_el++)
+	{
+		if ((*it_el)->hasChildren())
+		{
+			continue; //only add values from active elements
+		}
+		else
+		{
+			//add values to correct spatial element
+			spatial_id = (*it_el)->getSpatialElement()->getID();
+			//compute the integrals for each basis function
+			//loop over gauss points, add term for each basis function
+			
+
+		}
+	}
+	
 }

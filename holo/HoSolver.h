@@ -26,6 +26,7 @@
 #include "StandardResidualSource.h"
 #include "LinDiscSource.h"
 #include "CWDParticle1D.h"
+#include <vector>
 
 class HoSolver
 {
@@ -51,7 +52,14 @@ protected:
 	//residual source handling functions
 	void computeResidualSource();
 	void initializeSamplingSource();
-	
+
+	//For computing projected half range fluxes on coarsest mesh, useful for data transfer to low order date
+	std::vector<std::vector<double>> _psi_plus_dof; //row: spatial element, column: angular flux dof
+	std::vector<std::vector<double>> _psi_minus_dof; //row: spatial element, column: angular flux dof
+
+	void computeProjectedAngularFlux(); //computes the angular flux dof  element in half range
+	std::vector<double> getScalarFluxDOF(int spatial_elem_id); //get the scalar flux LD DOF for a particular spatial element
+		
 public:
 
 	HoSolver(); //Default constructor, should probably never be called
@@ -59,11 +67,13 @@ public:
 	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, string sampling_method,
 		double required_exp_convg_constant, int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
 	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
-	void updateSystem(); //compute the angular fluxes and compute new residual source
+	void updateSystem(); //compute the angular fluxes, currently unused
 
 	//reader, printer, and interface functions
 	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;
 	void printAllTallies(std::ostream &out) const;
+	void printProjectedScalarFlux(std::ostream &out) const;
+
 	//methods for data transfer
 };
 
