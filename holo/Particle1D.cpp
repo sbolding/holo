@@ -167,6 +167,7 @@ void Particle1D::runHistory()
 	} //end of outer history while loop
 }
 
+
 //return random numbers for use by source or whoever needs one
 inline double Particle1D::getRandNum()
 {
