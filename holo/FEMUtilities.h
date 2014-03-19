@@ -32,14 +32,15 @@ public:
 };
 
 
-namespace FEMUtilties
+namespace FEMUtilities
 {
 	inline double evalLinDiscFunc2D(std::vector<double> dof, std::vector<double> dimensions,
-		std::vector<double>coors, double x, double mu)
+		std::vector<double>coors, double x, double mu) //evaluate a 2D LD function at x and mu
 	{
 		return dof[0] + 2. / dimensions[0] * dof[1] * (x - coors[0])
 			+ 2. / dimensions[1] * dof[2] * (mu - coors[1]);
-	} //evaluate a 2D LD function at x and mu
+	} 
+	void convertMomentsToEdgeValues1D(std::vector<double> moment_dof, std::vector<double> & nodal_values); //convert moment dof to edge values
 }
 
 

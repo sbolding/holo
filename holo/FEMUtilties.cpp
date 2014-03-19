@@ -49,8 +49,19 @@ std::vector<double> GaussQuadrature::getQuadratureWeights(double center, double 
 	std::vector<double> wgts(_n_points);
 	for (int i = 0; i < _n_points; ++i)
 	{
-		wgts[i] = _weights[i] * 0.5*width;
+		wgts[i] = _weights[i] * 0.5*width; //multiply by 0.5 because gauss quadrature is over intervale [-1,1]
 	}
 	return wgts;
 }
 
+void FEMUtilities::convertMomentsToEdgeValues1D(std::vector<double> moment_dof, std::vector<double> & nodal_values) //convert moment dof to edge values
+{
+	if (moment_dof.size() != 2)
+	{
+		std::cerr << "Passed in incorrect length of moment vector to FEMUtilties::convertMomentsToEdgeValues1D\n";
+		exit(1);
+	}
+	nodal_values.resize(2);
+	nodal_values[0] = moment_dof[0] - moment_dof[1];
+	nodal_values[1] = moment_dof[0] + moment_dof[1];
+}

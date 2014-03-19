@@ -58,7 +58,7 @@ protected:
 	std::vector<std::vector<double>> _psi_minus_dof; //row: spatial element, column: angular flux dof
 
 	void computeProjectedAngularFlux(); //computes the angular flux dof  element in half range
-	std::vector<double> getScalarFluxDOF(int spatial_elem_id); //get the scalar flux LD DOF for a particular spatial element
+	std::vector<double> getScalarFluxDOF(int spatial_elem_id) const; //get the scalar flux LD DOF for a particular spatial element
 		
 public:
 

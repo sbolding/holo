@@ -7,10 +7,11 @@
 #include "RNG.h"
 #include "DataTransfer.h"
 
-using namespace std;
-
 int main()
 {
+	using std::cout;
+	using std::endl;
+
 	cout << "We're rolling..." << endl;
 	LoSolver* lo_solver;
 	HoSolver* ho_solver;
@@ -30,9 +31,9 @@ int main()
 	int num_elems =  10;
 	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 100000; //50000000
-	int n_batches = 5;
-	double exp_convg_rate = 5.;
+	int n_histories = 1000000; //50000000
+	int n_batches = 15;
+	double exp_convg_rate = 20.0;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -55,7 +56,8 @@ int main()
 	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches);
 	ho_solver->solveSystem();
 	ho_solver->updateSystem();
-	ho_solver->printAllTallies(cout); 
+//	ho_solver->printAllTallies(cout);
+	ho_solver->printProjectedScalarFlux(cout);
 
 	//Transfer HO data to the LO system
 	/*DataTransfer data_transfer(ho_solver, &mesh_1D);

@@ -199,7 +199,7 @@ void Particle1D::updateElementProperties()
 		_sigma_scat = mat.getSigmaS();
 		_sigma_abs = mat.getSigmaA();
 		//Set the material data
-		if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem, maybe?
+		if (_method == HoMethods::HOLO_ECMC || _method == HoMethods::HOLO_STANDARD_MC) //pure absorber problem
 		{
 			_scat_ratio = 0.0;
 		}
@@ -260,7 +260,8 @@ inline void Particle1D::initializeHistory()
 inline void Particle1D::scoreFaceTally()
 {
 	return;
-	//Currently inactive, if you wanted to do standard MC you would need to add these back in
+	//Currently inactive, if you wanted to do standard MC you would need to add these back in and 
+	//make sure you only score whe yo0u leave a spatial element most likely
 
 
 	//The face tally is scored before you have left the cell, so everything is

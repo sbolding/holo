@@ -68,6 +68,7 @@ void HoSolver::solveSystem(std::ostream & out)
 			_particle->runHistory();
 			if (HoController::WRITE_HISTORIES_COMPLETE)
 			{
+				std::cout << std::endl;
 				if ((hist + 1) % (_n_histories / 10) == 0)
 				{
 					std::cout << (int)((hist + 1) / (float)_n_histories * 100) << "% of " <<
@@ -261,7 +262,7 @@ void HoSolver::computeProjectedAngularFlux()
 			Element* sp_elem = (*it_el)->getSpatialElement();
 			spatial_id = sp_elem->getID();
 			sp_nodes = sp_elem->getNodalCoordinates();
-			sp_dimens[0] = (sp_nodes[1] - sp_nodes[0])*0.5;
+			sp_dimens[0] = (sp_nodes[1] - sp_nodes[0]);
 			sp_coors[0] = (sp_nodes[1] + sp_nodes[0])*0.5;
 			sp_coors[1] = ((*it_el)->getAngularCoordinate() > 0.0) ? 0.5 : -0.5;
 
@@ -281,15 +282,14 @@ void HoSolver::computeProjectedAngularFlux()
 			{
 				for (int j_qp = 0; j_qp < n_qps; ++j_qp) //mu_qps
 				{
-					//1/(h_x*h_mu)*psi(x,mu))
-					double derp = FEMUtilties::evalLinDiscFunc2D(el_dof, el_dimens, el_coors, x_pnts[i_qp], mu_pnts[j_qp]);
-					double psi_avg= x_wgts[i_qp] * mu_wgts[j_qp] / (sp_dimens[0] * sp_dimens[1])*
-						FEMUtilties::evalLinDiscFunc2D(el_dof, el_dimens, el_coors, x_pnts[i_qp], mu_pnts[j_qp]); //compute contribution to average flux moment
+					//1/(h_x*h_mu)*psi(x,mu)), where hx and hmu are for the half range element
+					double psi_avg_qp= x_wgts[i_qp] * mu_wgts[j_qp] / (sp_dimens[0] * sp_dimens[1])*
+						FEMUtilities::evalLinDiscFunc2D(el_dof, el_dimens, el_coors, x_pnts[i_qp], mu_pnts[j_qp]); //compute contribution to average flux moment
 					
 					//compute the integrals for each basis function
-					sp_sum[0] += psi_avg;
-					sp_sum[1] += 6.0*psi_avg*(x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]; //these two lines could be replaced by a for loop if x,mu pnts in one vector
-					sp_sum[2] += 6.0*psi_avg*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]; //basis function is based on unrefined half range element, because that is what we are projecting to
+					sp_sum[0] += psi_avg_qp;
+					sp_sum[1] += 6.0*psi_avg_qp*(x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]; //these two lines could be replaced by a for loop if x,mu pnts in one vector
+					sp_sum[2] += 6.0*psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]; //basis function is based on unrefined half range element, because that is what we are projecting to
 				}
 			}
 
@@ -307,5 +307,38 @@ void HoSolver::computeProjectedAngularFlux()
 			}
 		}
 	}
-	
+}
+
+std::vector<double> HoSolver::getScalarFluxDOF(int spatial_elem_id) const
+{
+	std::vector<double> scalar_flux_dof(_lo_mesh->getSpatialDimension()+1);  //avg, spatial moments, then angular moments
+	for (int i = 0; i < scalar_flux_dof.size(); ++i)
+	{
+		scalar_flux_dof[i] = _psi_minus_dof[spatial_elem_id][i] + _psi_plus_dof[spatial_elem_id][i];
+	}
+	return scalar_flux_dof;
+}
+
+void HoSolver::printProjectedScalarFlux(std::ostream &out) const
+{
+	out << "------------------------------------------------------------\n"
+		<< "					Element Scalar Flux Edge Values			\n"
+		<< " (Node, flux value     \n"
+		<< "------------------------------------------------------------\n";
+	std::vector<double> flux_dof;
+	std::vector<double> flux_edge_values;
+	std::vector<double> nodal_coords;
+	for (int id = 0; id < _lo_mesh->getNumElems(); id++)
+	{
+		nodal_coords = _lo_mesh->getElement(id)->getNodalCoordinates();
+		flux_dof = getScalarFluxDOF(id);	//get moments
+		FEMUtilities::convertMomentsToEdgeValues1D(flux_dof, flux_edge_values); //get edge values
+
+		for (int j = 0; j < flux_dof.size(); ++j)
+		{
+			out.precision(3);
+			out << nodal_coords[j] << " " << setw(25) <<
+				setprecision(14) << scientific << flux_edge_values[j] << endl;
+		}
+	}
 }

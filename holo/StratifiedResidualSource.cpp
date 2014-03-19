@@ -41,11 +41,9 @@ void StratifiedResidualSource::sampleSourceParticle()
 		_current_element_id++;
 		while (true)
 		{
-			if (_res_element_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE ||
-				(_res_face_mags[_current_element_id] > GlobalConstants::RELATIVE_TOLERANCE))
+			if (!_particle->_mesh->getElement(_current_element_id)->hasChildren())
 			{
-				//in current implementation, these are both zero for inactive elemetns, but if they are zero anyways you dont need to sample them either.  In future
-				//may replace this with a check of the mesh for inactive elements
+				//if there face residual here was zero, you could choose to forgo sampling
 
 					_n_sampled_from_current_element = 0; //reset counter
 					_curr_el_face_probability = _res_face_mags[_current_element_id];
