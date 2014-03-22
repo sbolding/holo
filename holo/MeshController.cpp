@@ -298,7 +298,7 @@ void MeshController::refineMesh()
 	//Refine elements, and neighboring elements as needed
 	index = 0;  //which element to refine
 
-	/*
+	
 	while (true)
 	{
 		refineElement(jump_errors[index].first);
@@ -310,11 +310,7 @@ void MeshController::refineMesh()
 		{
 			index++;
 		}
-	}*/
-
-	std::cout << "TEMPORARILY FORCING REFINEMENT IN MESHCONTROLLER.CPP!!!!!\n";
-	refineElement(0);
-	refineElement(3);
+	}
 
 	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
