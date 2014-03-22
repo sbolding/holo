@@ -97,11 +97,12 @@ double MeshController::computeElementJumpError(int element_id)
 		//Set values to map fluxes to the correct faces
 		if (adj_element == neighbors_struct._left)
 		{
-			avg_mu_val = 0.0;
-			avg_x_val = -1.;
-			slope_mu_val = 1.;
-			slope_x_val = 0.0;
-			edge_width = h_mu;
+			//For example
+			avg_mu_val = 0.0; //there is no term for mu added to average moment on face
+			avg_x_val = -1.; //Average is psi_a - psi_x on left face
+			slope_mu_val = 1.; //In the slope moment you are integrating the jump along mu, thus slope moment is psi_mu
+			slope_x_val = 0.0; //not integrating along x face
+			edge_width = h_mu; //integrating along x, so the width of the integration domain along the face is in mu
 		}
 		else if (adj_element == neighbors_struct._right)
 		{
@@ -138,13 +139,15 @@ double MeshController::computeElementJumpError(int element_id)
 			//adj_element is more refined, compute jump error for both children on the face
 			double jump_error = 0.0;
 			edge_width *= 0.5;
+			std::vector<double> el_child_dof(el_dof); //copy to manipulate for each of the children
 
-			//map el_dof slopes to smaller element
-			el_dof[1] *= 0.5;
-			el_dof[2] *= 0.5;
+			//map el_dof slopes to smaller element children
+			el_child_dof[1] *= 0.5;
+			el_child_dof[2] *= 0.5;
 
-			//Initialize to the bottom element, for horizontal edges will be "left" child
-			el_dof[0] = el_dof[0] + slope_mu_val*el_dof[1] + slope_x_val*el_dof[1] - (slope_mu_val*el_dof[2] + slope_x_val*el_dof[1]); //map to smaller element, i know this works, but very convoluted
+			//Initialize to the bottom element, nearest to appropriate face, for horizontal edges will be "left" child
+			el_child_dof[0] += avg_x_val*el_child_dof[1] + avg_mu_val*el_child_dof[2] - //get to face edge this line, next line get to top or bottom cell 
+				(slope_mu_val*el_child_dof[2] + slope_x_val*el_child_dof[1]); //map to smaller element, i know this works, but very convoluted
 
 			//Initialize the location of the child element
 			adj_coords = adj_element->getElementCoordinates();
@@ -153,31 +156,31 @@ double MeshController::computeElementJumpError(int element_id)
 			double & adj_x = adj_coords[0];
 			double & adj_h_x = adj_dimens[0];
 			double & adj_h_mu = adj_dimens[1];
-			double child_x = adj_x - 0.25*adj_h_x*avg_x_val;
-			double child_mu = adj_mu - 0.25*adj_h_mu*avg_mu_val;
+			double adj_child_x = adj_x - 0.25*adj_h_x*(avg_x_val + std::abs(avg_mu_val)); //(neighbor:child) right:left, left:right, plus:left, minus:left
+			double adj_child_mu = adj_mu - 0.25*adj_h_mu*(avg_mu_val+std::abs(avg_x_val));	//(neighbor:child) plus:minus, , plus:left, minus:left
 			
 			for (int i_child = 0; i_child < 2; i_child++)
 			{
 				//get the child element values
-				ECMCElement1D* child = adj_element->getChild(child_x, child_mu);
+				ECMCElement1D* child(adj_element->getChild(adj_child_x, adj_child_mu)); //copy constructor
 				adj_dof = child->getAngularFluxDOF();
 
 				//set average values on face
-				el_face_dof[0] = el_dof[0] + avg_x_val*el_dof[1] + avg_mu_val*el_dof[2];
+				el_face_dof[0] = el_child_dof[0] + avg_x_val*el_child_dof[1] + avg_mu_val*el_child_dof[2];
 				adj_face_dof[0] = adj_dof[0] - avg_x_val*adj_dof[1] - avg_mu_val*adj_dof[2];
 
 				//set slope values on face;
-				el_face_dof[1] = slope_x_val*el_dof[1] + slope_mu_val*el_dof[2];
+				el_face_dof[1] = slope_x_val*el_child_dof[1] + slope_mu_val*el_child_dof[2];
 				adj_face_dof[1] = slope_x_val*adj_dof[1] + slope_mu_val*adj_dof[2];
 
 				jump_error += computeJumpIntegral(el_face_dof, adj_face_dof, edge_width);
 
-				//move el_dof to the second element values (either top or right element)
-				el_dof[0] = el_dof[0] + el_dof[2] * slope_mu_val + el_dof[1] * slope_x_val;
-		/*		child_x += slope_mu_val*0.5*adj_h_x;
-				child_mu += slope_x_val*0.5*adj_h_mu;*/
+				//move el_dof average to the second child element (either top or right element)
+				el_child_dof[0] += 2*(el_child_dof[2] * slope_mu_val + el_child_dof[1] * slope_x_val); //move to top if integrating along mu, right if integrating along x
+				adj_child_x += slope_x_val*0.5*adj_h_x; //if integrating along x, move to next position
+				adj_child_mu += slope_mu_val*0.5*adj_h_mu; //if integrating along mu, move to next position
 			}
-			element_jump_errors.push_back(0.0);
+			element_jump_errors.push_back(jump_error);
 		}
 		else if (adj_element->getRefinementLevel() == refinement_lev)
 		{
@@ -208,7 +211,7 @@ double MeshController::computeElementJumpError(int element_id)
 
 			//determine if the "top" or "bottom" element, for horizontal edges will be "right" or "left"
 			double top_or_bottom = (mu*slope_mu_val + x*slope_x_val > adj_mu*slope_mu_val + adj_x*slope_x_val ? 1. : -1.);
-			adj_dof[0] = adj_dof[0] + slope_mu_val*adj_dof[1] + slope_x_val*adj_dof[1] + top_or_bottom*(slope_mu_val*adj_dof[2] + slope_x_val*adj_dof[1]); //map to smaller element, i know this works, but very convoluted
+			adj_dof[0] = adj_dof[0] - avg_mu_val*adj_dof[2] - avg_x_val*adj_dof[1] + top_or_bottom*(slope_mu_val*adj_dof[2] + slope_x_val*adj_dof[1]); //map to smaller element, i know this works, but very convoluted
 
 			//set average values on face
 			el_face_dof[0] = el_dof[0] + avg_x_val*el_dof[1] + avg_mu_val*el_dof[2];
@@ -294,6 +297,8 @@ void MeshController::refineMesh()
 	
 	//Refine elements, and neighboring elements as needed
 	index = 0;  //which element to refine
+
+	/*
 	while (true)
 	{
 		refineElement(jump_errors[index].first);
@@ -305,7 +310,11 @@ void MeshController::refineMesh()
 		{
 			index++;
 		}
-	}
+	}*/
+
+	std::cout << "TEMPORARILY FORCING REFINEMENT IN MESHCONTROLLER.CPP!!!!!\n";
+	refineElement(0);
+	refineElement(3);
 
 	//update the boundary cells if needed
 	_mesh->findUpwindBoundaryCells();
@@ -461,6 +470,7 @@ ElementNeighbors MeshController::findNeighbors(int element_id)
 	double el_x_left = el_x_coor - 0.5*element->getSpatialWidth();
 	double el_x_right = el_x_coor + 0.5*element->getSpatialWidth();
 
+
 	//Set the downstream and upstream element values, based on flow direction
 	_mesh->findUpwindBoundaryCells(); //must have boundary cells for this function to work
 	ECMCElement1D* up_str_element = _mesh->findJustUpwindElement(element_id);
@@ -503,7 +513,7 @@ ElementNeighbors MeshController::findNeighbors(int element_id)
 		double it_x_coor = (*it_el)->getSpatialCoordinate();
 		double it_h_x = (*it_el)->getSpatialWidth();
 
-		if (std::abs(el_x_coor - it_x_coor) < it_h_x) //element matches vertically
+		if (std::abs(el_x_coor - it_x_coor) < 0.5*it_h_x) //element matches vertically
 		{
 			double it_mu_coor = (*it_el)->getAngularCoordinate();
 			double it_h_mu = (*it_el)->getAngularWidth();
