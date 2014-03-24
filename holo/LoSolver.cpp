@@ -22,10 +22,10 @@ void LoSolver::solveLinearSystem()
 	_system_matrix->gauss(_system_vec, _sol_vec); 
 }
 
-LoSolver::LoSolver(int dim, Mesh* mesh)
+LoSolver::LoSolver(int dim, Mesh* mesh) :
+_mesh(mesh),
+_dim(dim)
 {
-	_dim = dim;
-	_mesh = mesh;
 	if (dim != 1)
 	{
 		cerr << "Only 1D for now" << endl;

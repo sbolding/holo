@@ -30,12 +30,12 @@ Element::Element()
 
 void Element::setLoData(LoData1D &lo_data)
 {
-	_lo_data = &lo_data;
+	*_lo_data = lo_data; //set the value, not the address
 }
 
 void Element::setMaterial(MaterialConstant &mat)
 {
-	_mat = &mat;
+	*_mat = mat;
 }
 
 std::vector<double> Element::getExtSourceNodalValues(void) const

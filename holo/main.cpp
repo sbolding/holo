@@ -33,7 +33,7 @@ int main()
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = 2000; //50000000
 	int n_batches = 20;
-	double exp_convg_rate = 0.0;
+	double exp_convg_rate = 0.20;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -44,12 +44,12 @@ int main()
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	size_t n_holo_solves;
+	size_t n_holo_solves = 5;
 
 	//Assemble the LoSystem
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
 
-	for (size_t i = 0; i < 5; ++i)
+	for (size_t i = 0; i < n_holo_solves; ++i)
 	{
 		//solve lo order system
 		lo_solver->solveSystem();
@@ -68,6 +68,9 @@ int main()
 		//Transfer HO data to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
 		data_transfer.updateLoSystem();
+
+//		lo_solver = new LoSolver1D(&mesh_1D);
+		lo_solver->solveSystem();
 	}
 
 

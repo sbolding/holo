@@ -142,12 +142,14 @@ void LoSolver1D::solveSystem()
 	assembleSystem();
 
 	//Output to screen if desired
+	std::cout << "\nSystem before solving:\n";
 	printSystem(std::cout);
 
 	//Solve linear system;
 	solveLinearSystem();
 
 	//Output to screen if desired
+	std::cout << "\nSystem after solving:\n";
 	printSystem(std::cout);
 
 	//Free up memory from matrix and load vector

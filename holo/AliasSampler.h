@@ -36,7 +36,7 @@ class AliasSampler
 {
 private:
 	std::vector<AliasData> _alias_data; //index of array is the corresponding bin
-	void createAliasTable(std::vector<double> &pp);
+	void createAliasTable(std::vector<double> &unnormalized_bin_probabilities);
 	int _n_bins;
 
 public:
