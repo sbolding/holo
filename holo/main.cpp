@@ -31,7 +31,7 @@ int main()
 	int num_elems =  2;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 2000; //50000000
+	int n_histories = 20000; //50000000
 	int n_batches = 20;
 	double exp_convg_rate = 0.20;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
@@ -44,12 +44,13 @@ int main()
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	size_t n_holo_solves = 5;
+	size_t n_holo_solves = 25;
 
 	//Assemble the LoSystem
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
 
-	for (size_t i = 0; i < n_holo_solves; ++i)
+	size_t i_holo_solves = 0; //counter
+	while (true)
 	{
 		//solve lo order system
 		lo_solver->solveSystem();
@@ -61,6 +62,11 @@ int main()
 		mesh_1D.printLDScalarFluxValues(cout);
 		mesh_1D.printLDScalarFluxValues(lo_out_file);
 
+		if (i_holo_solves == n_holo_solves) //do one extra LO solve, because it is the only solution really being calculated
+		{
+			break;
+		}
+
 		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
@@ -69,10 +75,9 @@ int main()
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
 		data_transfer.updateLoSystem();
 
-//		lo_solver = new LoSolver1D(&mesh_1D);
-		lo_solver->solveSystem();
+		//update counter
+		i_holo_solves++;
 	}
-
-
+	
 	return 0;
 }

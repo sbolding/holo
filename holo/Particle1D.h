@@ -66,7 +66,7 @@ protected:
 	int _current_element_ID;	//which element are you in
 	int _current_mat_ID;  //Material of current element
 	ECMCElement1D* _current_element; //Pointer to the current ECMC element
-	Element* _spatial_element; //The spatial element you are currently in
+	Element* _spatial_element; //Pointer to the spatial element you are currently in
 	size_t _n_elements;		//for sampling which element a particle is born in
 	bool _is_dead;		 //for terminating particle history
 

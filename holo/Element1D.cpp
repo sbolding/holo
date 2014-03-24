@@ -319,7 +319,7 @@ void Element1D::printLDScalarFluxValues(std::ostream &out) const
 	{
 		out.precision(3);
 		out <<  flux_coordinates[i] << " " << setw(14) <<
-			setprecision(4) << scientific << flux_values[i] << endl;
+			setprecision(15) << scientific << flux_values[i] << endl;
 	}
 }
 
