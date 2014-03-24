@@ -31,49 +31,45 @@ int main()
 	int num_elems =  2;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 5000; //50000000
-	int n_batches = 15;
-	double exp_convg_rate = 20.0;
+	int n_histories = 2000; //50000000
+	int n_batches = 20;
+	double exp_convg_rate = 0.0;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.4, 0.0);
+	MaterialConstant mat(10, 0.4, 0.50);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	//Assemble and solve the Lo system
-	/*lo_solver = new LoSolver1D(&mesh_1D);
-	lo_solver->solveSystem();
+	size_t n_holo_solves;
 
-	//Update lo order system to current solution
-	lo_solver->updateSystem();*/
+	//Assemble the LoSystem
+	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
 
+	for (size_t i = 0; i < 5; ++i)
+	{
+		//solve lo order system
+		lo_solver->solveSystem();
 
-	//Solve the low order system
-	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches);
-	ho_solver->solveSystem();
-	ho_solver->updateSystem();
-//	ho_solver->printAllTallies(cout);
-	ho_solver->printProjectedScalarFlux(cout);
+		//Update lo order system to current solution
+		lo_solver->updateSystem();
 
-	//Transfer HO data to the LO system
-	/*DataTransfer data_transfer(ho_solver, &mesh_1D);
-	data_transfer.updateLoSystem();*/
-	
-	//temporary return
-	system("pause");
+		//Print LO scalar flux estimate
+		mesh_1D.printLDScalarFluxValues(cout);
+		mesh_1D.printLDScalarFluxValues(lo_out_file);
 
-	return 0;
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches);
+		ho_solver->solveSystem();
+		ho_solver->updateSystem();
 
-	//Print scalar flux
-	mesh_1D.printLDScalarFluxValues(cout);
-	mesh_1D.printLDScalarFluxValues(lo_out_file);
+		//Transfer HO data to the LO system
+		DataTransfer data_transfer(ho_solver, &mesh_1D);
+		data_transfer.updateLoSystem();
+	}
 
-	//Produce scalar flux on nodes.
-	system("pause");
 
 	return 0;
 }

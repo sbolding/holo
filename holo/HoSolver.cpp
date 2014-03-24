@@ -13,6 +13,8 @@
 #include "HoSolver.h"
 #include "GlobalConstants.h"
 #include "FEMUtilities.h"
+#include <limits>
+#include <cmath>
 
 HoSolver::HoSolver()
 {
@@ -118,50 +120,65 @@ void HoSolver::solveSystem(std::ostream & out)
 	}	
 }
 
-
-LoData1D HoSolver::getLoData(int element_id)
+void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 {
-	std::cerr << "This doesnt work whatsoever\n";
-	exit(1);
-	/*//NOTE: all variables in this section are independent of the sources strength in the problem, 
+	//NOTE: all variables in this section are independent of the sources strength in the problem, 
 	//not in general true
+
 	//local variables to calculate	
-	LoData1D lo_data;
-	double alpha;
-	double alpha_plus;
-	double alpha_minus;
 	AveragedCosines surf_cosines;
 	AveragedCosines vol_cosines;
+	
+	//Because HO solution is projected LD solution in half range, the spatial factor is inheriently 2.0 (default LD value)
+	lo_data.setSpatialClosureFactor(2);
 
-	//Calculate alpha based on phi left and phi right moments, and face flux value
-	double phi_left_moment;
-	double phi_right_moment;
-	double left_face_value;
-	double right_face_value;
-	int left_face_id = _lo_mesh->getFaceIndex(element_id, 0);
-	int right_face_id = _lo_mesh->getFaceIndex(element_id, 1);
+	//Get the angular flux dof for this element
+	const std::vector<double> psi_plus_el(_psi_plus_dof[element_id]);
+	const std::vector<double> psi_minus_el(_psi_minus_dof[element_id]);
 
-	//based on relations between phi_zeta and phi_avg, can be derived from definition moments
-	phi_right_moment = 2.*_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 1);
-	phi_left_moment = 2.*(_flux_element_tallies[element_id]->getScoreAngularIntegrated(_n_histories, 0)) - phi_right_moment;
-	left_face_value = _flux_face_tallies[_mesh->getFaceIndex(element_id,0)]->getScoreAngularIntegrated(_n_histories);
-	right_face_value = _flux_face_tallies[_mesh->getFaceIndex(element_id, 1)]->getScoreAngularIntegrated(_n_histories);
+	//-------------------------
+	//Calculate face values
+	//-------------------------
+	double edge_flux_plus = psi_plus_el[0] + psi_plus_el[1]; //int_0,1 psi(x_R,mu) dmu
+	double edge_flux_minus = psi_minus_el[0] - psi_minus_el[1]; //int_0,1 psi(x_L,mu) dmu
 
-	//calculate alpha plus and alpha minus
-	alpha_plus = (right_face_value - phi_left_moment) / (phi_right_moment - phi_left_moment);
-	alpha_minus = (left_face_value - phi_right_moment) / (phi_left_moment - phi_right_moment);
+	if (edge_flux_plus > std::fmax(psi_plus_el[0],psi_plus_el[1]) * GlobalConstants::RELATIVE_TOLERANCE &&
+		edge_flux_minus > std::fmax(psi_plus_el[0], psi_plus_el[1])* psi_minus_el[0] * GlobalConstants::RELATIVE_TOLERANCE)
+	{
+		surf_cosines._mu_right_plus = 0.5*(psi_plus_el[0] + psi_plus_el[1] + psi_plus_el[2] / 3.) / edge_flux_plus;
+		surf_cosines._mu_left_minus = -0.5*(psi_minus_el[0] + psi_minus_el[1] + psi_minus_el[2] / 3.) / edge_flux_minus; //negative 0.5 is the mu_center of -1 to 0 angular element
+	}
+	else
+	{
+		std::cerr << "Have a zero flux, not sure what to do about it yet, in HoSolver::getLoData1D";
+		exit(1);
+	}
 
-	//Assume alpha is average of these two for now, quite possibly totally wrong though
-	alpha = 0.5*(alpha_plus + alpha_minus);
-	lo_data.setSpatialClosureFactor(alpha);
+	//set others to infinity to ensure that they are not being used in algorithm (because of upwinding they shouldnt ever be used)
+	surf_cosines._mu_right_minus = std::numeric_limits<double>::infinity();
+	surf_cosines._mu_left_plus = std::numeric_limits<double>::infinity();
 
-	//Calculate the different surface cosines
-	surf_cosines._mu_left_minus = _current_face_tallies[left_face_id]->getScore(_n_histories, 0) /
-		_flux_face_tallies[left_face_id]->getScore(_n_histories,0);
-//	lo_data.setSurfAveragedCos(surf_cosines);
-//	lo_data.setVolAveragedCos(vol_cosines); 
+	//-----------------------
+	//Calculate Vol Values
+	//-----------------------
+	
+	//Convert the avg, slope dof to the left and right moments, since psi_mu terms are not effected by basis integrals because of how average is defined
+	std::vector<double> basis_moments_plus(2), basis_moments_minus(2);
+	std::vector<double> avg_slope_plus(psi_plus_el.begin(), psi_plus_el.end()-1); //does not include mu+1 term
+	std::vector<double> avg_slope_minus(psi_minus_el.begin(), psi_minus_el.end()-1);
+	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_plus, basis_moments_plus); //convert to spatial moments
+	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_minus, basis_moments_minus);
 
-	return lo_data; */
+	//Calculate average mu's based on basis moments, very straightforward, use mu moment value from psi_plus and minus
+	vol_cosines._mu_left_minus = -0.5*(basis_moments_minus[0] + psi_minus_el[2]/3.) / basis_moments_minus[0]; //left moment, minus: <.>L^-
+	vol_cosines._mu_right_minus = -0.5*(basis_moments_minus[1] + psi_minus_el[2] / 3.) / basis_moments_minus[1]; //etc.
+	vol_cosines._mu_left_plus = 0.5*(basis_moments_plus[0] + psi_plus_el[2] / 3.) / basis_moments_plus[0]; 
+	vol_cosines._mu_right_plus = 0.5*(basis_moments_plus[1] + psi_plus_el[2] / 3.) / basis_moments_plus[1];
+
+	//Set the LoData cosine values
+	lo_data.setSurfAveragedCos(surf_cosines);
+	lo_data.setVolAveragedCos(vol_cosines);
+
 }
 
 void HoSolver::printAllTallies(std::ostream& out) const
@@ -177,9 +194,6 @@ void HoSolver::printAllTallies(std::ostream& out) const
 
 void HoSolver::updateSystem()
 {
-	//update angular fluxes
-	_ho_mesh->computeAngularFluxes(_n_histories);
-
 	//calculate projected fluxes
 	computeProjectedAngularFlux();
 }

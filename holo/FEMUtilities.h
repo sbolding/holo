@@ -41,6 +41,7 @@ namespace FEMUtilities
 			+ 2. / dimensions[1] * dof[2] * (mu - coors[1]);
 	} 
 	void convertMomentsToEdgeValues1D(std::vector<double> moment_dof, std::vector<double> & nodal_values); //convert moment dof to edge values
+	void convertAvgSlopeToBasisMoments1D(std::vector<double> const & moment_dof, std::vector<double> & left_right_moments); //convert from average and slope moments to left and right basis function moments
 }
 
 

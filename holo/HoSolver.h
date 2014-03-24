@@ -57,6 +57,7 @@ protected:
 	std::vector<std::vector<double>> _psi_plus_dof; //row: spatial element, column: angular flux dof
 	std::vector<std::vector<double>> _psi_minus_dof; //row: spatial element, column: angular flux dof
 
+	//For data transfer and printing angular flux
 	void computeProjectedAngularFlux(); //computes the angular flux dof  element in half range
 	std::vector<double> getScalarFluxDOF(int spatial_elem_id) const; //get the scalar flux LD DOF for a particular spatial element
 		
@@ -70,11 +71,11 @@ public:
 	void updateSystem(); //compute the angular fluxes, currently unused
 
 	//reader, printer, and interface functions
-	virtual LoData1D getLoData(int element_id);		//calculate the LoData parameters based on tallies;
 	void printAllTallies(std::ostream &out) const;
 	void printProjectedScalarFlux(std::ostream &out) const;
 
-	//methods for data transfer
+	//data transfer functions
+	virtual void getLoData1D(LoData1D & lo_data, int spatial_element_id);		//calculate the LoData parameters based on projected half range fluxes;
 };
 
 #endif  //_HOSOLVER_H

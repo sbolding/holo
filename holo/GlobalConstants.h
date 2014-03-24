@@ -44,6 +44,8 @@ namespace EquationMaps1D
 {
 	const unsigned int DOF_MAP[4] = {3 , 2, 0, 1 }; //Map for DOF aliases, this is used in Element1D constructor
 	//Order of values is phi_left_plus, phi_right_plus, phi_left_minus, phi_right_minus
+	//WARNING: if a pure absorber problem, these will not work correctly because it makes the diagonal of the system 0, these
+	//can simply be reordered in a more intelligent way, or it may just be an issue of the matrix solver not being smart enough
 
 	//Map the alias function to actual function, this order is done in the initialization list
 	//----- WARNING: DO NOT CHANGE THIS BLOCK -----

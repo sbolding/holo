@@ -12,68 +12,35 @@
 #include <iostream>
 
 //Default Constructor
-LoData1D::LoData1D()
+LoData1D::LoData1D():
+_alpha(),
+_surf_avg_cosines(),
+_vol_avg_cosines()
 {
 	//initialize all the cosines to diffusion theory
 	init();
 
 	//For LD spatial closer alpha is 2
 	_alpha = 2.0;
-
 }
-
-//Originally I thought I would need external source stored in the low order data, but
-// now it is just with the elements because the HO solver will need access to the same source
-//
-//
-
-//LoData1D::LoData1D(double const_source) //Initialize to a constant source value
-//{
-//	//initialize to diffusion theory and LD
-//	init();
-//	_alpha = 2.0;
-//
-//	//Initialize the external source based on finite element interpolant
-//	_ext_source_nodal_values.resize(2);
-//	_ext_source_nodal_values[0] = const_source;
-//	_ext_source_nodal_values[1] = const_source;
-//}
-//
-//
-//LoData1D::LoData1D(std::vector<double> ext_source_nodal_values) //Initialize with specified source
-//{
-//	//initialize to diffusion theory and LD
-//	init();
-//	_alpha = 2.0;
-//
-//	if (ext_source_nodal_values.size() != 2)
-//	{
-//		std::cerr << "Trouble initializing external source" << std::endl;
-//		exit(1);
-//	}
-//
-//	//Use passed in ext_source_nodal_values
-//	_ext_source_nodal_values = ext_source_nodal_values;
-//}
-
 
 //for use by all constructors
 void LoData1D::init()
 {
+	using LODATA_COSINES::STARTING_AVERAGE_COSINE;
+
 	//Set average cosines all to 2/3 for diffusion theory 
-	_vol_avg_cosines._mu_left_plus = TWO_THIRDS;
-	_vol_avg_cosines._mu_left_minus = -TWO_THIRDS;
-	_vol_avg_cosines._mu_right_plus = TWO_THIRDS;
-	_vol_avg_cosines._mu_right_minus = -TWO_THIRDS;
+	_vol_avg_cosines._mu_left_plus = STARTING_AVERAGE_COSINE ;
+	_vol_avg_cosines._mu_left_minus = -STARTING_AVERAGE_COSINE ;
+	_vol_avg_cosines._mu_right_plus = STARTING_AVERAGE_COSINE ;
+	_vol_avg_cosines._mu_right_minus = -STARTING_AVERAGE_COSINE ;
 
 	//Set average cosine values for surfaces/
-	_surf_avg_cosines._mu_left_plus = TWO_THIRDS;
-	_surf_avg_cosines._mu_left_minus = -TWO_THIRDS;
-	_surf_avg_cosines._mu_right_plus = TWO_THIRDS;
-	_surf_avg_cosines._mu_right_minus = -TWO_THIRDS;
+	_surf_avg_cosines._mu_left_plus = STARTING_AVERAGE_COSINE ;
+	_surf_avg_cosines._mu_left_minus = -STARTING_AVERAGE_COSINE ;
+	_surf_avg_cosines._mu_right_plus = STARTING_AVERAGE_COSINE ;
+	_surf_avg_cosines._mu_right_minus = -STARTING_AVERAGE_COSINE ;
 }
-
-
 
 double LoData1D::getSpatialClosureFactor() const
 {

@@ -65,3 +65,15 @@ void FEMUtilities::convertMomentsToEdgeValues1D(std::vector<double> moment_dof, 
 	nodal_values[0] = moment_dof[0] - moment_dof[1];
 	nodal_values[1] = moment_dof[0] + moment_dof[1];
 }
+
+void FEMUtilities::convertAvgSlopeToBasisMoments1D(std::vector<double> const & moment_dof, std::vector<double> & left_right_moments)
+{
+	if (moment_dof.size() != 2)
+	{
+		std::cerr << "Passed in incorrect length of moment vector to FEMUtilties::convertAvgSlopeToBasis\n";
+		exit(1);
+	}
+	left_right_moments.resize(2);
+	left_right_moments[0] = moment_dof[0] - moment_dof[1] / 3.; //left basis moment
+	left_right_moments[1] = moment_dof[0] + moment_dof[1] / 3.; //right basis moment
+}
