@@ -31,8 +31,8 @@ int main()
 	int num_elems =  2;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 20000; //50000000
-	int n_batches = 20;
+	int n_histories = 3000; //50000000
+	int n_batches = 28;
 	double exp_convg_rate = 0.20;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
@@ -44,7 +44,7 @@ int main()
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	size_t n_holo_solves = 25;
+	size_t n_holo_solves = 50;
 
 	//Assemble the LoSystem
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
