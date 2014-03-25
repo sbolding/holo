@@ -81,8 +81,8 @@ Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* materia
 		//TODO Hard coded boundary condition values
 		//*******************************************************************
 		std::vector<DirichletBC1D *> dirichlet_bcs;
-		dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], 1.25));
-		dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], 1.25));
+		dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], 0.0));
+		dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], 0.0));
 		_dirichlet_bcs = dirichlet_bcs;
 		_n_dirichlet_bc = dirichlet_bcs.size();
 	}	
@@ -217,4 +217,22 @@ void Mesh::printLDScalarFluxValues(std::ostream &out) const
 int Mesh::getSpatialDimension() const
 {
 	return _dim;
+}
+
+void Mesh::getDiscScalarFluxVector(std::vector<double> & v) const
+{
+	//Have the elements do the printing
+	std::vector<Element*>::const_iterator it_el;  //element iterator
+	it_el = _elements.begin();				//initialize iterator
+	std::vector<double> flux_edge_values, dummy;
+	v.clear();
+
+	for (; it_el != _elements.end(); ++it_el)
+	{
+		(*it_el)->getScalarFluxHOClosure(flux_edge_values, dummy);
+		for (int i = 0; i < flux_edge_values.size(); ++i)
+		{
+			v.push_back(flux_edge_values[i]);
+		}
+	}
 }

@@ -16,8 +16,11 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 	it_el = elements->begin();			            //initialize iterator
 	double ext_source_el;		             		//magnitude of external source of curren ECMC element, units of p/sec
 	std::vector<double> total_src_nodal_values_el;
+	bool only_one_spatial_element = true;
 
 	Element* spatial_element; //spatial element corresponding to the current element
+	Element* first_spat_element;
+	first_spat_element = (*elements)[0]->getSpatialElement();
 
 	for (; it_el != elements->end(); it_el++)
 	{
@@ -30,6 +33,10 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 		{
 			//Map external source (and scattering source if ECMC) onto each element
 			spatial_element = (*it_el)->getSpatialElement();
+			if (first_spat_element != spatial_element)
+			{
+				only_one_spatial_element = false;
+			}
 			mapExtSrcToElement(total_src_nodal_values_el, ext_source_el, spatial_element, *it_el); //determine external source nodal values over the element
 
 			//Add element values to total array
@@ -72,6 +79,11 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 			if (element->getSpatialElement() != bcs[i_bc]->getElement()) //on the wrong face
 			{
 				continue;
+			}
+			else if (only_one_spatial_element)
+			{
+				std::cout << "This function only works with more than one spatial element, in LinDiscSource.  Use Residual source instead\n";
+				exit(1);
 			}
 			else
 			{

@@ -259,10 +259,6 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	double ds_mu_minus = ds_mu_center - 0.5*ds_h_mu;
 	double ds_mu_plus = ds_mu_center + 0.5*ds_h_mu;
 	unsigned int ds_refinement_level = _elements[down_str_element_id]->getRefinementLevel();
-	if (down_str_element_id == 5000)
-	{
-		std::cout << "cool\n";
-	}
 
 	for (it_bc_id = _boundary_cells.begin(); it_bc_id != _boundary_cells.end(); it_bc_id++)
 	{

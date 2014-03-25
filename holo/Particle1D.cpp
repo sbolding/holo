@@ -152,6 +152,10 @@ void Particle1D::runHistory()
 {
 	//start history
 	sampleSourceParticle(); //samples position, direction, and initalizes weight
+	if (_is_dead)
+	{
+		return; //have to check because of stratified sampling
+	}
 
 	double path_length_mfp;  
 

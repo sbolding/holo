@@ -31,6 +31,7 @@ protected:
 
 	//info for current element you are sampling
 	int _current_element_id;  //which element you are currently sampling from
+	int _last_el_id; //for the case of zero probability elements to know when you have finished sampling all elements
 	double _curr_el_face_probability; //total probability of a particel being born on face of element, not relative probablity
 	double _curr_el_element_probability; //total probability of a particel being born on volumetric portion of residual, not relative probablity
 	unsigned int _n_sampled_from_current_element;  //how many samples taken from the current element

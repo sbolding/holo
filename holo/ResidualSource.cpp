@@ -303,9 +303,9 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 
 
 	//this first block is for the special cases to eliminate divide by zero errors
-	if (std::abs(res_x/res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
+	if (std::abs(res_x) <= std::abs(res_avg)*GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
-		if (std::abs(res_mu)/std::abs(res_avg) < GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
+		if (std::abs(res_mu) <= std::abs(res_avg)*GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0 also
 		{
 			res_mag = std::abs(res_avg);
 		}
@@ -314,7 +314,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 			res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
 		}
 	}
-	else if (std::abs(res_mu)/std::abs(res_avg)<GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
+	else if (std::abs(res_mu) <= std::abs(res_avg)*GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
 	{
 		res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
 	}

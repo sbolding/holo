@@ -6,6 +6,7 @@
 #include <fstream>
 #include "RNG.h"
 #include "DataTransfer.h"
+#include <cmath>
 
 int main()
 {
@@ -17,8 +18,8 @@ int main()
 	HoSolver* ho_solver;
 
 	//open output file
-	ofstream lo_out_file("./lo_results.txt", std::ofstream::out);
-	if (!lo_out_file)
+	ofstream out_file("Z:/TAMU_Research/HOLO/results_output_folder/results.txt", std::ofstream::out);
+	if (!out_file)
 	{
 		std::cerr << "Can't open file" << endl;
 		exit(1);
@@ -26,18 +27,19 @@ int main()
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
-	double width = 2.0; //cm
-	double ext_source = 2.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems =  2;
-	int n_ang_elements = 2; //number angles in half ranges
+	double width = 3.0; //cm
+	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
+	int num_elems =  20;
+	int n_ang_elements = 4; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 3000; //50000000
-	int n_batches = 28;
-	double exp_convg_rate = 0.20;
+	int n_histories = 100000; //50000000
+	int n_batches = 20;
+	double exp_convg_rate = 0.0;
+	double convergence_tolerance = 1.E-4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.4, 0.50);
+	MaterialConstant mat(10, 0.1, 0.05);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -50,20 +52,25 @@ int main()
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
 
 	size_t i_holo_solves = 0; //counter
+
+	//Variables for checking convergence
+	std::vector<double> old_flux_vector(num_elems*(dimension+1),0.0);
+	std::vector<double> new_flux_vector(num_elems*(dimension+1));
+
 	while (true)
 	{
 		//solve lo order system
 		lo_solver->solveSystem();
-
-		//Update lo order system to current solution
-		lo_solver->updateSystem();
-
+		lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
+		mesh_1D.getDiscScalarFluxVector(new_flux_vector);
+		
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(cout);
-		mesh_1D.printLDScalarFluxValues(lo_out_file);
 
 		if (i_holo_solves == n_holo_solves) //do one extra LO solve, because it is the only solution really being calculated
 		{
+			mesh_1D.printLDScalarFluxValues(out_file);
+			mesh_1D.printLDScalarFluxValues(std::cout);
 			break;
 		}
 
@@ -77,7 +84,29 @@ int main()
 
 		//update counter
 		i_holo_solves++;
+
+		//Check convergence of solution
+		double diff_sum_sq = 0.;
+		double old_sum_sq = 0.;
+		for (int i_vec = 0; i_vec < new_flux_vector.size(); i_vec++)
+		{
+			double diff = new_flux_vector[i_vec] - old_flux_vector[i_vec];
+			diff_sum_sq += diff*diff;
+			old_sum_sq += old_flux_vector[i_vec] * old_flux_vector[i_vec];
+		}
+		std::cout << "Convergence Norm of Flux Vector: " << std::sqrt(diff_sum_sq) / std::sqrt(old_sum_sq);
+		if (std::sqrt(diff_sum_sq) < convergence_tolerance*std::sqrt(old_sum_sq))
+		{
+			std::cout << "\nConverged on iteration " << i_holo_solves << " to a relative precision"
+				<< " of " << convergence_tolerance << std::endl;
+			mesh_1D.printLDScalarFluxValues(out_file);
+			mesh_1D.printLDScalarFluxValues(std::cout);
+			break;
+		}
+		else
+		{
+			old_flux_vector = new_flux_vector;
+		}		
 	}
-	
 	return 0;
 }

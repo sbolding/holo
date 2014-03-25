@@ -169,7 +169,6 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	b->addCoeff(EQN_MAP[3], source_value_right);  //TODO need to make this not a constant
 
 	eqns = getEqnNumbers(); //set the equation numbers correctly
-	M->printCompact(std::cout);
 }
 
 void Element1D::getPosUpwinding(std::vector<double> &pos_upwind_values, int &eqn, std::vector<int> &cols) const

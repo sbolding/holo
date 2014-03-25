@@ -97,7 +97,7 @@ void LoSolver1D::assembleSystem()
 		//Reset local vectors
 		local_load_vector->zero();
 		local_moment_matrix->zero();
-	}
+	} //end of for loop over elements
 
 	//--------------------------------------------------------------------------------
 	//Add in Boundary Conditions
@@ -138,19 +138,28 @@ void LoSolver1D::printSolution(std::ostream& out)
 
 void LoSolver1D::solveSystem()
 {
+	//Output
+	std::cout << "Solving the low order system...\n";
+
 	//Assemble 1D system
 	assembleSystem();
 
 	//Output to screen if desired
-	std::cout << "\nSystem before solving:\n";
-	printSystem(std::cout);
+	if (LoController::WRITE_MATRIX)
+	{
+		std::cout << "\nSystem before solving:\n";
+		printSystem(std::cout);
+	}
 
 	//Solve linear system;
 	solveLinearSystem();
 
 	//Output to screen if desired
-	std::cout << "\nSystem after solving:\n";
-	printSystem(std::cout);
+	if (LoController::WRITE_MATRIX)
+	{
+		std::cout << "\nSystem after solving:\n";
+		printSystem(std::cout);
+	}
 
 	//Free up memory from matrix and load vector
 	deleteMatrixVector();

@@ -63,14 +63,12 @@ void HoSolver::solveSystem(std::ostream & out)
 
 	for (int batch = 0; batch < _n_batches; batch++)
 	{
-		std::cout << "\nRunning batch " << batch + 1 << " of " << _n_batches;
-		//loop over the number of histories
-		for (int hist = 0; hist < _n_histories; hist++)
+		if (HoController::WRITE_BATCHES_COMPLETE) std::cout << "Running batch " << batch + 1 << " of " << _n_batches << std::endl;	
+		for (int hist = 0; hist < _n_histories; hist++) //loop over the number of histories for each batch
 		{
 			_particle->runHistory();
 			if (HoController::WRITE_HISTORIES_COMPLETE)
 			{
-				std::cout << std::endl;
 				if ((hist + 1) % (_n_histories / 10) == 0)
 				{
 					std::cout << (int)((hist + 1) / (float)_n_histories * 100) << "% of " <<
@@ -98,11 +96,15 @@ void HoSolver::solveSystem(std::ostream & out)
 		//store and print residual norm
 		double resid_L1_norm = _source->getTotalSourceStrength();
 		_mesh_controller->storeResidualNorm(resid_L1_norm);
-		if (HoController::WRITE_RESIDUAL_NORMS)
+		if (HoController::WRITE_RESIDUAL_NORMS && HoController::WRITE_BATCHES_COMPLETE)
 		{
 			out.setf(ios::scientific);
 			out.precision(15);
-			out << ", Residual L1 Norm: " << resid_L1_norm;
+			out << "Residual L1 Norm: " << resid_L1_norm << std::endl;
+		}
+		else if (HoController::WRITE_BATCHES_COMPLETE)
+		{
+			out << std::endl;
 		}
 
 		//if necessary refine solution
@@ -110,7 +112,7 @@ void HoSolver::solveSystem(std::ostream & out)
 		{
 			if (_mesh_controller->meshNeedsRefinement())
 			{
-				std::cout << "\nRefining mesh...";
+				if (HoController::WRITE_BATCHES_COMPLETE) std::cout << "Refining mesh...\n"; //Debug output
 				int n_elems_before_refinement = _ho_mesh->getNumElems();
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement); //update number of histories before computing new residual
@@ -336,8 +338,8 @@ std::vector<double> HoSolver::getScalarFluxDOF(int spatial_elem_id) const
 void HoSolver::printProjectedScalarFlux(std::ostream &out) const
 {
 	out << "------------------------------------------------------------\n"
-		<< "					Element Scalar Flux Edge Values			\n"
-		<< " (Node, flux value     \n"
+		<< "			Element Scalar Flux Edge Values			\n"
+		<< " (Node, flux value)     \n"
 		<< "------------------------------------------------------------\n";
 	std::vector<double> flux_dof;
 	std::vector<double> flux_edge_values;

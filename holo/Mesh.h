@@ -53,6 +53,7 @@ public:
 	//Printing functions
 	void print(std::ostream &out) const;      //echo mesh parameters
 	void printLDScalarFluxValues(std::ostream &out) const; //print results of lo order flux LD values (phi_r and phi_l)
+	void getDiscScalarFluxVector(std::vector<double> & out_vector) const; //copy scalar flux LD values to this vector;
 
 	//Reading functions
 	int getNumElems() const;
