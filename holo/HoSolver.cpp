@@ -147,8 +147,8 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	if (edge_flux_plus > std::fmax(psi_plus_el[0],psi_plus_el[1]) * GlobalConstants::RELATIVE_TOLERANCE &&
 		edge_flux_minus > std::fmax(psi_plus_el[0], psi_plus_el[1])* psi_minus_el[0] * GlobalConstants::RELATIVE_TOLERANCE)
 	{
-		surf_cosines._mu_right_plus = 0.5*(psi_plus_el[0] + psi_plus_el[1] + psi_plus_el[2] / 3.) / edge_flux_plus;
-		surf_cosines._mu_left_minus = -0.5*(psi_minus_el[0] + psi_minus_el[1] + psi_minus_el[2] / 3.) / edge_flux_minus; //negative 0.5 is the mu_center of -1 to 0 angular element
+		surf_cosines._mu_right_plus = 0.5*(edge_flux_plus + psi_plus_el[2] / 3.) / edge_flux_plus;
+		surf_cosines._mu_left_minus = -0.5*(edge_flux_minus - psi_minus_el[2] / 3.) / edge_flux_minus; //negative 0.5 is the mu_center of -1 to 0 angular element
 	}
 	else
 	{
@@ -163,6 +163,7 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	//-----------------------
 	//Calculate Vol Values
 	//-----------------------
+
 	
 	//Convert the avg, slope dof to the left and right moments, since psi_mu terms are not effected by basis integrals because of how average is defined
 	std::vector<double> basis_moments_plus(2), basis_moments_minus(2);
@@ -171,9 +172,18 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_plus, basis_moments_plus); //convert to spatial moments
 	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_minus, basis_moments_minus);
 
+
+	//check that there is non zero moments
+	if (basis_moments_plus[0] < GlobalConstants::RELATIVE_TOLERANCE ||
+		basis_moments_minus[0] < GlobalConstants::RELATIVE_TOLERANCE )
+	{
+		std::cerr << "Have a zero flux moment, not sure what to do about it yet, in HoSolver::getLoData1D, probalby just assume diffusions parameters";
+		exit(1);
+	}
+
 	//Calculate average mu's based on basis moments, very straightforward, use mu moment value from psi_plus and minus
-	vol_cosines._mu_left_minus = -0.5*(basis_moments_minus[0] + psi_minus_el[2]/3.) / basis_moments_minus[0]; //left moment, minus: <.>L^-
-	vol_cosines._mu_right_minus = -0.5*(basis_moments_minus[1] + psi_minus_el[2] / 3.) / basis_moments_minus[1]; //etc.
+ 	vol_cosines._mu_left_minus = -0.5*(basis_moments_minus[0] - psi_minus_el[2] / 3.) / basis_moments_minus[0]; //left moment, minus: <.>L^-
+	vol_cosines._mu_right_minus = -0.5*(basis_moments_minus[1] - psi_minus_el[2] / 3.) / basis_moments_minus[1]; //etc.
 	vol_cosines._mu_left_plus = 0.5*(basis_moments_plus[0] + psi_plus_el[2] / 3.) / basis_moments_plus[0]; 
 	vol_cosines._mu_right_plus = 0.5*(basis_moments_plus[1] + psi_plus_el[2] / 3.) / basis_moments_plus[1];
 
@@ -226,7 +236,7 @@ void HoSolver::initializeSamplingSource()
 {
 	//Initially source is always a standard mc source of some kind
 	_source = new LinDiscSource(_particle); //uses standard sampling, no stratified available for LinDiscSource
-	//_source = new ResidualSource(_particle); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check
+	//_source = new StratifiedResidualSource(_particle, _n_histories); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check}
 }
 
 void HoSolver::computeProjectedAngularFlux()

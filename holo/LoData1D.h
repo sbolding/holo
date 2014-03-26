@@ -22,7 +22,7 @@ namespace LODATA_COSINES
 	const double TWO_THIRDS = 0.66666666666666667L;
 	const double INV_SQRT_THREE = 0.57735026919;
 	const double ONE_HALF = 0.50000000000000000L;
-	const double STARTING_AVERAGE_COSINE = TWO_THIRDS;
+	const double STARTING_AVERAGE_COSINE = INV_SQRT_THREE;
 }
 
 #include <vector>

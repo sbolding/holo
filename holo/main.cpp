@@ -29,24 +29,24 @@ int main()
 	int dimension = 1;
 	double width = 3.0; //cm
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems =  20;
-	int n_ang_elements = 4; //number angles in half ranges
+	int num_elems = 20;
+	int n_ang_elements = 3; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = 100000; //50000000
-	int n_batches = 20;
-	double exp_convg_rate = 0.0;
+	int n_histories = num_elems*n_ang_elements*500; //50000000
+	int n_batches = 25;
+	double exp_convg_rate = 0.05;
 	double convergence_tolerance = 1.E-4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.1, 0.05);
+	MaterialConstant mat(10, 0.25, 0.75);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	size_t n_holo_solves = 50;
+	size_t n_holo_solves = 30;
 
 	//Assemble the LoSystem
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
@@ -74,11 +74,14 @@ int main()
 			break;
 		}
 
-		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches);
+
+		//Solve high order system
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches,3);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
+		ho_solver->printProjectedScalarFlux(std::cout);
 
-		//Transfer HO data to the LO system
+		//Transfer HO estimated parameters to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
 		data_transfer.updateLoSystem();
 
@@ -99,14 +102,21 @@ int main()
 		{
 			std::cout << "\nConverged on iteration " << i_holo_solves << " to a relative precision"
 				<< " of " << convergence_tolerance << std::endl;
+			lo_solver->solveSystem();
+			lo_solver->updateSystem();
 			mesh_1D.printLDScalarFluxValues(out_file);
 			mesh_1D.printLDScalarFluxValues(std::cout);
+			ho_solver->printProjectedScalarFlux(std::cout);
 			break;
 		}
 		else
 		{
 			old_flux_vector = new_flux_vector;
-		}		
+		}
 	}
+
+
+
+
 	return 0;
 }
