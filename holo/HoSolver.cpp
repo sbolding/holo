@@ -60,6 +60,7 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 void HoSolver::solveSystem(std::ostream & out)
 {
 	std::cout << "Solving the HO system..." << std::endl;
+	double psi_l2_error; //l2 norm of addiditive error from each batch
 
 	for (int batch = 0; batch < _n_batches; batch++)
 	{
@@ -76,8 +77,8 @@ void HoSolver::solveSystem(std::ostream & out)
 				}
 			}
 		}
-		//compute the new angular fluxes
-		_ho_mesh->computeAngularFluxes(_n_histories, _source->getTotalSourceStrength());
+		//compute the new angular fluxes, determine the L2 norm of the error
+		_ho_mesh->computeAngularFluxes(_n_histories, psi_l2_error, _source->getTotalSourceStrength());
 
 		//debug outputs
 		if (HoController::PARTICLE_BALANCE)  _particle->printParticleBalance(_n_histories);

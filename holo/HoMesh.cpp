@@ -156,11 +156,13 @@ std::vector<ECMCElement1D* >* HoMesh::getElements(void)
 	return &_elements; //pointer, be careful not to change these values
 }
 
-void HoMesh::computeAngularFluxes(int n_histories, double total_src_strength)
+void HoMesh::computeAngularFluxes(int n_histories, double & l2_error, double total_src_strength)
 {
+	l2_error = 0.0;
+	double l2_error_element;
 	for (int i = 0; i < _n_elems; ++i)
 	{
-		_elements[i]->computeAngularFLuxDOF(n_histories, total_src_strength);
+		_elements[i]->computeAngularFLuxDOF(n_histories, l2_error_element, total_src_strength);
 	}
 }
 

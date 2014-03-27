@@ -29,13 +29,13 @@ int main()
 	int dimension = 1;
 	double width = 3.0; //cm
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems = 20;
+	int num_elems = 3;
 	int n_ang_elements = 3; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*n_ang_elements*500; //50000000
 	int n_batches = 25;
 	double exp_convg_rate = 0.05;
-	double convergence_tolerance = 1.E-4;
+	double convergence_tolerance = 1.E-10;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s

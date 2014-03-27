@@ -41,7 +41,7 @@ public:
 	ECMCElement(int id, Element* spatial_element, int number_spatial_dimensions, int number_angular_dimensions);  //let derived classes set actual values
 
 	//virtual functions
-	virtual void computeAngularFLuxDOF(int n_histories, double total_src_strength=1.0) = 0; //optional ext src strength, 1.0 normalizes to per source particle
+	virtual void computeAngularFLuxDOF(int n_histories, double & l2_error_squared_el, double total_src_strength=1.0) = 0; //optional ext src strength, 1.0 normalizes to per source particle, computes l2 error over element
 	virtual void printAngularFluxDOF(std::ostream & out) const = 0;
 
 	//Access functions

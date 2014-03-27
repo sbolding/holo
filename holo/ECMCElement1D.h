@@ -56,7 +56,7 @@ public:
 
 	//virtual methods
 	virtual void printAngularFluxDOF(std::ostream & out) const;
-	virtual void computeAngularFLuxDOF(int n_histories, double ext_src_str = 1.0);
+	virtual void computeAngularFLuxDOF(int n_histories, double & l2_error_element_squared, double total_src_strength = 1.0); 
 
 	//adaptive refinement methods
 	virtual void refine(int last_element_id); //the id of the last element in the element vector, first refined element will be id+1

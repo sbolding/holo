@@ -11,6 +11,7 @@
 
 #include "GlobalConstants.h"
 #include "ECMCElement1D.h"
+#include "FEMUtilities.h"
 
 ECMCElement1D::ECMCElement1D(int id, Element* element, ECMCElement1D* down_stream_element, 
 		std::vector<double> dimensions, std::vector<double> coordinates, int refinement_level):
@@ -65,7 +66,7 @@ void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, d
 	_tally->incrementScores(weight, path_length_cm, normalized_direction, volume_cm_str, normalized_position);
 }
 
-void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_strength) 
+void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_element_sq, double total_src_strength) 
 {
 	if (_has_children) //in the future may want to map from fine elements on to parent elements
 	{
@@ -73,16 +74,47 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double total_src_stre
 	}
 
 	std::vector<double> spatial_moments = _tally->getSpatialMoments(n_histories); //0th and 1st spatial moment
-	double angular_moment = _tally->getAngularMoment(n_histories);
-	_psi_average += spatial_moments[0]*total_src_strength;
+	double angular_moment = _tally->getAngularMoment(n_histories); //angular moment
+
+	//References for the additive error DOF
+	std::vector<double> err_dof(3);
+	double & psi_avg_err = err_dof[0];
+	double & psi_x_err = err_dof[1];
+	double & psi_mu_err = err_dof[2];
 
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
-	_psi_x += 6 * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength; 
-	_psi_mu += 6 * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;      
+	psi_avg_err = spatial_moments[0] * total_src_strength;
+	psi_x_err = 6 * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength;
+	psi_mu_err = 6 * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+
+	//update angular flux
+	_psi_average += psi_avg_err;
+	_psi_x += psi_x_err;
+	_psi_mu += psi_mu_err;
 
 	//reset tallies to zero
 	_tally->reset();
+
+	//compute l2 relative error over element with quadrature
+	GaussQuadrature quad;
+	int n_qps = quad.getNumPoints();
+	std::vector<double> x_wgts(quad.getQuadratureWeights(_position_center, _width_spatial));
+	std::vector<double> mu_wgts(quad.getQuadratureWeights(_mu_center, _width_angle));
+	std::vector<double> x_pnts(quad.getQuadraturePoints(_position_center, _width_spatial));
+	std::vector<double> mu_pnts(quad.getQuadraturePoints(_mu_center, _width_angle));
+
+	l2_error_element_sq = 0.0; //zero out sum
+	double err_sq_qp; //error in angular flux evaluated at quadrature point
+	for (int i_qp = 0; i_qp < n_qps; ++i_qp) //x_qps
+	{
+		for (int j_qp = 0; j_qp < n_qps; ++j_qp) //mu_qps
+		{
+			err_sq_qp = FEMUtilities::evalLinDiscFunc2D(err_dof, _dimensions, _coordinates, x_pnts[i_qp], mu_pnts[j_qp]);
+			err_sq_qp *= err_sq_qp; //square it
+			l2_error_element_sq += x_wgts[i_qp] * mu_wgts[j_qp]*err_sq_qp; //w_x_i w_mu_i * psi^2(x_i,mu_i)
+		}
+	}
 }
 
 void ECMCElement1D::printAngularFluxDOF(std::ostream &out) const
