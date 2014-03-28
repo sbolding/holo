@@ -336,6 +336,12 @@ bool MeshController::meshNeedsRefinement()
 	}
 	else
 	{
+		//Forced refinement for debugging
+		if (HoController::FORCE_REFINEMENT)
+		{
+			return true;
+		}
+
 		double alpha_avg = 0.0;
 		for (int i = 0; i < _n_batches_to_check; ++i) //loop over batches
 		{

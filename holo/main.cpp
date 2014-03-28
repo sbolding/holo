@@ -32,14 +32,14 @@ int main()
 	int num_elems = 5;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = num_elems*2*n_ang_elements*5000; //50000000
+	int n_histories = num_elems*2*n_ang_elements*120; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.05;
 	double convergence_tolerance = 1.E-3;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.25, 0.75);
+	MaterialConstant mat(10, 0.25, 0.0);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -60,9 +60,9 @@ int main()
 	while (true)
 	{
 		//solve lo order system
-		lo_solver->solveSystem();
+/*		lo_solver->solveSystem();
 		lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
-		mesh_1D.getDiscScalarFluxVector(new_flux_vector);
+		mesh_1D.getDiscScalarFluxVector(new_flux_vector); */
 		
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(cout);
@@ -75,7 +75,7 @@ int main()
 		}
 
 		//Solve high order system
-		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches,3);
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches,2);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
 		ho_solver->printProjectedScalarFlux(std::cout);
