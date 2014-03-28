@@ -60,7 +60,22 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 void HoSolver::solveSystem(std::ostream & out)
 {
 	std::cout << "Solving the HO system..." << std::endl;
-	double psi_l2_error; //l2 norm of addiditive error from each batch
+	double psi_l2_error; //L2 norm of addiditive error from each batch
+	double psi_ref_l2_norm; //L2 norm of psi from the first batch
+
+	//print out initial mesh to mesh file
+	if (HoController::WRITE_MESH_EVERY_REFINEMENT)
+	{
+		//open output file
+		ofstream mesh_file("Z:/TAMU_Research/HOLO/results_output_folder/mesh.out", ios::out);
+		if (!mesh_file)
+		{
+			std::cerr << "Can't open mesh output file" << endl;
+			exit(1);
+		}
+		_ho_mesh->printActiveMesh(mesh_file);
+		mesh_file.close();
+	}
 
 	for (int batch = 0; batch < _n_batches; batch++)
 	{
@@ -80,10 +95,35 @@ void HoSolver::solveSystem(std::ostream & out)
 		//compute the new angular fluxes, determine the L2 norm of the error
 		_ho_mesh->computeAngularFluxes(_n_histories, psi_l2_error, _source->getTotalSourceStrength());
 
+		//Convergence criteria for angular flux
+		if (batch == 0)
+		{
+			psi_ref_l2_norm = psi_l2_error;
+		}
+		else
+		{
+			//check convergence
+			if (psi_l2_error / psi_ref_l2_norm < HoConstants::ECMC_REL_ERR_TOL)
+			{
+				out << "\nError converged on batch " << batch + 1 << " to a rel. tol. of "
+					<< HoConstants::ECMC_REL_ERR_TOL << std::endl;
+				break;
+			}
+		}
+	
+
 		//debug outputs
+		if (HoController::WRITE_RELATIVE_ERROR_NORMS)
+		{
+			out.setf(ios::scientific);
+			out.precision(15);
+			out << "Relative Error L2 Norm: " << psi_l2_error / psi_ref_l2_norm << std::endl;
+
+		}
 		if (HoController::PARTICLE_BALANCE)  _particle->printParticleBalance(_n_histories);
 		if (HoController::WRITE_ALL_ANGULAR_FLUXES) _ho_mesh->printAngularFluxes(out);
 
+		//compute residual or exit
 		if (_solver_mode_int == HoMethods::STANDARD_MC) //you are done, exit
 		{
 			return;
@@ -117,7 +157,22 @@ void HoSolver::solveSystem(std::ostream & out)
 				int n_elems_before_refinement = _ho_mesh->getNumElems();
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement); //update number of histories before computing new residual
+				std::cout << "New mesh has " << _ho_mesh->getNumActiveElements() << " active elements\n";
 				computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
+
+				//output the mesh if desired
+				if (HoController::WRITE_MESH_EVERY_REFINEMENT)
+				{
+					//open output file
+					ofstream mesh_file("Z:/TAMU_Research/HOLO/results_output_folder/mesh.out", ios::app);
+					if (!mesh_file)
+					{
+						std::cerr << "Can't open mesh output file" << endl;
+						exit(1);
+					}
+					_ho_mesh->printActiveMesh(mesh_file);
+					mesh_file.close();
+				}
 			}
 		}
 	}	

@@ -11,6 +11,7 @@
 
 
 #include "MeshController.h"
+#include <cmath>
 
 //Functor for comparing pairs, needed for sorting jump errors
 class CompareBySecond
@@ -293,7 +294,8 @@ void MeshController::refineMesh()
 	std::sort(jump_errors.begin(), jump_errors.end(), CompareBySecond());
 
 	//Determine number of new elements to create
-	int n_refinements = std::ceil(HoController::FRACTION_CELLS_TO_REFINE*(double)_mesh->_n_elems); //round up so always at least one
+	int n_refinements = std::ceil(HoController::FRACTION_CELLS_TO_REFINE*(double)_mesh->_n_active_elements); //round up so always at least one
+	n_refinements = std::fmin(_mesh->_n_active_elements, n_refinements); //in case rounds up
 	
 	//Refine elements, and neighboring elements as needed
 	index = 0;  //which element to refine

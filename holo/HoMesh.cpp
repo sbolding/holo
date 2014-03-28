@@ -159,11 +159,13 @@ std::vector<ECMCElement1D* >* HoMesh::getElements(void)
 void HoMesh::computeAngularFluxes(int n_histories, double & l2_error, double total_src_strength)
 {
 	l2_error = 0.0;
-	double l2_error_element;
+	double l2_error_element_sq;
 	for (int i = 0; i < _n_elems; ++i)
 	{
-		_elements[i]->computeAngularFLuxDOF(n_histories, l2_error_element, total_src_strength);
+		_elements[i]->computeAngularFLuxDOF(n_histories, l2_error_element_sq, total_src_strength);
+		l2_error += l2_error_element_sq; //integrate error^2 over elements
 	}
+	l2_error = sqrt(l2_error);	//square root
 }
 
 void HoMesh::printAngularFluxes(std::ostream &out)
@@ -214,8 +216,8 @@ std::vector<int> HoMesh::findUpwindBoundaryCells()
 			double h_x = _elements[i]->getSpatialWidth();
 			if (_elements[i]->getAngularCoordinate() > 0.0)
 			{
-				double edge_left = x_coor - 0.5*h_x;
-				if (std::abs((edge_left - x_edges[0]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
+				double edge_left = x_coor - 0.5*h_x; //i think this check is only necessary because of single element problems, but causes problems
+				if (std::abs((edge_left - x_edges[0])) < GlobalConstants::RELATIVE_TOLERANCE*h_x*10)
 				{
 					if (spatial_ID == 0)
 					{
@@ -226,7 +228,7 @@ std::vector<int> HoMesh::findUpwindBoundaryCells()
 			else //negative flow
 			{
 				double edge_right = x_coor + 0.5*h_x;
-				if (std::abs((edge_right - x_edges[1]) / h_x) < GlobalConstants::RELATIVE_TOLERANCE)
+				if (std::abs((edge_right - x_edges[1])) < GlobalConstants::RELATIVE_TOLERANCE*h_x*10)
 				{
 					if (spatial_ID == last_element_ID)
 					{
@@ -246,6 +248,7 @@ std::vector<DirichletBC1D*> HoMesh::getDirichletBCs() const
 {
 	return _lo_mesh->getDirichletBCs();
 }
+
 
 ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 {
@@ -275,6 +278,23 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 	if (it_bc_id == _boundary_cells.end())
 	{
 		std::cerr << "Boundary element not found in findJustUpwindElement, HoMesh.cpp\n";
+		//print out debug info on element
+		_elements[down_str_element_id]->printData(std::cerr);
+		//print out mesh
+		std::ofstream mesh_file("Z:/TAMU_Research/HOLO/results_output_folder/mesh.out", std::ios::app);
+		if (!mesh_file)
+		{
+			std::cerr << "Can't open mesh output file" << std::endl;
+			exit(1);
+		}
+		printActiveMesh(mesh_file);
+		mesh_file.close();
+		//Try updating the boundary cells and try again
+		_boundary_cells_need_update = true;
+		findUpwindBoundaryCells();
+		std::cout << "Trying again\n";
+		findJustUpwindElement(down_str_element_id);
+		system("pause");
 		exit(1);
 	}
 
@@ -367,4 +387,29 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 		}
 	}
 	return up_str_elem;
+}
+
+void HoMesh::printActiveMesh(std::ostream & out)
+{
+	out << "\n-----------------------------------------------\n"
+		<< "                    ECMC Mesh\n"
+		<< "  x_i h_x mu_j h_mu "
+		<< "\n-----------------------------------------------\n";
+	std::vector<double> coors, dimens;
+	for (int i = 0; i < _n_elems; ++i)
+	{
+		if (_elements[i]->hasChildren())
+		{
+			continue;
+		}
+		coors = _elements[i]->getElementCoordinates();
+		dimens = _elements[i]->getElementDimensions();
+
+		//print out the coordinates, followed by the dimensions, currently only works in 1D
+		for (int j = 0; j < coors.size(); ++j)
+		{
+			out << " " << coors[j] << " " << dimens[j];
+		}
+		out << std::endl;
+	}
 }

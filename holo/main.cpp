@@ -27,15 +27,15 @@ int main()
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
-	double width = 3.0; //cm
+	double width = 3; //cm
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems = 3;
-	int n_ang_elements = 3; //number angles in half ranges
+	int num_elems = 5;
+	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = num_elems*n_ang_elements*500; //50000000
-	int n_batches = 25;
+	int n_histories = num_elems*2*n_ang_elements*5000; //50000000
+	int n_batches = 100;
 	double exp_convg_rate = 0.05;
-	double convergence_tolerance = 1.E-10;
+	double convergence_tolerance = 1.E-3;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -46,7 +46,7 @@ int main()
 	mesh_1D.setExternalSource(ext_source);
 	mesh_1D.print(cout);
 
-	size_t n_holo_solves = 30;
+	size_t n_holo_solves = 100;
 
 	//Assemble the LoSystem
 	lo_solver = new LoSolver1D(&mesh_1D); //uses default some estimated lo order parameters and LD
@@ -74,7 +74,6 @@ int main()
 			break;
 		}
 
-
 		//Solve high order system
 		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches,3);
 		ho_solver->solveSystem();
@@ -83,7 +82,10 @@ int main()
 
 		//Transfer HO estimated parameters to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
+		std::cout << "Change in LoData (before and after): \n";
+		data_transfer.printLoDataEl(0, std::cout);
 		data_transfer.updateLoSystem();
+		data_transfer.printLoDataEl(0, std::cout);
 
 		//update counter
 		i_holo_solves++;
@@ -106,7 +108,7 @@ int main()
 			lo_solver->updateSystem();
 			mesh_1D.printLDScalarFluxValues(out_file);
 			mesh_1D.printLDScalarFluxValues(std::cout);
-			ho_solver->printProjectedScalarFlux(std::cout);
+		//	ho_solver->printProjectedScalarFlux(out_file);
 			break;
 		}
 		else

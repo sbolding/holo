@@ -62,3 +62,20 @@ unsigned int ECMCElement::getRefinementLevel() const
 {
 	return _refinement_level;
 }
+
+void ECMCElement::printData(std::ostream & out) const
+{
+	std::cout << " Element ID = " << _id
+		<< "\n Refinement Level = " << _refinement_level
+		 << "\n (Coordinates[i], Dimensions[i]) :  \n";
+	out.setf(std::ios::scientific);
+	out.precision(15);
+	out.width(12);
+	for (int i = 0; i < _coordinates.size(); i++)
+	{
+		std::cout << "( " << _coordinates[i] << " , " <<
+			_dimensions[i] << " )\n";
+	}
+	std::cout << "Spatial Element Info: \n---------------------\n";
+	_spatial_element->print(out);
+}

@@ -54,6 +54,7 @@ public:
 	{
 		return _spatial_element;
 	}
+	void printData(std::ostream & out) const;
 
 	//Mesh refinement functions
 	virtual void refine(int last_element_id) = 0; //will create new elements and update refinement level, etc.

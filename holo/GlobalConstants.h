@@ -21,6 +21,9 @@ namespace HoConstants
 
 	//exponential atenuation information
 	const double MAX_STREAMING_MFP = 5.0; //how many mfp to exponentially attenuate weight before switching to standard MC pathlength sampling
+
+	//ECMC convergence constraints
+	const double ECMC_REL_ERR_TOL = 1.E-5; //convergence tolerance for ECMC error, as estimated by inverting transport operator on residual
 }
 
 namespace HoMethods

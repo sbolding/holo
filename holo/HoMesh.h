@@ -48,9 +48,12 @@ public:
 
 	//computing angular flux
 	void computeAngularFluxes(int n_histories, double & l2_error_this_batch, double total_src_strength = 1.0); //compute moments of angular flux based on n_histories and total source strength (assumed 1 if normalizing to per source particle)
-	void printAngularFluxes(std::ostream &out);
 	std::vector<int> findUpwindBoundaryCells(); //return a list of cells who have boundary on their upwind face
 	std::vector<DirichletBC1D*> getDirichletBCs() const;
+
+	//printing functions
+	void printAngularFluxes(std::ostream &out);
+	void printActiveMesh(std::ostream &out);
 };
 
 #endif  //_HOMESH_H

@@ -70,6 +70,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 {
 	if (_has_children) //in the future may want to map from fine elements on to parent elements
 	{
+		l2_error_element_sq = 0.0;
 		return;
 	}
 

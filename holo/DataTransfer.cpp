@@ -46,3 +46,30 @@ void DataTransfer::calculateLoData(LoData1D & lo_data, int element_id)
 
 	_ho_solver->getLoData1D(lo_data, element_id);
 } 
+
+void DataTransfer::printLoDataEl(int element_id, std::ostream & out)
+{
+	LoData1D lo_data = _mesh->getElement(element_id)->getLoData();
+	out << "Element ID = " << element_id;
+	out << "-- Spatial Closure Factor = " << lo_data.getSpatialClosureFactor();
+	out << "\n-- " << "Surface Cosines, left, minus to right, plus -- \n ";
+	
+	AveragedCosines cosines = lo_data.getSurfAveragedCos();
+	out.setf(ios::scientific);
+	out.precision(15);
+	out << "  " << cosines._mu_left_minus << std::endl;
+	out << "  " << cosines._mu_left_plus << std::endl;
+	out << "  " << cosines._mu_right_minus << std::endl;
+	out << "  " << cosines._mu_right_plus << std::endl;
+	
+	out << "-- " << "Volume Cosines, left, minus to right, plus -- \n";
+
+	cosines = lo_data.getVolAveragedCos();
+	out.setf(ios::scientific);
+	out.precision(15);
+	out << "  " << cosines._mu_left_minus << std::endl;
+	out << "  " << cosines._mu_left_plus << std::endl;
+	out << "  " << cosines._mu_right_minus << std::endl;
+	out << "  " << cosines._mu_right_plus << std::endl;
+	out << "\n";
+}
