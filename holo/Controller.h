@@ -17,8 +17,8 @@ namespace HoController
 {
 	//Mesh refinement stuff 
 	const bool ADAPTIVE_REFINEMENT = true;
-	const bool FORCE_REFINEMENT = true;
-	const double FRACTION_CELLS_TO_REFINE = 0.4;
+	const bool FORCE_REFINEMENT = false;
+	const double FRACTION_CELLS_TO_REFINE = 0.3;
 	const bool REFINE_ACROSS_MU_ZERO = false;
 	const bool USE_MAX_JUMP_ERROR = true; //use the max jump error of all sides as error indicator for refinement
 
@@ -30,6 +30,7 @@ namespace HoController
 	const bool WRITE_HISTORIES_COMPLETE = false;
 	const bool WRITE_BATCHES_COMPLETE = true;
 	const bool WRITE_MESH_EVERY_REFINEMENT = true;
+	const bool WRITE_HALF_RANGE_LO_FLUXES = true;
 
 	//Sampling stuff
 	const int INPUT_SEED = 73907;

@@ -86,8 +86,24 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
 	psi_avg_err = spatial_moments[0] * total_src_strength;
-	psi_x_err = 6 * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength;
-	psi_mu_err = 6 * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+	psi_x_err = 6. * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength;
+	psi_mu_err = 6. * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+
+
+	//DEBUG STATEMENTS
+	if (std::abs(psi_avg_err) < GlobalConstants::RELATIVE_TOLERANCE*_psi_average)
+		std::cout << "Average flux is too small";
+	if (std::abs(psi_x_err) < GlobalConstants::RELATIVE_TOLERANCE *std::abs(_psi_x))
+		std::cout << "X flux is too small << " << psi_x_err << " " << _psi_x;
+	if (std::abs(psi_mu_err) < GlobalConstants::RELATIVE_TOLERANCE *std::abs(_psi_mu))
+		std::cout << "Mu flux is too small";
+	psi_avg_err = spatial_moments[0] * total_src_strength;
+	psi_x_err = 6.*spatial_moments[1];
+	psi_x_err -= 3.*spatial_moments[0];
+	psi_x_err *= total_src_strength;
+	psi_mu_err = 6. * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+
+
 
 	//update angular flux
 	_psi_average += psi_avg_err;

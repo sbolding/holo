@@ -247,6 +247,23 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	lo_data.setSurfAveragedCos(surf_cosines);
 	lo_data.setVolAveragedCos(vol_cosines);
 
+	//If desired print out the low order half range flux dof's
+	if (HoController::WRITE_HALF_RANGE_LO_FLUXES)
+	{
+		std::cout << "Element ID = " << element_id;
+		std::cout << "\n\n Plus DOF: ";
+		for (int i = 0; i < psi_plus_el.size(); ++i)
+		{
+			std::cout << psi_plus_el[i] << "  ";
+		}
+		std::cout << "\n Minus DOF: ";
+		for (int i = 0; i < psi_minus_el.size(); ++i)
+		{
+			std::cout << psi_minus_el[i] << "  ";
+		}
+		std::cout << "\n\n";
+	}
+
 }
 
 void HoSolver::printAllTallies(std::ostream& out) const

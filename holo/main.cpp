@@ -27,19 +27,19 @@ int main()
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
-	double width = 3; //cm
-	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems = 5;
-	int n_ang_elements = 2; //number angles in half ranges
+	double width = 1.0; //cm
+	double ext_source = 0.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
+	int num_elems = 10;
+	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = num_elems*2*n_ang_elements*120; //50000000
-	int n_batches = 100;
+	int n_histories = num_elems*2*n_ang_elements*100; //50000000
+	int n_batches = 50;
 	double exp_convg_rate = 0.05;
 	double convergence_tolerance = 1.E-3;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
-	string sampling_method = "stratified";
+	string sampling_method = "standard";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.25, 0.0);
+	MaterialConstant mat(10, 0.4, 0.0);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -60,10 +60,10 @@ int main()
 	while (true)
 	{
 		//solve lo order system
-/*		lo_solver->solveSystem();
-		lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
-		mesh_1D.getDiscScalarFluxVector(new_flux_vector); */
-		
+		/*		lo_solver->solveSystem();
+				lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
+				mesh_1D.getDiscScalarFluxVector(new_flux_vector); */
+
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(cout);
 
@@ -75,17 +75,20 @@ int main()
 		}
 
 		//Solve high order system
-		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches,2);
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
 		ho_solver->printProjectedScalarFlux(std::cout);
 
 		//Transfer HO estimated parameters to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
-		std::cout << "Change in LoData (before and after): \n";
-		data_transfer.printLoDataEl(0, std::cout);
 		data_transfer.updateLoSystem();
-		data_transfer.printLoDataEl(0, std::cout);
+		for (int i = 0; i < mesh_1D.getNumElems(); ++i)
+		{
+			data_transfer.printLoDataEl(i, std::cout);
+		}
+		ho_solver->printProjectedScalarFlux(out_file);
+		exit(10);
 
 		//update counter
 		i_holo_solves++;
