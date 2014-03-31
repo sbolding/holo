@@ -221,8 +221,8 @@ void Particle1D::scoreElementTally(double path_start_mfp, double path_end_mfp)
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
 	double path_length_cm = abs((path_start_mfp - path_end_mfp)*_mfp_tot/_mu);
-	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp; //location of the center of pathlength
-	
+	double normalized_position = 0.5*(path_start_mfp+path_end_mfp)/_element_width_mfp - 0.5; //location of the center of pathlength
+
 	//ScoreECMCTallies, using a normalized direction cosine to ensure positive tallies
 	_current_element->incrementTallyScores(_weight, path_length_cm, 
 		_mu, normalized_position);

@@ -18,8 +18,8 @@ namespace HoController
 	//Mesh refinement stuff 
 	const bool ADAPTIVE_REFINEMENT = true;
 	const bool FORCE_REFINEMENT = false;
-	const double FRACTION_CELLS_TO_REFINE = 0.3;
-	const bool REFINE_ACROSS_MU_ZERO = false;
+	const double FRACTION_CELLS_TO_REFINE = 0.25;
+	const bool REFINE_ACROSS_MU_ZERO = true;
 	const bool USE_MAX_JUMP_ERROR = true; //use the max jump error of all sides as error indicator for refinement
 
 	//output
