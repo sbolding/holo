@@ -47,7 +47,7 @@ void DataTransfer::calculateLoData(LoData1D & lo_data, int element_id)
 	_ho_solver->getLoData1D(lo_data, element_id);
 } 
 
-void DataTransfer::printLoDataEl(int element_id, std::ostream & out)
+void DataTransfer::printLoDataEl(int element_id, std::ostream & out) const
 {
 	LoData1D lo_data = _mesh->getElement(element_id)->getLoData();
 	out << "Element ID = " << element_id;
@@ -72,4 +72,15 @@ void DataTransfer::printLoDataEl(int element_id, std::ostream & out)
 	out << "  " << cosines._mu_right_minus << std::endl;
 	out << "  " << cosines._mu_right_plus << std::endl;
 	out << "\n";
+}
+
+void DataTransfer::printAllLoData(std::ostream & out) const
+{
+	if (HoController::WRITE_ALL_LO_DATA)
+	{
+		for (int i = 0; i < _mesh->getNumElems(); ++i)
+		{
+			printLoDataEl(i, out);
+		}
+	}
 }

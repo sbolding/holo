@@ -95,7 +95,7 @@ void StratifiedResidualSource::sampleSourceParticle()
 	_particle->updateElementProperties();
 
 	//Sample if face or element source
-	if (_rng->rand_num() < _curr_el_element_probability/(_curr_el_face_probability + _curr_el_element_probability)) //element source
+	if (_rng->rand_num()*(_curr_el_face_probability + _curr_el_element_probability) < _curr_el_element_probability) //element source
 	{
 		//determine location and direction within element using rejection method
 		sampleElementSource();

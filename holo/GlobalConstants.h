@@ -16,6 +16,7 @@ namespace GlobalConstants
 
 namespace HoConstants
 {
+	//Constants for facetallies, not used really
 	const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
 	const double COSINE_SUBSTITUTE_VALUE = 0.5*COSINE_CUTOFF; //half of the cutoff value by default
 
@@ -23,7 +24,7 @@ namespace HoConstants
 	const double MAX_STREAMING_MFP = 5.0; //how many mfp to exponentially attenuate weight before switching to standard MC pathlength sampling
 
 	//ECMC convergence constraints
-	const double ECMC_REL_ERR_TOL = 4.E-4; //convergence tolerance for ECMC error, as estimated by inverting transport operator on residual
+	const double ECMC_REL_ERR_TOL = 50.E-4; //convergence tolerance for ECMC error, as estimated by inverting transport operator on residual
 }
 
 namespace HoMethods
@@ -46,6 +47,7 @@ namespace HoMethods
 namespace EquationMaps1D
 {
 	const unsigned int DOF_MAP[4] = {3 , 2, 0, 1 }; //Map for DOF aliases, this is used in Element1D constructor
+	//const unsigned int DOF_MAP[4] = { 3, 2, 1, 0 };
 	//Order of values is phi_left_plus, phi_right_plus, phi_left_minus, phi_right_minus
 	//WARNING: if a pure absorber problem, these will not work correctly because it makes the diagonal of the system 0, these
 	//can simply be reordered in a more intelligent way, or it may just be an issue of the matrix solver not being smart enough

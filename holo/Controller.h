@@ -33,6 +33,7 @@ namespace HoController
 	const bool WRITE_BATCHES_COMPLETE = true;
 	const bool WRITE_MESH_EVERY_REFINEMENT = true;
 	const bool WRITE_HALF_RANGE_LO_FLUXES = true;
+	const bool WRITE_ALL_LO_DATA = true;
 
 	//Sampling stuff
 	const int INPUT_SEED = 73907;

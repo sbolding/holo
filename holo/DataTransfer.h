@@ -26,8 +26,8 @@ public:
 	DataTransfer(HoSolver* HoSolver, Mesh* mesh);
 	void updateLoSystem(); //Calculate the new LoData based on the Hodata.
     void calculateLoData(LoData1D & lo_data, int element_id);	//calculate the LoData parameters based on tallies of Ho solver;
-	void printLoDataEl(int element_id, std::ostream & out);
-	void printAllLoData(std::ostream & out);
+	void printLoDataEl(int element_id, std::ostream & out) const;
+	void printAllLoData(std::ostream & out) const;
 
 };
 

@@ -117,7 +117,6 @@ void LoSolver1D::assembleSystem()
 			row = global_eqn_indices[i_row];
 			_system_vec->addCoeff(row, local_load_vector->getCoeff(i_row));
 		}
-
 	}
 
 

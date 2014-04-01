@@ -419,8 +419,8 @@ void HoSolver::computeProjectedAngularFlux()
 
 std::vector<double> HoSolver::getScalarFluxDOF(int spatial_elem_id) const
 {
-	std::vector<double> scalar_flux_dof(_lo_mesh->getSpatialDimension()+1);  //avg, spatial moments, then angular moments
-	for (int i = 0; i < scalar_flux_dof.size(); ++i)
+	std::vector<double> scalar_flux_dof(_lo_mesh->getSpatialDimension()+1);  
+	for (int i = 0; i < scalar_flux_dof.size(); ++i) //avg, spatial moments, then angular moments which are neglected
 	{
 		scalar_flux_dof[i] = _psi_minus_dof[spatial_elem_id][i] + _psi_plus_dof[spatial_elem_id][i];
 	}

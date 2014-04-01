@@ -226,7 +226,7 @@ void Element1D::addDirichletBC(numVector* b, std::vector<int> &eqns, double diri
 	using EquationMaps1D::EQN_MAP;
 
 	//Here, it is performed for a Marshak Boundary Condition, where "dirichlet_value" is incoming current
-	//and does not to be weighted by mu
+	//and does not need to be weighted by mu
 
 	if (node->getID() == _nodes[0]->getID())  //Is it a left BC?
 	{
