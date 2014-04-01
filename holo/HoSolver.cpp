@@ -156,7 +156,7 @@ void HoSolver::solveSystem(std::ostream & out)
 				if (HoController::WRITE_BATCHES_COMPLETE) std::cout << "Refining mesh...\n"; //Debug output
 				int n_elems_before_refinement = _ho_mesh->getNumActiveElements();
 				_mesh_controller->refineMesh(); //this will refine if necessary
-				_n_histories = (int)(_n_histories*_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement); //update number of histories before computing new residual
+				_n_histories = (int)((double)_n_histories*((double)_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement)); //update number of histories before computing new residual
 				std::cout << "New mesh has " << _ho_mesh->getNumActiveElements() << " active elements\n";
 				computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
 
