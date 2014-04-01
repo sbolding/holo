@@ -15,6 +15,13 @@ StratifiedResidualSource::StratifiedResidualSource(Particle1D* particle, int & n
 	}
 	_n_samples_per_element = n_histories / (int)n_active_elements;
 
+	if (_n_samples_per_element < 100)
+	{
+		std::cout << "DEBUG less than 100: " << _n_samples_per_element << std::endl;
+		std::cout << "n_histories" << n_histories << " N_elements" << n_active_elements << std::endl;
+		system("pause");
+	}
+
 	//initialize the element id, the next two lines will lead to starting on the 0th element the first time through
 	_current_element_id = -1; //always start at the first element, if inactive it will be determined later
 	_n_sampled_from_current_element = _n_samples_per_element;
@@ -58,15 +65,15 @@ void StratifiedResidualSource::sampleSourceParticle()
 			else if (!_particle->_mesh->getElement(_current_element_id)->hasChildren())
 			{
 				//if the residual for an element is zero, need to forego sampling
-				if (_res_face_mags[_current_element_id] < GlobalConstants::RELATIVE_TOLERANCE) 
+				if (_res_face_mags[_current_element_id] < 0.0001*GlobalConstants::RELATIVE_TOLERANCE) //source is normalized to one, so accurate 
 				{
-					if (_res_element_mags[_current_element_id] < GlobalConstants::RELATIVE_TOLERANCE)
+					if (_res_element_mags[_current_element_id] < 0.0001*GlobalConstants::RELATIVE_TOLERANCE)
 					{
 						_current_element_id++; 
 						//DEBUG STUFF
-						std::cout << "Element has zero residual, ID =  " << _current_element_id - 1 << std::endl;
-						continue;
-						
+						//std::cout << "Element has zero residual, ID =  " << _current_element_id - 1 << "FACE: " << _res_element_mags[_current_element_id-1]
+							//<< " ELEMENT: " << _res_element_mags[_current_element_id-1] << std::endl;
+						continue;					
 					}
 				}
 				//found a working element
@@ -81,8 +88,6 @@ void StratifiedResidualSource::sampleSourceParticle()
 			}
 		}
 	}  //else, stay on the current element
-
-
 
 	//set particle in cell
 	_particle->_current_element_ID = _current_element_id;

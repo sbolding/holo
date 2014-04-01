@@ -32,9 +32,9 @@ int main()
 	int num_elems = 10;
 	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
-	int n_histories = num_elems*2*n_ang_elements*100; //50000000
+	int n_histories = num_elems*2*n_ang_elements*120; //50000000
 	int n_batches = 100;
-	double exp_convg_rate = 0.00;
+	double exp_convg_rate = 0.05;
 	double convergence_tolerance = 1.E-3;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";

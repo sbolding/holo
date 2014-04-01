@@ -91,6 +91,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	psi_mu_err = angular_moment*total_src_strength;
 		
 	//DEBUG STATEMENTS
+	/*
 	if (std::abs(psi_avg_err) < GlobalConstants::RELATIVE_TOLERANCE*_psi_average)
 	{
 		std::cout << "Average flux is too small, Element ID = "<< _id << " " << _psi_average << "\n";
@@ -104,7 +105,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	if (std::abs(psi_mu_err) < GlobalConstants::RELATIVE_TOLERANCE *std::abs(_psi_mu))
 	{
 		std::cout << "Mu flux is too small, Element ID = " << _id << " " << psi_mu_err << " " << _psi_mu << std::endl;
-	}
+	}*/
 
 	//update angular flux
 	_psi_average += psi_avg_err;
