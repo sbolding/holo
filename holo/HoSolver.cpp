@@ -155,9 +155,17 @@ void HoSolver::solveSystem(std::ostream & out)
 			{
 				if (HoController::WRITE_BATCHES_COMPLETE) std::cout << "Refining mesh...\n"; //Debug output
 				int n_elems_before_refinement = _ho_mesh->getNumActiveElements();
+				int n_histories_before_refinement = _n_histories;
 				_mesh_controller->refineMesh(); //this will refine if necessary
 				_n_histories = (int)((double)_n_histories*((double)_ho_mesh->getNumActiveElements() / (double)n_elems_before_refinement)); //update number of histories before computing new residual, casting is necessary, trust me
 				computeResidualSource(); //need to recompute residual for the new cells, if refinement occured
+
+				//Error check for int overflow
+				if (_n_histories < n_histories_before_refinement)
+				{
+					std::cerr << "Int overflow in num histories in HoSolver, need to store n_hist_per_elem instead of n_histories\n";
+					exit(1);
+				}
 
 				//output the mesh if desired
 				if (HoController::WRITE_MESH_EVERY_REFINEMENT)
