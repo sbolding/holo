@@ -62,7 +62,6 @@ void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, d
 	//to cm, rather than mfp
 	double volume_cm_str = _width_spatial*_width_angle;//*1.0cm*1.0cm*delta_mu = h_xh_mu(cm^3-str)
 	double normalized_direction = ((dir_cosine - _mu_center) / _width_angle) + 0.5; //normalized angle with in the element
-	normalized_position *= 6.;
 
 	_tally->incrementScores(weight, path_length_cm, normalized_direction, volume_cm_str, normalized_position);
 }
