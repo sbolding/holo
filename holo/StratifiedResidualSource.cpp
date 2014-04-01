@@ -63,7 +63,10 @@ void StratifiedResidualSource::sampleSourceParticle()
 					if (_res_element_mags[_current_element_id] < GlobalConstants::RELATIVE_TOLERANCE)
 					{
 						_current_element_id++; 
+						//DEBUG STUFF
+						std::cout << "Element has zero residual, ID =  " << _current_element_id - 1 << std::endl;
 						continue;
+						
 					}
 				}
 				//found a working element

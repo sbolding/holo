@@ -89,15 +89,22 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	psi_avg_err = spatial_moments[0] * total_src_strength;
 	psi_x_err = spatial_moments[1]*total_src_strength;
 	psi_mu_err = angular_moment*total_src_strength;
-
-	
+		
 	//DEBUG STATEMENTS
 	if (std::abs(psi_avg_err) < GlobalConstants::RELATIVE_TOLERANCE*_psi_average)
-		std::cout << "Average flux is too small\n";
+	{
+		std::cout << "Average flux is too small, Element ID = "<< _id << " " << _psi_average << "\n";
+		printData(std::cout);
+	}
 	if (std::abs(psi_x_err) < GlobalConstants::RELATIVE_TOLERANCE *std::abs(_psi_x))
-		std::cout << "X flux is too small\n << " << psi_x_err << " " << _psi_x;
+	{
+		std::cout << "X flux is too small, Element ID = " << _id << " " << psi_x_err << "PSIX_IS " << _psi_x << " AVERAGE_IS:  " << _psi_average << std::endl;
+		printData(std::cout);
+	}
 	if (std::abs(psi_mu_err) < GlobalConstants::RELATIVE_TOLERANCE *std::abs(_psi_mu))
-		std::cout << "Mu flux is too small\n";
+	{
+		std::cout << "Mu flux is too small, Element ID = " << _id << " " << psi_mu_err << " " << _psi_mu << std::endl;
+	}
 
 	//update angular flux
 	_psi_average += psi_avg_err;

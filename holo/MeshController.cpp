@@ -303,7 +303,7 @@ void MeshController::refineMesh()
 	
 	while (true)
 	{
-		refineElement(jump_errors[index].first);
+		refineElement(jump_errors[index].first); //all checks on refinement done in this function
 		if (_newly_refined_elements.size() >= n_refinements) //limit on number of refinements, including extra refinements to keep mesh regular
 		{
 			break;
@@ -363,6 +363,14 @@ bool MeshController::meshNeedsRefinement()
 
 void MeshController::refineElement(int element_id)
 {
+	//Check that the refinement level of the current element is not past the maximum, if it is set
+	if (HoController::MAX_REFINEMENT_LEVEL_SET)
+	{
+		if (_mesh->_elements[element_id]->getRefinementLevel() == HoController::MAX_REFINEMENT_LEVEL)
+		{
+			return;
+		}
+	}
 
 	//Check that the element to be refined has not already been refined to maintain mesh regularity, in this case another call to this function has already refined the cell
 	std::vector<int>::iterator it_refined = std::find(_newly_refined_elements.begin(),
