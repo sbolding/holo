@@ -217,7 +217,7 @@ std::vector<int> HoMesh::findUpwindBoundaryCells()
 			if (_elements[i]->getAngularCoordinate() > 0.0)
 			{
 				double edge_left = x_coor - 0.5*h_x; //i think this check is only necessary because of single element problems, but causes problems
-				if (std::abs((edge_left - x_edges[0])) < GlobalConstants::RELATIVE_TOLERANCE*h_x*10)
+				if (std::abs((edge_left - x_edges[0])) < 0.25*h_x)
 				{
 					if (spatial_ID == 0)
 					{
@@ -228,7 +228,7 @@ std::vector<int> HoMesh::findUpwindBoundaryCells()
 			else //negative flow
 			{
 				double edge_right = x_coor + 0.5*h_x;
-				if (std::abs((edge_right - x_edges[1])) < GlobalConstants::RELATIVE_TOLERANCE*h_x*10)
+				if (std::abs((edge_right - x_edges[1])) < 0.25*h_x)
 				{
 					if (spatial_ID == last_element_ID)
 					{
@@ -289,12 +289,6 @@ ECMCElement1D* HoMesh::findJustUpwindElement(int down_str_element_id)
 		}
 		printActiveMesh(mesh_file);
 		mesh_file.close();
-		//Try updating the boundary cells and try again
-		_boundary_cells_need_update = true;
-		findUpwindBoundaryCells();
-		std::cout << "Trying again\n";
-		findJustUpwindElement(down_str_element_id);
-		system("pause");
 		exit(1);
 	}
 

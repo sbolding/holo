@@ -40,8 +40,8 @@ void CurrentElementTally::incrementScore(double weight, double path_length,
 	if (path_length*normal_cosine < 0.)
 	{
 		std::cerr << "You have passed in a negative pathlength or cosine to the tally, this may not be correct for ECMC case, CurrentElementTally.cpp";
-	//	system("pause");
-	//	exit(1);
+		system("pause");
+		exit(1);
 	}
 	for (int i = 0; i < _bin_sums[0].size(); ++i)
 	{
