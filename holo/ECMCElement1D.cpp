@@ -61,7 +61,7 @@ void ECMCElement1D::incrementTallyScores(double weight, double path_length_cm, d
 	//Score Element tally, need to convert path_length and volume
 	//to cm, rather than mfp
 	double volume_cm_str = _width_spatial*_width_angle;//*1.0cm*1.0cm*delta_mu = h_xh_mu(cm^3-str)
-	double normalized_direction = 6.*((dir_cosine - _mu_center) / _width_angle) ; //6*(mu-mu_i)/h_mu
+	double normalized_direction = ((dir_cosine - _mu_center) / _width_angle) + 0.5; //normalized angle with in the element
 	normalized_position *= 6.;
 
 	_tally->incrementScores(weight, path_length_cm, normalized_direction, volume_cm_str, normalized_position);
@@ -87,10 +87,10 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
 	psi_avg_err = spatial_moments[0] * total_src_strength;
-	psi_x_err = spatial_moments[1]*total_src_strength;
-	psi_mu_err = angular_moment*total_src_strength;
-		
-	//DEBUG STATEMENTS
+	psi_x_err = 6. * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength;
+	psi_mu_err = 6. * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+
+	//DEBUG STATEMENTS, THESE ARE NOT NECESSARILY PROBLEMS AS LONG AS THE RESIDUAL IS ZERO IN THIS ELEMENT
 	/*
 	if (std::abs(psi_avg_err) < GlobalConstants::RELATIVE_TOLERANCE*_psi_average)
 	{

@@ -37,12 +37,12 @@ void CurrentElementTally::incrementScore(double weight, double path_length,
 	}
 	//loop over spatial moments, recursively, zeroth bin is 0th moment
 	value = weight*normal_cosine*path_length / volume; //0th spatial moment
-	//if (path_length*normal_cosine < 0.)
-	//{
-	//	std::cerr << "You have passed in a negative pathlength or cosine to the tally, this may not be correct for ECMC case, CurrentElementTally.cpp";
-	//	system("pause");
-	//	exit(1);
-	//}
+	if (path_length*normal_cosine < 0.)
+	{
+		std::cerr << "You have passed in a negative pathlength or cosine to the tally, this may not be correct for ECMC case, CurrentElementTally.cpp";
+		system("pause");
+		exit(1);
+	}
 	for (int i = 0; i < _bin_sums[0].size(); ++i)
 	{
 		_bin_sums[angular_bin][i] += value;
