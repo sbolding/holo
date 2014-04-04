@@ -197,7 +197,7 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	AveragedCosines vol_cosines;
 	
 	//Because HO solution is projected LD solution in half range, the spatial factor is inheriently 2.0 (default LD value)
-	lo_data.setSpatialClosureFactor(2);
+	lo_data.setSpatialClosureFactor(2.0);
 
 	//Get the angular flux dof for this element
 	const std::vector<double> psi_plus_el(_psi_plus_dof[element_id]);
@@ -212,8 +212,8 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	if (edge_flux_plus > std::fmax(psi_plus_el[0],psi_plus_el[1]) * GlobalConstants::RELATIVE_TOLERANCE &&
 		edge_flux_minus > std::fmax(psi_plus_el[0], psi_plus_el[1])* psi_minus_el[0] * GlobalConstants::RELATIVE_TOLERANCE)
 	{
-		surf_cosines._mu_right_plus = 0.5*(edge_flux_plus + psi_plus_el[2] / 3.) / edge_flux_plus;
-		surf_cosines._mu_left_minus = -0.5*(edge_flux_minus - psi_minus_el[2] / 3.) / edge_flux_minus; //negative 0.5 is the mu_center of -1 to 0 angular element
+		surf_cosines._mu_right_plus = 0.5*(edge_flux_plus + (psi_plus_el[2]+psi_plus_el[3]) / 3.) / edge_flux_plus; //added cross moment
+		surf_cosines._mu_left_minus = -0.5*(edge_flux_minus - (psi_minus_el[2] - psi_minus_el[3]) / 3.) / edge_flux_minus; //negative 0.5 is the mu_center of -1 to 0 angular element
 	}
 	else
 	{
@@ -228,12 +228,11 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	//-----------------------
 	//Calculate Vol Values
 	//-----------------------
-
-	
+		
 	//Convert the avg, slope dof to the left and right moments, since psi_mu terms are not effected by basis integrals because of how average is defined
 	std::vector<double> basis_moments_plus(2), basis_moments_minus(2);
-	std::vector<double> avg_slope_plus(psi_plus_el.begin(), psi_plus_el.end()-1); //does not include mu+1 term
-	std::vector<double> avg_slope_minus(psi_minus_el.begin(), psi_minus_el.end()-1);
+	std::vector<double> avg_slope_plus(psi_plus_el.begin(), psi_plus_el.begin()+2); //does not include mu and x_mu moments
+	std::vector<double> avg_slope_minus(psi_minus_el.begin(), psi_minus_el.begin()+2); //does not include mu and x_mu moments
 	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_plus, basis_moments_plus); //convert to spatial moments
 	FEMUtilities::convertAvgSlopeToBasisMoments1D(avg_slope_minus, basis_moments_minus);
 
@@ -247,10 +246,10 @@ void HoSolver::getLoData1D(LoData1D & lo_data, int element_id)
 	}
 
 	//Calculate average mu's based on basis moments, very straightforward, use mu moment value from psi_plus and minus
- 	vol_cosines._mu_left_minus = -0.5*(basis_moments_minus[0] - psi_minus_el[2] / 3.) / basis_moments_minus[0]; //left moment, minus: <.>L^-
-	vol_cosines._mu_right_minus = -0.5*(basis_moments_minus[1] - psi_minus_el[2] / 3.) / basis_moments_minus[1]; //etc.
-	vol_cosines._mu_left_plus = 0.5*(basis_moments_plus[0] + psi_plus_el[2] / 3.) / basis_moments_plus[0]; 
-	vol_cosines._mu_right_plus = 0.5*(basis_moments_plus[1] + psi_plus_el[2] / 3.) / basis_moments_plus[1];
+	vol_cosines._mu_left_minus = -0.5*(basis_moments_minus[0] - (psi_minus_el[2] - psi_minus_el[3]) / 3.) / basis_moments_minus[0]; //left moment, minus: <.>L^-
+	vol_cosines._mu_right_minus = -0.5*(basis_moments_minus[1] - (psi_minus_el[2] + psi_minus_el[3]) / 3.) / basis_moments_minus[1]; //etc.
+	vol_cosines._mu_left_plus = 0.5*(basis_moments_plus[0] + (psi_plus_el[2] - psi_plus_el[3]) / 3.) / basis_moments_plus[0];
+	vol_cosines._mu_right_plus = 0.5*(basis_moments_plus[1] + (psi_plus_el[2] + psi_plus_el[3]) / 3.) / basis_moments_plus[1];
 
 	//Set the LoData cosine values
 	lo_data.setSurfAveragedCos(surf_cosines);
@@ -329,8 +328,8 @@ void HoSolver::computeProjectedAngularFlux()
 	_psi_plus_dof.resize(n_spatial_elems);
 
 	//resize dof vectors, initialize to zeros
-	size_t dof_size = _ho_mesh->getElement(0)->getElementDimensions().size()+1; //how many DOF per element, 1 extra for 
-	size_t n_dimens = dof_size - 1; //how many dimensions, spatial and angular
+	size_t dof_size = _ho_mesh->getElement(0)->getElementDimensions().size()+2; //how many DOF per element, 2 extra for bilinear finite element
+	size_t n_dimens = dof_size - 2; //how many dimensions, spatial and angular
 	for (int i = 0; i < n_spatial_elems; i++)
 	{
 		_psi_minus_dof[i].assign(dof_size, 0.0);
@@ -398,6 +397,7 @@ void HoSolver::computeProjectedAngularFlux()
 					sp_sum[0] += psi_avg_qp;
 					sp_sum[1] += 6.0*psi_avg_qp*(x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]; //these two lines could be replaced by a for loop if x,mu pnts in one vector
 					sp_sum[2] += 6.0*psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]; //basis function is based on unrefined half range element, because that is what we are projecting to
+					sp_sum[3] += 12.0*psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1] * (x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0];
 				}
 			}
 
@@ -444,7 +444,7 @@ void HoSolver::printProjectedScalarFlux(std::ostream &out) const
 
 		for (int j = 0; j < flux_dof.size(); ++j)
 		{
-			out.precision(3);
+			out.precision(5);
 			out << nodal_coords[j] << " " << setw(25) <<
 				setprecision(14) << scientific << flux_edge_values[j] << endl;
 		}

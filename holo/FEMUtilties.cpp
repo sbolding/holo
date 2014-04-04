@@ -71,6 +71,7 @@ void FEMUtilities::convertAvgSlopeToBasisMoments1D(std::vector<double> const & m
 	if (moment_dof.size() != 2)
 	{
 		std::cerr << "Passed in incorrect length of moment vector to FEMUtilties::convertAvgSlopeToBasis\n";
+		std::cerr << "Length = " << moment_dof.size() << std::endl;
 		exit(1);
 	}
 	left_right_moments.resize(2);

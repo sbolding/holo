@@ -54,9 +54,11 @@ protected:
 	void initializeSamplingSource();
 
 	//For computing projected half range fluxes on coarsest mesh, useful for data transfer to low order date
+	//Currently they are projected onto a BILINEAR finite element to ensure the LO data is computed exactly
+	//All other calculations are identical
 	std::vector<std::vector<double>> _psi_plus_dof; //row: spatial element, column: angular flux dof
 	std::vector<std::vector<double>> _psi_minus_dof; //row: spatial element, column: angular flux dof
-
+	
 	//For data transfer and printing angular flux
 	void computeProjectedAngularFlux(); //computes the angular flux dof  element in half range
 	std::vector<double> getScalarFluxDOF(int spatial_elem_id) const; //get the scalar flux LD DOF for a particular spatial element

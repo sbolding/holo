@@ -123,7 +123,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	double source_value_right = _h/FOUR_PI * (1. / 3.*_ext_source_nodal_values[0] + 2. / 3.*_ext_source_nodal_values[1]);
 
 	//Add in terms for < . >_L^+ equation
-	// The order is changed here, because we want this equation to always be first to limit band size of matrix
+	// The order is changed by eqn map, because we want this equation to always be first to limit band size of matrix
 	//----------------------------------------------------------------------------------------------------
 	value = vol_mu._mu_left_plus + (_h * (sigma_t - sigma_s / (FOUR_PI)));
 	M->addCoeff(EQN_MAP[0], DOF_MAP[0], value);
