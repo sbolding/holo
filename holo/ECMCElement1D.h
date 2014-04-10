@@ -34,6 +34,9 @@ protected:
 	double & _mu_center;		//mu_i (center of element in mu)
 	ECMCElement1D();			//don't call me
 
+	//variable for storing the average of mu*x
+	double _psi_mu_x;
+
 	//Pointer to the downstream element (different for positive and negative flow)
 	ECMCElement1D* _down_stream_element;
 

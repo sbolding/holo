@@ -76,6 +76,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 
 	std::vector<double> spatial_moments = _tally->getSpatialMoments(n_histories); //0th and 1st spatial moment
 	double angular_moment = _tally->getAngularMoment(n_histories); //angular moment
+	double cross_moment = _tally->getCrossMoment(n_histories);
 
 	//References for the additive error DOF
 	std::vector<double> err_dof(3);
@@ -88,6 +89,9 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	psi_avg_err = spatial_moments[0] * total_src_strength;
 	psi_x_err = 6. * (spatial_moments[1] - 0.5*spatial_moments[0])*total_src_strength;
 	psi_mu_err = 6. * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
+
+	//compute error in cross term
+	double psi_mu_x_err = 12.*(cross_moment - 0.5*(spatial_moments[1] + angular_moment) + 0.25*spatial_moments[0]);
 
 	//DEBUG STATEMENTS, THESE ARE NOT NECESSARILY PROBLEMS AS LONG AS THE RESIDUAL IS ZERO IN THIS ELEMENT
 	/*
@@ -110,6 +114,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	_psi_average += psi_avg_err;
 	_psi_x += psi_x_err;
 	_psi_mu += psi_mu_err;
+	_psi_mu_x += psi_mu_x_err;
 
 	//reset tallies to zero
 	_tally->reset();

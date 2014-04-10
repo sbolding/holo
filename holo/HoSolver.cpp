@@ -397,7 +397,7 @@ void HoSolver::computeProjectedAngularFlux()
 					sp_sum[0] += psi_avg_qp;
 					sp_sum[1] += 6.0*psi_avg_qp*(x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]; //these two lines could be replaced by a for loop if x,mu pnts in one vector
 					sp_sum[2] += 6.0*psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]; //basis function is based on unrefined half range element, because that is what we are projecting to
-					sp_sum[3] += 12.0*psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1] * (x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0];
+					sp_sum[3] += 12.0*(psi_avg_qp*(mu_pnts[i_qp] - sp_coors[1]) / sp_dimens[1]) * ((x_pnts[i_qp] - sp_coors[0]) / sp_dimens[0]);
 				}
 			}
 

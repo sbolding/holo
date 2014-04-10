@@ -13,7 +13,7 @@
 #include "ECMCTally.h"
 
 
-ECMCTally::ECMCTally() : _angular_moment(1, 1), _spatial_moments(1,2)
+ECMCTally::ECMCTally() : _angular_moment(1, 2), _spatial_moments(1,2)
 {}
 
 ECMCTally::~ECMCTally()
@@ -30,7 +30,12 @@ void ECMCTally::incrementScores(double weight, double path_length, double normal
 
 double ECMCTally::getAngularMoment(int n_histories)
 {
-	return _angular_moment.getScore(n_histories, 0); //there is only one angular bin
+	return _angular_moment.getScore(n_histories, 0,0); //there is only one angular bin
+}
+
+double ECMCTally::getCrossMoment(int n_histories)
+{
+	return _angular_moment.getScore(n_histories, 0, 1);
 }
 
 std::vector<double> ECMCTally::getSpatialMoments(int n_histories)

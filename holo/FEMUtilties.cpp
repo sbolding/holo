@@ -1,21 +1,28 @@
 #include "FEMUtilities.h"
 
-std::vector<double> GaussQuadrature::_weights = { 1., 1. };
-std::vector<double> GaussQuadrature::_gauss_points = { -0.5773502691896257, 0.5773502691896257 };
-
-GaussQuadrature::GaussQuadrature()
+GaussQuadrature::GaussQuadrature():
+_weights(), _gauss_points()
 {
 	_n_points = 2;
+	_weights = { 1., 1. };
+	_gauss_points = { -0.5773502691896257, 0.5773502691896257 };
 }
 
-GaussQuadrature::GaussQuadrature(int n_gauss_points)
+GaussQuadrature::GaussQuadrature(int n_gauss_points):
+_weights(), _gauss_points()
 {
-	if (n_gauss_points != 2)
+	if (n_gauss_points != 2 || n_gauss_points != 3)
 	{
-		std::cerr << "Only 2 point gauss quadrature available\n";
+		std::cerr << "Only 2 and 3 point quadrature currently available\n";
 		exit(1);
 	}
-	_n_points = 2;
+	_n_points = n_gauss_points;
+	case (_n_point):
+		switch
+	if (_n_points == 2)
+	{
+
+	}
 }
 
 int GaussQuadrature::getNumPoints()
