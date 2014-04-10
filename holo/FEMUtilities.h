@@ -25,7 +25,7 @@ private:
 public:
 
 	GaussQuadrature(); //default 2 gauss points
-	GaussQuadrature(int n_gauss_points); //currently only works for 2
+	GaussQuadrature(int n_gauss_points); //currently only works for 2 and 3
 	std::vector<double> getQuadraturePoints(double center, double width); //returns gauss points over the interval a to b
 	std::vector<double> getQuadratureWeights(double center, double width); //note, for a higherDimension domain weights have to be multiplied together
 	int getNumPoints();

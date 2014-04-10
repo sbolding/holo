@@ -79,10 +79,11 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	double cross_moment = _tally->getCrossMoment(n_histories);
 
 	//References for the additive error DOF
-	std::vector<double> err_dof(3);
+	std::vector<double> err_dof(4);
 	double & psi_avg_err = err_dof[0];
 	double & psi_x_err = err_dof[1];
 	double & psi_mu_err = err_dof[2];
+	double & psi_mu_x_err = err_dof[3];
 
 	//calculate moments based on LD closure, adding the moments from the tallies
 	//if standard MC, tallies are the the angular flux, else tallies are the additive error
@@ -91,7 +92,7 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 	psi_mu_err = 6. * (angular_moment - 0.5*spatial_moments[0])*total_src_strength;
 
 	//compute error in cross term
-	double psi_mu_x_err = 12.*(cross_moment - 0.5*(spatial_moments[1] + angular_moment) + 0.25*spatial_moments[0]);
+	psi_mu_x_err = 12.*(cross_moment - 0.5*(spatial_moments[1] + angular_moment) + 0.25*spatial_moments[0]);
 
 	//DEBUG STATEMENTS, THESE ARE NOT NECESSARILY PROBLEMS AS LONG AS THE RESIDUAL IS ZERO IN THIS ELEMENT
 	/*
@@ -118,6 +119,10 @@ void ECMCElement1D::computeAngularFLuxDOF(int n_histories, double & l2_error_ele
 
 	//reset tallies to zero
 	_tally->reset();
+
+	//temp debug
+	err_dof.pop_back();
+	//std::cout << "temporarily deleteing last error member\n";
 
 	//compute l2 relative error over element with quadrature
 	GaussQuadrature quad;

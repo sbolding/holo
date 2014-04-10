@@ -11,17 +11,25 @@ _weights(), _gauss_points()
 GaussQuadrature::GaussQuadrature(int n_gauss_points):
 _weights(), _gauss_points()
 {
-	if (n_gauss_points != 2 || n_gauss_points != 3)
+	if (n_gauss_points < 2 || n_gauss_points > 4)
 	{
 		std::cerr << "Only 2 and 3 point quadrature currently available\n";
 		exit(1);
 	}
 	_n_points = n_gauss_points;
-	case (_n_point):
-		switch
-	if (_n_points == 2)
+	switch (_n_points)
 	{
-
+	case(2):
+		_weights = { 1., 1. };
+		_gauss_points = { -0.5773502691896257, 0.5773502691896257 };
+		break;
+	case(3):
+		_weights = { 0.5555555555555556, 0.8888888888888888, 0.5555555555555556 };
+		_gauss_points = { -0.7745966692414834, 0.0L, 0.7745966692414834 };
+		break;
+	case(4):
+		_weights = { 0.3478548451374538, 0.6521451548625461, 0.6521451548625461, 0.3478548451374538 };
+		_gauss_points = { -0.8611363115940526, -0.3399810435848563, 0.3399810435848563, 0.8611363115940526 };
 	}
 }
 
