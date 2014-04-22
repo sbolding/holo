@@ -44,9 +44,9 @@ int main()
 	MaterialConstant mat(10, 0.0, 1.);
 
 	//Create a constant external source
-	ConstFixedSource q(ext_source);
+	MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
 	std::vector<double> a, b;
-	a = {0, 0.5};
+	a = {0, 0.0};
 	b = {4, 1};
 	cout << q.getHoMoments(a, b)[0] << endl;
 	cout << q.getHoMoments(a, b)[1] << endl;

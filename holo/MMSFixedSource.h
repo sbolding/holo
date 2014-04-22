@@ -17,6 +17,6 @@ public:
 	MMSFixedSource();
 	MMSFixedSource(double scalar_coeff, double x_coeff, double mu_coeff);
 	~MMSFixedSource();
-	virtual double getValue(const std::vector<double> coors) const; //evaluates function
+	virtual double getValue(const std::vector<double> & coors) const; //evaluates function
 };
 

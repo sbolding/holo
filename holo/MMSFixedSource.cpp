@@ -16,7 +16,7 @@ MMSFixedSource::~MMSFixedSource()
 {
 }
 
-double MMSFixedSource::getValue(const std::vector<double> coors) const
+double MMSFixedSource::getValue(const std::vector<double> & coors) const
 {
 	return _a + coors[0] * _a_x + coors[1] * _a_mu;
 }
