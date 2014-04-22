@@ -68,6 +68,7 @@
   <ItemGroup>
     <ClInclude Include="AliasSampler.h" />
     <ClInclude Include="AverageCosineData.h" />
+    <ClInclude Include="ConstFixedSource.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="CurrentElementTally.h" />
     <ClInclude Include="CurrentFaceTally.h" />
@@ -83,6 +84,7 @@
     <ClInclude Include="ElementTally.h" />
     <ClInclude Include="FaceTally.h" />
     <ClInclude Include="FEMUtilities.h" />
+    <ClInclude Include="FixedSourceFunctor.h" />
     <ClInclude Include="FluxElementTally.h" />
     <ClInclude Include="FluxFaceTally.h" />
     <ClInclude Include="GlobalConstants.h" />
@@ -96,6 +98,7 @@
     <ClInclude Include="MaterialConstant.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshController.h" />
+    <ClInclude Include="MMSFixedSource.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Node1D.h" />
     <ClInclude Include="numMatrix.h" />
@@ -113,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AliasSampler.cpp" />
+    <ClCompile Include="ConstFixedSource.cpp" />
     <ClCompile Include="CurrentElementTally.cpp" />
     <ClCompile Include="CurrentFaceTally.cpp" />
     <ClCompile Include="CWDParticle1D.cpp" />
@@ -127,6 +131,7 @@
     <ClCompile Include="ElementTally.cpp" />
     <ClCompile Include="FaceTally.cpp" />
     <ClCompile Include="FEMUtilties.cpp" />
+    <ClCompile Include="FixedSourceFunctor.cpp" />
     <ClCompile Include="FluxElementTally.cpp" />
     <ClCompile Include="FluxFaceTally.cpp" />
     <ClCompile Include="HoMesh.cpp" />
@@ -139,6 +144,7 @@
     <ClCompile Include="MaterialConstant.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshController.cpp" />
+    <ClCompile Include="MMSFixedSource.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Node1D.cpp" />
     <ClCompile Include="numMatrix.cpp" />

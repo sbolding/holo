@@ -7,6 +7,8 @@
 #include "RNG.h"
 #include "DataTransfer.h"
 #include <cmath>
+#include "ConstFixedSource.h"
+#include "MMSFixedSource.h"
 
 int main()
 {
@@ -35,11 +37,26 @@ int main()
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.00;
-	double convergence_tolerance = 10.E-6;
+	double convergence_tolerance = 50.E-4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.0, 15.);
+	MaterialConstant mat(10, 0.0, 1.);
+
+	//Create a constant external source
+	ConstFixedSource q(ext_source);
+	std::vector<double> a, b;
+	a = {0, 0.5};
+	b = {4, 1};
+	cout << q.getHoMoments(a, b)[0] << endl;
+	cout << q.getHoMoments(a, b)[1] << endl;
+	cout << q.getHoMoments(a, b)[2] << endl;
+	a = { 0 };
+	b = { 4 };
+	cout << q.getLoNodalValues(a, b)[0] << endl;
+	cout << q.getLoNodalValues(a, b)[1] << endl;
+	system("pause");
+	exit(1);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);

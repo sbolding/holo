@@ -165,6 +165,15 @@
     <ClInclude Include="FEMUtilities.h">
       <Filter>Header Files\Ho Files</Filter>
     </ClInclude>
+    <ClInclude Include="FixedSourceFunctor.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstFixedSource.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MMSFixedSource.h">
+      <Filter>Header Files\Shared Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -283,6 +292,15 @@
     </ClCompile>
     <ClCompile Include="FEMUtilties.cpp">
       <Filter>Source Files\Ho Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FixedSourceFunctor.cpp">
+      <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstFixedSource.cpp">
+      <Filter>Source Files\Shared Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MMSFixedSource.cpp">
+      <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
