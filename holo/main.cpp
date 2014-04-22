@@ -46,13 +46,13 @@ int main()
 	//Create a constant external source
 	MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
 	std::vector<double> a, b;
-	a = {0, 0.0};
-	b = {4, 1};
+	a = {2, 0.5};
+	b = {2, 1.0};
 	cout << q.getHoMoments(a, b)[0] << endl;
 	cout << q.getHoMoments(a, b)[1] << endl;
 	cout << q.getHoMoments(a, b)[2] << endl;
-	a = { 0 };
-	b = { 4 };
+	a = { 1 };
+	b = { 3 };
 	cout << q.getLoNodalValues(a, b)[0] << endl;
 	cout << q.getLoNodalValues(a, b)[1] << endl;
 	system("pause");
