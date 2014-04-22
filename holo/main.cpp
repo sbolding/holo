@@ -35,11 +35,11 @@ int main()
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.00;
-	double convergence_tolerance = 5.E-4;
+	double convergence_tolerance = 10.E-6;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.01, 0.99);
+	MaterialConstant mat(10, 0.0, 15.);
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
@@ -56,6 +56,8 @@ int main()
 	//Variables for checking convergence
 	std::vector<double> old_flux_vector(num_elems*(dimension+1),0.0);
 	std::vector<double> new_flux_vector(num_elems*(dimension+1));
+	double old_delta_phi_norm = 0.01;
+	double spectral_radius; //estimate of spectral radius estimated by change in scalar flux values
 	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3); //just for debugging purposes
 
 	while (true)
@@ -66,13 +68,13 @@ int main()
 		mesh_1D.getDiscScalarFluxVector(new_flux_vector); 
 
 		//Print LO scalar flux estimate
-		mesh_1D.printLDScalarFluxValues(cout);
+		//mesh_1D.printLDScalarFluxValues(cout);
 		if (i_holo_solves == 0)
 		{
 			mesh_1D.printLDScalarFluxValues(out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution
 		}
 
-		//Check convergence of solution (this should be placed before HO solve, it is just hear for printing abilities)
+		//Check convergence of solution 
 		double diff_sum_sq = 0.;
 		double old_sum_sq = 0.;
 		for (int i_vec = 0; i_vec < new_flux_vector.size(); i_vec++)
@@ -81,8 +83,14 @@ int main()
 			diff_sum_sq += diff*diff;
 			old_sum_sq += old_flux_vector[i_vec] * old_flux_vector[i_vec];
 		}
-		std::cout << "Convergence Norm of Flux Vector: " << std::sqrt(diff_sum_sq) / std::sqrt(old_sum_sq);
-		if (std::sqrt(diff_sum_sq) < convergence_tolerance*std::sqrt(old_sum_sq))
+		double diff_norm = std::sqrt(diff_sum_sq);
+		double relative_diff_norm = diff_norm / std::sqrt(old_sum_sq);
+		spectral_radius = std::sqrt(diff_sum_sq) / old_delta_phi_norm;
+		double error = std::abs(relative_diff_norm / (1. - spectral_radius));
+		std::cout << "Error estimate based on spectral radius: " << error << std::endl;
+		std::cout << "Spectral Radius = " << spectral_radius << " Relative Difference = " << 
+			relative_diff_norm << " Abs Diff Phi = " << diff_norm << std::endl;
+		if (error < convergence_tolerance)
 		{
 			std::cout << "\nConverged on iteration " << i_holo_solves << " to a relative precision"
 				<< " of " << convergence_tolerance << std::endl;
@@ -95,6 +103,7 @@ int main()
 		}
 		else
 		{
+			old_delta_phi_norm = diff_norm;
 			old_flux_vector = new_flux_vector;
 		}
 
@@ -106,16 +115,17 @@ int main()
 		}
 
 		//Solve high order system
-		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3);
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 2);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
-		ho_solver->printProjectedScalarFlux(std::cout);
-
+		
 		//Transfer HO estimated parameters to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);
 		data_transfer.updateLoSystem();
-		data_transfer.printAllLoData(std::cout);
-		//exit(123);
+		if (HoController::WRITE_ALL_LO_DATA)
+		{
+			data_transfer.printAllLoData(std::cout);
+		}
 
 		//update counter
 		i_holo_solves++;
@@ -127,3 +137,4 @@ int main()
 
 	return 0;
 }
+

@@ -30,7 +30,6 @@ public:
 		double volume, double normalized_position); //Using a normalized dir_cosine produces an always positive value for moment
 	std::vector<double> getSpatialMoments(int n_histories); //return the score for the spatial moment
 	double getAngularMoment(int n_histories); //return the score for angular moment
-	double getCrossMoment(int n_histories); //return the average of mu*x, where x is normalized
 	void reset(); //reset all values to zero
 };
 

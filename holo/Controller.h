@@ -29,13 +29,13 @@ namespace HoController
 	//output
 	const bool PARTICLE_BALANCE = false;
 	const bool WRITE_ALL_ANGULAR_FLUXES = false; //print out angular fluxes after each batch
-	const bool WRITE_RESIDUAL_NORMS = true;
+	const bool WRITE_RESIDUAL_NORMS = false;
 	const bool WRITE_RELATIVE_ERROR_NORMS = true; //print out the error after each batch, relative to norm of original psi
 	const bool WRITE_HISTORIES_COMPLETE = false;
 	const bool WRITE_BATCHES_COMPLETE = true;
-	const bool WRITE_MESH_EVERY_REFINEMENT = true;
-	const bool WRITE_HALF_RANGE_LO_FLUXES = true;
-	const bool WRITE_ALL_LO_DATA = true;
+	const bool WRITE_MESH_EVERY_REFINEMENT = false;
+	const bool WRITE_HALF_RANGE_LO_FLUXES = false;
+	const bool WRITE_ALL_LO_DATA = false;
 
 	//Sampling stuff
 	const int INPUT_SEED = 73907;

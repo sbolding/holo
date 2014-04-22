@@ -105,13 +105,12 @@ void HoSolver::solveSystem(std::ostream & out)
 			//check convergence
 			if (psi_l2_error / psi_ref_l2_norm < HoConstants::ECMC_REL_ERR_TOL)
 			{
-				out << "\nError converged on batch " << batch + 1 << " to a rel. tol. of "
+				out << "Error converged on batch " << batch + 1 << " to a rel. tol. of "
 					<< HoConstants::ECMC_REL_ERR_TOL << std::endl;
 				break;
 			}
 		}
 	
-
 		//debug outputs
 		if (HoController::WRITE_RELATIVE_ERROR_NORMS)
 		{
