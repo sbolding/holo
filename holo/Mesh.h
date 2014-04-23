@@ -58,6 +58,9 @@ public:
 	void printLDScalarFluxValues(std::ostream &out) const; //print results of lo order flux LD values (phi_r and phi_l)
 	void getDiscScalarFluxVector(std::vector<double> & out_vector) const; //copy scalar flux LD values to this vector;
 
+	//Source functor.  This is safe to be public because it has no data that can be set
+	FixedSourceFunctor * _ext_source_functor; //will not always be initialized
+
 	//Reading functions
 	int getNumElems() const;
 	int getNumNodes() const;
@@ -71,7 +74,7 @@ public:
 
 	//Setting functions. Currently easiest way to do non-isotropic BCs and external sources
 	void setExternalSource(double);
-	void setExternalSource(const FixedSourceFunctor & q); //pass in a fixed source functor q, which will set LD nodal values (Q_L Q_R) as needed
+	void setExternalSource(FixedSourceFunctor & q); //pass in a fixed source functor q, which will set LD nodal values (Q_L Q_R) as needed
 	void setBoundaryConditions(const std::vector<std::vector<double>> & ang_flux_moments); //ang_flux angular moments (avg, mu_slope, etc.) for each boundary of interest
 };
 

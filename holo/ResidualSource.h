@@ -50,7 +50,7 @@ protected:
 public:
 
 	~ResidualSource();
-	ResidualSource(Particle1D* particle);
+	ResidualSource(Particle1D* particle, FixedSourceFunctor & q);
 	virtual void sampleSourceParticle() = 0;
 	virtual double getTotalSourceStrength();
 

@@ -51,7 +51,7 @@ HoSolver::HoSolver(Mesh* mesh, int n_histories,
 	_sampling_method_index = HoMethods::sampling_map.at(sampling_method); //unsigned int that can be compared against global constants
 
 	//create source based on full particle class, the source constructor will update the particle class pointer
-	initializeSamplingSource();
+	initializeSamplingSource(*_lo_mesh->_ext_source_functor);
 
 	//create adaptive refinement class
 	_mesh_controller = new MeshController(_ho_mesh,exp_convg_constant,n_batches_to_avg);
@@ -298,12 +298,12 @@ void HoSolver::computeResidualSource()
 	//create new source
 	if (_sampling_method_index == HoMethods::STANDARD_SAMPLING)
 	{
-		_source = new StandardResidualSource(_particle);
+		_source = new StandardResidualSource(_particle, *_lo_mesh->_ext_source_functor);
 	}
 	else if (_sampling_method_index == HoMethods::STRATIFIED_SAMPLING)
 	{
 		//This function will increase the number of histories slightly to make sure that an even number of particles can be sampled from each element
-		_source = new StratifiedResidualSource(_particle, _n_histories);
+		_source = new StratifiedResidualSource(_particle, *_lo_mesh->_ext_source_functor, _n_histories);
 	}
 	else
 	{
@@ -312,12 +312,12 @@ void HoSolver::computeResidualSource()
 	}
 }
 
-void HoSolver::initializeSamplingSource()
+void HoSolver::initializeSamplingSource(FixedSourceFunctor & q)
 {
 	//Initially source is always a standard mc source of some kind
 //	_source = new LinDiscSource(_particle); //DOES NOT WORK FOR ANISOTROPIC BOUNDARIES, uses standard sampling, no stratified available for LinDiscSource
-	_source = new StratifiedResidualSource(_particle, _n_histories); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check}
-//	_source = new StandardResidualSource(_particle);
+	_source = new StratifiedResidualSource(_particle, q, _n_histories); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check}
+//	_source = new StandardResidualSource(_particle,q);
 }
 
 void HoSolver::computeProjectedAngularFlux()

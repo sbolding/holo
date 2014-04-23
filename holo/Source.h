@@ -7,6 +7,7 @@
 #include "Controller.h"
 #include "GlobalConstants.h"
 #include "ECMCElement1D.h"
+#include "FixedSourceFunctor.h"
 
 class Particle1D; //forward declaration
 
@@ -19,6 +20,7 @@ protected:
 	RNG* _rng;	//pointer to particles random number generator
 	double _vol_src_total; //The total volumetric source (p/sec)
 	double _BC_src_total; //The total BC source (p/sec)
+	FixedSourceFunctor* _ext_src_functor; //This is only used for computations in anisotropic sources
 
 	//Angle sampling methods
 	void sampleAngleIsotropic();
@@ -38,6 +40,7 @@ protected:
 
 public:
 	Source(Particle1D* particle);
+	Source(Particle1D* particle, FixedSourceFunctor *q); //if desired can pass in a functor that is needed for mapping to elements
 	~Source();
 
 	virtual void sampleSourceParticle() = 0; //samples a source particle direction and location

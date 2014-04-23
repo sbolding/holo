@@ -25,7 +25,8 @@ Mesh::Mesh()
 	exit(0);
 }
 
-Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* material, double* bc_values) //TODO currently constant material accross the problem
+Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* material, double* bc_values): //TODO currently constant material accross the problem
+_ext_source_functor(NULL) //this will not always be used
 {
 	//set fstream to dummy file
 	_dim = dim;
@@ -76,9 +77,7 @@ Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* materia
 			element_nodes.clear(); //reset temp vector
 		}
 
-		//Set boundary conditions
-		//*******************************************************************
-		//TODO Hard coded boundary condition values
+		//Set boundary conditions, currently only correct in 1D
 		//*******************************************************************
 		if (bc_values != NULL)
 		{
@@ -181,7 +180,7 @@ void Mesh::setExternalSource(double ext_source_constant)
 	}
 }
 
-void Mesh::setExternalSource(const FixedSourceFunctor & q)
+void Mesh::setExternalSource(FixedSourceFunctor & q)
 {
 	//Have the elements do the setting
 	std::vector<Element*>::const_iterator it_el;  //element iterator
@@ -193,6 +192,9 @@ void Mesh::setExternalSource(const FixedSourceFunctor & q)
 			q.getLoNodalValues( (*it_el)->getSpatialCoordinates(), 
 			(*it_el)->getElementDimensions())   );
 	}
+
+	//store the functor, going to need it
+	_ext_source_functor = &q;
 }
 
 void Mesh::setBoundaryConditions(const std::vector<std::vector<double>> & ang_flux_moments)

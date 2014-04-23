@@ -13,10 +13,24 @@ Source::~Source()
 	//do nothing
 }
 
-Source::Source(Particle1D* particle)
+Source::Source(Particle1D* particle) :
+_particle(particle),
+_ext_src_functor(NULL)
 {
 	_particle = particle;
 	_rng = particle->_rng; 
+	_vol_src_total = 0.0;
+	_BC_src_total = 0.0;
+
+	//make sure particle's pointer is to this source
+	_particle->_source = this;
+}
+
+Source::Source(Particle1D* particle, FixedSourceFunctor* q) :
+_particle(particle),
+_ext_src_functor(q)
+{
+	_rng = particle->_rng;
 	_vol_src_total = 0.0;
 	_BC_src_total = 0.0;
 
@@ -132,7 +146,13 @@ double Source::sampleLinDiscFunc1D(std::vector<double> nodal_values, double left
 void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el, double & tot_src_strength,
 	Element* spatial_element, ECMCElement1D* element)
 {
-	double angular_probability = element->getAngularWidth()/GlobalConstants::FOUR_PI;
+	//Determine if the source is isotropic.
+	bool is_isotropic = false;
+	if (_ext_src_functor == NULL) is_isotropic = true;
+	if (is_isotropic)
+	{
+		double angular_probability = element->getAngularWidth() / GlobalConstants::FOUR_PI;
+	}
 	if (element->hasChildren())
 	{
 		std::cerr << "No abstract elements should reach this function, mapExtSrcToElement in Source.cpp\n";

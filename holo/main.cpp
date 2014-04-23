@@ -41,7 +41,7 @@ int main()
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.00;
-	double convergence_tolerance = 5.e-4;
+	double convergence_tolerance = 50.e-4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -67,7 +67,7 @@ int main()
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-//	mesh_1D.setBoundaryConditions(bc_moments);
+	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;

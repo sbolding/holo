@@ -26,6 +26,7 @@
 #include "StandardResidualSource.h"
 #include "LinDiscSource.h"
 #include "CWDParticle1D.h"
+#include "FixedSourceFunctor.h"
 #include <vector>
 
 class HoSolver
@@ -51,7 +52,7 @@ protected:
 
 	//residual source handling functions
 	void computeResidualSource();
-	void initializeSamplingSource();
+	void initializeSamplingSource(FixedSourceFunctor & q);
 
 	//For computing projected half range fluxes on coarsest mesh, useful for data transfer to low order date
 	//Currently they are projected onto a BILINEAR finite element to ensure the LO data is computed exactly

@@ -2,7 +2,7 @@
 #include "Particle1D.h"
 #include <cmath>
 
-ResidualSource::ResidualSource(Particle1D* particle) : Source(particle)
+ResidualSource::ResidualSource(Particle1D* particle, FixedSourceFunctor & q) : Source(particle, &q)
 {
 	//member variables initialize
 	_face_src_total = 0.0;
@@ -285,8 +285,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	//Map external source (and scattering source if ECMC) onto each element
 	spatial_element = element->getSpatialElement();
 	double sigma_tot = spatial_element->getMaterial().getSigmaT(); //total cross section
-	mapExtSrcToElement(total_src_nodal_values_el, ext_source_mag, spatial_element, element); //determine external source nodal values over the element
-	convertNodalValuesToMoments(total_src_nodal_values_el, ext_source_LD_values, true); //if isotropic special case, Q_mu = 0.0
+	mapExtSrcToElement(ext_source_LD_values, ext_source_mag, spatial_element, element); //determine external source nodal values over the element
 
 	//compute residual LD values for the element
 	res_LD_values_el[0] = ext_source_LD_values[0] - sigma_tot*psi_avg

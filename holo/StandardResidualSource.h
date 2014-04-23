@@ -27,7 +27,7 @@ protected:
 public:
 
 	~StandardResidualSource();
-	StandardResidualSource(Particle1D* particle);
+	StandardResidualSource(Particle1D* particle, FixedSourceFunctor & q);
 	virtual void sampleSourceParticle();
 
 };

@@ -2,8 +2,8 @@
 #include "Particle1D.h" //Because a friend class, MUST include this here and not in the header file
 #include <cmath>
 
-StandardResidualSource::StandardResidualSource(Particle1D* particle) :
-ResidualSource(particle)
+StandardResidualSource::StandardResidualSource(Particle1D* particle, FixedSourceFunctor & q) :
+ResidualSource(particle, q)
 {
 	//Create sampler with alias sampling, let it normalize, delete unneccessary data
 	_face_source = new AliasSampler(_res_face_mags, false);
