@@ -70,3 +70,4 @@ std::vector<double> FixedSourceFunctor::getLoNodalValues(const std::vector<doubl
 	lo_moments[1] = ho_moments[0] + ho_moments[1]; //Q_R
 	return lo_moments;
 }
+

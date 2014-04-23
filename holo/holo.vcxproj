@@ -82,6 +82,7 @@
     <ClInclude Include="Element.h" />
     <ClInclude Include="Element1D.h" />
     <ClInclude Include="ElementTally.h" />
+    <ClInclude Include="ExactSolution.h" />
     <ClInclude Include="FaceTally.h" />
     <ClInclude Include="FEMUtilities.h" />
     <ClInclude Include="FixedSourceFunctor.h" />
@@ -129,6 +130,7 @@
     <ClCompile Include="Element.cpp" />
     <ClCompile Include="Element1D.cpp" />
     <ClCompile Include="ElementTally.cpp" />
+    <ClCompile Include="ExactSolution.cpp" />
     <ClCompile Include="FaceTally.cpp" />
     <ClCompile Include="FEMUtilties.cpp" />
     <ClCompile Include="FixedSourceFunctor.cpp" />

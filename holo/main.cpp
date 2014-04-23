@@ -31,8 +31,10 @@ int main()
 	int dimension = 1;
 	double width = 3.0; //cm
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	int num_elems = 50;
-	int n_ang_elements = 5; //number angles in half ranges
+	double bc_left = 0.25;
+	double bc_right = 0.25;
+	int num_elems = 20;
+	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
@@ -43,13 +45,23 @@ int main()
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, 1.0, 1.0);
 
+	//Array for simple isotropic boundary conditions
+	double* bc_values = new double[2];
+	bc_values[0] = bc_left;
+	bc_values[1] = bc_right;
+
+	//Vector of incident flux LD moments for more complicated anisotropic boundary conditions
+	std::vector<std::vector<double>> bc_moments;
+	bc_moments = { {bc_left, 0.0}, {bc_right, 0.0} };
+
 	//Create a constant external source
 	//MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
-	ConstFixedSource q(1.0); //constant source
+	ConstFixedSource q(ext_source); //constant source
 
 	//Create the mesh and elements;
-	Mesh mesh_1D(dimension, num_elems, width, &mat);
-	mesh_1D.setExternalSource(1.0);
+	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
+	mesh_1D.setExternalSource(q);
+	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;
@@ -64,7 +76,7 @@ int main()
 	std::vector<double> new_flux_vector(num_elems*(dimension+1));
 	double old_delta_phi_norm = 0.01;
 	double spectral_radius; //estimate of spectral radius estimated by change in scalar flux values
-	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3); //just for debugging purposes
+//	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3); //just for debugging purposes
 
 	while (true)
 	{
@@ -74,7 +86,7 @@ int main()
 		mesh_1D.getDiscScalarFluxVector(new_flux_vector); 
 
 		//Print LO scalar flux estimate
-//		mesh_1D.printLDScalarFluxValues(cout);
+		mesh_1D.printLDScalarFluxValues(cout);
 		if (i_holo_solves == 0)
 		{
 			mesh_1D.printLDScalarFluxValues(out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution
@@ -104,7 +116,7 @@ int main()
 			//		lo_solver->updateSystem();
 			mesh_1D.printLDScalarFluxValues(out_file);
 			mesh_1D.printLDScalarFluxValues(std::cout);
-			ho_solver->printProjectedScalarFlux(out_file);
+	//		ho_solver->printProjectedScalarFlux(out_file);
 			break;
 		}
 		else

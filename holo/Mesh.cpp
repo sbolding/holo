@@ -25,7 +25,7 @@ Mesh::Mesh()
 	exit(0);
 }
 
-Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* material) //TODO currently constant material accross the problem
+Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* material, double* bc_values) //TODO currently constant material accross the problem
 {
 	//set fstream to dummy file
 	_dim = dim;
@@ -80,11 +80,12 @@ Mesh::Mesh(int dim, int number_elements, double width, MaterialConstant* materia
 		//*******************************************************************
 		//TODO Hard coded boundary condition values
 		//*******************************************************************
-		std::vector<DirichletBC1D *> dirichlet_bcs;
-		dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], 0.25));
-		dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], 0.25));
-		_dirichlet_bcs = dirichlet_bcs;
-		_n_dirichlet_bc = dirichlet_bcs.size();
+		if (bc_values != NULL)
+		{
+			_dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], bc_values[0]));
+			_dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], bc_values[1]));
+			_n_dirichlet_bc = _dirichlet_bcs.size();
+		}
 	}	
 }
 
@@ -182,7 +183,7 @@ void Mesh::setExternalSource(double ext_source_constant)
 
 void Mesh::setExternalSource(const FixedSourceFunctor & q)
 {
-	//Have the elements do the printing
+	//Have the elements do the setting
 	std::vector<Element*>::const_iterator it_el;  //element iterator
 	it_el = _elements.begin();				//initialize iterator
 
@@ -191,12 +192,20 @@ void Mesh::setExternalSource(const FixedSourceFunctor & q)
 		(*it_el)->setExtSourceNodalValues(
 			q.getLoNodalValues( (*it_el)->getSpatialCoordinates(), 
 			(*it_el)->getElementDimensions())   );
-
-		//std::cout.precision(15);
-		//std::cout << "ID " << (*it_el)->getID();
-		//std::cout << " Q_L  " << std::scientific << (*it_el)->getExtSourceNodalValues()[0]
-		//	<< " Q_R  " << std::scientific << (*it_el)->getExtSourceNodalValues()[1] << std::endl;
 	}
+}
+
+void Mesh::setBoundaryConditions(const FixedSourceFunctor & q)
+{
+	if (_dim != 1)
+	{
+		std::cerr << "Boundary conditions in Mesh.cpp not implemented yet for higher dimensions\n";
+		exit(1);
+	}
+	_dirichlet_bcs.clear();   // need to clear incase already set
+	_dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], q));
+	_dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], q));
+	_n_dirichlet_bc = _dirichlet_bcs.size();
 }
 
 Element* Mesh::getElement(int element_id) const

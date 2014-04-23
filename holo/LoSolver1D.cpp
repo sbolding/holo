@@ -108,7 +108,7 @@ void LoSolver1D::assembleSystem()
 	{
 		//Get local vector to add for BC
 		(*it_bc)->getElement()->addDirichletBC(local_load_vector, global_eqn_indices, 
-			(*it_bc)->getValue(), (*it_bc)->getNode());
+			(*it_bc)->getCurrent(), (*it_bc)->getNode());
 
 		//Add boundary condition terms from the load vector, global
 		//eqn indices should be of length 2

@@ -301,7 +301,6 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	double r_left_plus = res_LD_values_el[0] - res_LD_values_el[1] + res_LD_values_el[2];
 	double r_left_minus = res_LD_values_el[0] - res_LD_values_el[1] - res_LD_values_el[2];
 
-
 	//this first block is for the special cases to eliminate divide by zero errors
 	if (std::abs(res_x) <= std::abs(res_avg)*GlobalConstants::RELATIVE_TOLERANCE) //x_slope~0
 	{
@@ -310,13 +309,31 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 			res_mag = std::abs(res_avg);
 		}
 		else //mu slope non-zero
-		{			
-			res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
+		{	
+			if (r_right_minus*r_right_plus > 0.0) //no sign change
+			{
+				res_mag = std::abs(res_avg);
+			}
+			else
+			{
+				res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
+				std::cout << "This has never been called yet, should be correct in ResidualSource.cpp" << std::endl;
+				exit(1);
+			}
 		}
 	}
 	else if (std::abs(res_mu) <= std::abs(res_avg)*GlobalConstants::RELATIVE_TOLERANCE) //mu_slope~0
 	{
-		res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
+		if (r_left_plus*r_right_plus > 0.0) //no sign change
+		{
+			res_mag = std::abs(res_avg);
+		}
+		else //sign change in x
+		{
+			res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
+			std::cout << "This has never been called yet, should be correct in ResidualSource.cpp" << std::endl;
+			exit(1);
+		}
 	}
 	//---
 	else if (r_left_plus*r_right_plus > 0.0) //no sign change on top
@@ -530,7 +547,7 @@ void ResidualSource::computeBCAngularFluxDof()
 
 	for (int i_bc = 0; i_bc < bcs.size(); i_bc++)
 	{
-		incident_current = bcs[i_bc]->getValue();	//p/sec entering the spatial cell
+		incident_current = bcs[i_bc]->getCurrent();	//p/sec entering the spatial cell
 		two_pi_incident_flux = 2.*incident_current; //This assumes incident flux is isotropic in halfspace and ECMC elements are azimuthally integrated
 
 		//map flux to boundary elements

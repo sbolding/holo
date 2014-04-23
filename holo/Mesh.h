@@ -48,7 +48,9 @@ protected:
 public:
 
     Mesh();                                          //Default constructor
-    Mesh(int dim, int number_elements, double width, MaterialConstant* material);   // pass in the number of elements as well as dimension
+	/* pass in the number of elements as well as dimension
+	The boundary conditions values r passed in from an array*/
+    Mesh(int dim, int number_elements, double width, MaterialConstant* material, double* bc_values = NULL );   
     Mesh(int dim, std::ifstream  input_file); //Constructor with a input file TODO not yet implemented
 
 	//Printing functions
@@ -67,10 +69,10 @@ public:
 	Element* getElement(int element_id) const;
 	int getFaceIndex(int element_id, int face_id) const; //get a face index using the connectivity array for tallying, face_id is 0 for left 1 for right, etc.
 
-	//Setting functions
+	//Setting functions. Currently easiest way to do non-isotropic BCs and external sources
 	void setExternalSource(double);
 	void setExternalSource(const FixedSourceFunctor & q); //pass in a fixed source functor q, which will set LD nodal values (Q_L Q_R) as needed
-	//void setExternalSource(void(*func_handle)); not implemented yet
+	void setBoundaryConditions(const std::vector<std::vector<double>> & ang_flux_moments); //ang_flux angular moments (avg, mu_slope, etc.) for each boundary of interest
 };
 
 #endif  //_MESH_H

@@ -67,7 +67,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 
 	for (int i_bc=0; i_bc < bcs.size(); i_bc++)
 	{
-		incident_current =  bcs[i_bc]->getValue();	//p/sec entering the region
+		incident_current =  bcs[i_bc]->getCurrent();	//p/sec entering the region
 		_BC_src_total += incident_current;
 		two_pi_incident_flux = 2.*incident_current; //p/sec-cm^2 This assumes incident flux is isotropic in halfspace
 
