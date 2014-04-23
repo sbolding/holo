@@ -34,11 +34,17 @@ private:
 public:
 
 	DirichletBC1D(int id, Element* element, Node* node, double incid_current); //Construction based on specified incoming current, assumes that incident FLUX is isotropic
-	DirichletBC1D(int id, Element* element, Node* node, std::vector<double> inc_flux_moments); //construct based on specified angular moments.  Useful for MMS solutions and anisotropic solutions
-
+	/*construct based on specified angular moments.  Useful for MMS solutions and anisotropic solutions.
+	The angular flux dof are exact over their respective half ranges, but the current is defined to always
+	be positive. Essentially, the BC angular flux DOF are treated as any other cell, and then current
+	is defined as always positive*/
+	DirichletBC1D(int id, Element* element, Node* node, std::vector<double> inc_flux_moments); 
 	//Public access functions
 	int getID() const;
 	double getCurrent() const;
+	std::vector<double> getAngularFluxDOF() const;
+	double getIncFluxAvg() const;
+	double getIncFluxAngMoment() const;
 	int getElementID() const;
 	Element* getElement() const;
 	Node* getNode() const;

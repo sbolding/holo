@@ -539,7 +539,7 @@ void ResidualSource::computeBCAngularFluxDof()
 	std::vector<int> bc_elem_IDs = _particle->_mesh->findUpwindBoundaryCells();
 	std::vector<double> bc_dof_el; //LD dof for each bc, for now isotropic so will only be the average term
 	ECMCElement1D* element;
-	double incident_current, two_pi_incident_flux, direction;
+	double direction, bc_avg, bc_mu, psi_avg, psi_mu; //"bc" dof are for an equivalent half range sized element, "psi" dof are for the actual element of interest
 	if (bcs.size() > 2)
 	{
 		std::cout << "Currently only implemented BCs for 1D problems, in ResidualSource.cpp\n";
@@ -547,14 +547,22 @@ void ResidualSource::computeBCAngularFluxDof()
 
 	for (int i_bc = 0; i_bc < bcs.size(); i_bc++)
 	{
-		incident_current = bcs[i_bc]->getCurrent();	//p/sec entering the spatial cell
-		two_pi_incident_flux = 2.*incident_current; //This assumes incident flux is isotropic in halfspace and ECMC elements are azimuthally integrated
-
+		bc_avg = bcs[i_bc]->getIncFluxAvg(); //average flux over half range
+		bc_mu = bcs[i_bc]->getIncFluxAngMoment(); //psi_mu over half range
+		
 		//map flux to boundary elements
 		for (int id = 0; id < bc_elem_IDs.size(); id++)
 		{
+			//get info about element
 			int el_id = bc_elem_IDs[id]; //id of current boundary element
 			element = _particle->_mesh->getElement(el_id);
+			double h_mu = element->getAngularWidth();
+			double mu_m = element->getAngularCoordinate(); //incident fluxes are defined over each appropriate half range - or + mu
+
+			//determine the value of mu on the boundary
+			double mu_bc = 0.5;
+			if (mu_m < 0.0) mu_bc *= -1.;
+
 			if (element->hasChildren())
 			{
 				std::cerr << "Error in computeBC in ResidualSource, only active elements should be passed from findUpwindBoundaryCells\n";
@@ -566,8 +574,10 @@ void ResidualSource::computeBCAngularFluxDof()
 			}
 			else
 			{
+				//Need to compute the average and mu moment over the projected ECMC element
 				bc_dof_el.assign(3, 0.0);
-				bc_dof_el[0] = two_pi_incident_flux; //fraction in this bin
+				bc_dof_el[0] = bc_avg + 2 * bc_mu*(mu_m - mu_bc);
+				bc_dof_el[2] = bc_mu*h_mu; //simply scaled by h_mu/h_bc = h_mu/(1.0)
 				_bc_dof.push_back(bc_dof_el);
 				_bc_element_to_dof_map[el_id] = _bc_dof.size() - 1; //index in bc_dof the last element corresponds to
 			}

@@ -20,8 +20,15 @@ _node(node)
 	_inc_flux_avg = inc_flux_moments[0];
 	_inc_flux_mu = inc_flux_moments[1];
 
-	//Calculate the half range current based on incident (\psi_inc = \psi_a + 2(mu+-0.5)\psi_mu)
-	_value_current = 0.5*(_inc_flux_avg + _inc_flux_mu / 3.);
+	if (node->getID() == 0) //left boundary condition
+	{
+		//Calculate the half range current based on incident (\psi_inc = \psi_a + 2(mu+-0.5)\psi_mu)
+		_value_current = 0.5*(_inc_flux_avg + _inc_flux_mu / 3.);
+	}
+	else //right boundary, inflow is opposite
+	{
+		_value_current = 0.5*(_inc_flux_avg - _inc_flux_mu / 3.);
+	}
 }
 
 int DirichletBC1D::getElementID() const
@@ -54,4 +61,21 @@ int DirichletBC1D::getNodeID() const
 	return _node->getID();
 }
 
+std::vector<double> DirichletBC1D::getAngularFluxDOF() const
+{
+	std::vector<double> dof;
+	dof.push_back(_inc_flux_avg);
+	dof.push_back(_inc_flux_mu);
+	return dof;
+}
+
+double DirichletBC1D::getIncFluxAvg() const
+{
+	return _inc_flux_avg;
+}
+
+double DirichletBC1D::getIncFluxAngMoment() const
+{
+	return _inc_flux_mu;
+}
 

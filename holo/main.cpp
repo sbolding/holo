@@ -30,20 +30,27 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 3.0; //cm
+	double sigma_a = 1.0;
+	double sigma_s = 25.0;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	double bc_left = 0.25;
-	double bc_right = 0.25;
+	double bc_left = 0.5;
+	double bc_right = 3.5;
 	int num_elems = 20;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.00;
-	double convergence_tolerance = 50.E-4;
+	double convergence_tolerance = 5.e-4;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 1.0, 1.0);
+	MaterialConstant mat(10, sigma_a, sigma_s);
+
+	//MMS factors
+	double a = 1.0;
+	double b = 2.0;
+	double c = 0.0;
 
 	//Array for simple isotropic boundary conditions
 	double* bc_values = new double[2];
@@ -52,16 +59,15 @@ int main()
 
 	//Vector of incident flux LD moments for more complicated anisotropic boundary conditions
 	std::vector<std::vector<double>> bc_moments;
-	bc_moments = { {bc_left*2, 0.0}, {bc_right*2, 0.0} };
+	bc_moments = { {a+0.5*c, c/2.}, {a+b*width-0.5*c, c/2.} };
 
 	//Create a constant external source
-	//MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
-	ConstFixedSource q(ext_source); //constant source
+	MMSFixedSource q(sigma_a*a*2.,2.*b*sigma_a,2.*(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
+	//ConstFixedSource q(ext_source); //constant source
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-	mesh_1D.setExternalSource(q);
-	mesh_1D.setBoundaryConditions(bc_moments);
+//	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;

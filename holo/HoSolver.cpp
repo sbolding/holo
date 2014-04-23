@@ -315,7 +315,7 @@ void HoSolver::computeResidualSource()
 void HoSolver::initializeSamplingSource()
 {
 	//Initially source is always a standard mc source of some kind
-//	_source = new LinDiscSource(_particle); //uses standard sampling, no stratified available for LinDiscSource
+//	_source = new LinDiscSource(_particle); //DOES NOT WORK FOR ANISOTROPIC BOUNDARIES, uses standard sampling, no stratified available for LinDiscSource
 	_source = new StratifiedResidualSource(_particle, _n_histories); //could just use residual source since initially residual is just the ext_source lin_disc, but I use LinDiscSource for debugging and sanity check}
 //	_source = new StandardResidualSource(_particle);
 }
