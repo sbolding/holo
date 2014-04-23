@@ -33,8 +33,8 @@ private:
 
 public:
 
-	DirichletBC1D(int id, Element* element, Node* node, double incid_current); //Construction based on specified incoming current
-	DirichletBC1D(int id, Element* element, Node* node, const FixedSourceFunctor & q); //construct based on evaluation of q at boundaries.  Useful for MMS solutions
+	DirichletBC1D(int id, Element* element, Node* node, double incid_current); //Construction based on specified incoming current, assumes that incident FLUX is isotropic
+	DirichletBC1D(int id, Element* element, Node* node, std::vector<double> inc_flux_moments); //construct based on specified angular moments.  Useful for MMS solutions and anisotropic solutions
 
 	//Public access functions
 	int getID() const;

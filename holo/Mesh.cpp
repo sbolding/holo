@@ -195,7 +195,7 @@ void Mesh::setExternalSource(const FixedSourceFunctor & q)
 	}
 }
 
-void Mesh::setBoundaryConditions(const FixedSourceFunctor & q)
+void Mesh::setBoundaryConditions(const std::vector<std::vector<double>> & ang_flux_moments)
 {
 	if (_dim != 1)
 	{
@@ -203,8 +203,8 @@ void Mesh::setBoundaryConditions(const FixedSourceFunctor & q)
 		exit(1);
 	}
 	_dirichlet_bcs.clear();   // need to clear incase already set
-	_dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], q));
-	_dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], q));
+	_dirichlet_bcs.push_back(new DirichletBC1D(0, _elements[0], _nodes[0], ang_flux_moments[0]));
+	_dirichlet_bcs.push_back(new DirichletBC1D(1, _elements[_n_elems - 1], _nodes[_n_nodes - 1], ang_flux_moments[1]));
 	_n_dirichlet_bc = _dirichlet_bcs.size();
 }
 

@@ -7,8 +7,8 @@ DirichletBC1D::DirichletBC1D(int id, Element* element, Node* node, double val)
 	_element = element;
 	_node = node;
 	_value_current = val;
-
-	//Need to set the other stuff
+	_inc_flux_avg = 2.0*_value_current;
+	_inc_flux_mu = 0.0L;
 }
 
 DirichletBC1D::DirichletBC1D(int id, Element* element, Node* node, std::vector<double> inc_flux_moments) :
@@ -16,11 +16,12 @@ _id(id),
 _element(element),
 _node(node)
 {
-	//Calculate the half range current using q
-	
-	q.getLoNodalValues()
-	
+	//set incident flux moments
+	_inc_flux_avg = inc_flux_moments[0];
+	_inc_flux_mu = inc_flux_moments[1];
 
+	//Calculate the half range current based on incident (\psi_inc = \psi_a + 2(mu+-0.5)\psi_mu)
+	_value_current = 0.5*(_inc_flux_avg + _inc_flux_mu / 3.);
 }
 
 int DirichletBC1D::getElementID() const

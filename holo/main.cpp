@@ -52,7 +52,7 @@ int main()
 
 	//Vector of incident flux LD moments for more complicated anisotropic boundary conditions
 	std::vector<std::vector<double>> bc_moments;
-	bc_moments = { {bc_left, 0.0}, {bc_right, 0.0} };
+	bc_moments = { {bc_left*2, 0.0}, {bc_right*2, 0.0} };
 
 	//Create a constant external source
 	//MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
