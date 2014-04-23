@@ -85,7 +85,8 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
 		}
 
 		//store x_center at the end for easy access next time
-		double x_center_start = x_center;
+		double x_center_start;
+		x_center_start = x_center;
 
 		//Construct elements for positive flow direction, traverse loop up stream
 		for (int i_ang = 0; i_ang < n_ang_cells_half_range; i_ang++)

@@ -41,26 +41,15 @@ int main()
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
-	MaterialConstant mat(10, 0.0, 1.);
+	MaterialConstant mat(10, 1.0, 1.0);
 
 	//Create a constant external source
-	MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
-	std::vector<double> a, b;
-	a = {2, 0.5};
-	b = {2, 1.0};
-	cout << q.getHoMoments(a, b)[0] << endl;
-	cout << q.getHoMoments(a, b)[1] << endl;
-	cout << q.getHoMoments(a, b)[2] << endl;
-	a = { 1 };
-	b = { 3 };
-	cout << q.getLoNodalValues(a, b)[0] << endl;
-	cout << q.getLoNodalValues(a, b)[1] << endl;
-	system("pause");
-	exit(1);
+	//MMSFixedSource q(1,2,4); //bilinear function, average, x coeff, mu coeff
+	ConstFixedSource q(1.0); //constant source
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat);
-	mesh_1D.setExternalSource(ext_source);
+	mesh_1D.setExternalSource(1.0);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;
@@ -85,7 +74,7 @@ int main()
 		mesh_1D.getDiscScalarFluxVector(new_flux_vector); 
 
 		//Print LO scalar flux estimate
-		//mesh_1D.printLDScalarFluxValues(cout);
+//		mesh_1D.printLDScalarFluxValues(cout);
 		if (i_holo_solves == 0)
 		{
 			mesh_1D.printLDScalarFluxValues(out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution
@@ -135,6 +124,7 @@ int main()
 		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 2);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
+		ho_solver->printProjectedScalarFlux(std::cout);
 		
 		//Transfer HO estimated parameters to the LO system
 		DataTransfer data_transfer(ho_solver, &mesh_1D);

@@ -330,3 +330,10 @@ std::vector<double> Element1D::getNodalCoordinates() const
 	locations[1] = _nodes[1]->getX();
 	return locations;
 }
+
+std::vector<double> Element1D::getSpatialCoordinates() const
+{
+	std::vector<double> locations(1);
+	locations[0] = 0.5*(_nodes[0]->getX() + _nodes[1]->getX());
+	return locations;
+}

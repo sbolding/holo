@@ -68,6 +68,5 @@ std::vector<double> FixedSourceFunctor::getLoNodalValues(const std::vector<doubl
 	std::vector<double> lo_moments(2);
 	lo_moments[0] = ho_moments[0] - ho_moments[1]; //Q_L
 	lo_moments[1] = ho_moments[0] + ho_moments[1]; //Q_R
-
 	return lo_moments;
 }

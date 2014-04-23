@@ -65,6 +65,7 @@ public:
 	virtual void printLDScalarFluxValues(std::ostream &out) const; //Print out the LD scalar flux and nodes
 	virtual std::vector<double> getElementDimensions() const; //For 1D, return the width of the element
 	virtual std::vector<double> getNodalCoordinates(void) const; //returns a vector of the nodal coordinates of the element
+	virtual std::vector<double> getSpatialCoordinates(void) const; //returns a vector of the coordinates corresponding to the center of spatial element
 };
 
 #endif  //_ELEMENT1D_H

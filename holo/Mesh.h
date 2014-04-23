@@ -26,6 +26,7 @@
 #include <vector>
 #include "MaterialConstant.h"
 #include "DirichletBC1D.h"
+#include "FixedSourceFunctor.h"
 
 class Mesh
 {
@@ -67,7 +68,8 @@ public:
 	int getFaceIndex(int element_id, int face_id) const; //get a face index using the connectivity array for tallying, face_id is 0 for left 1 for right, etc.
 
 	//Setting functions
-	void setExternalSource(double) const;
+	void setExternalSource(double);
+	void setExternalSource(const FixedSourceFunctor & q); //pass in a fixed source functor q, which will set LD nodal values (Q_L Q_R) as needed
 	//void setExternalSource(void(*func_handle)); not implemented yet
 };
 
