@@ -163,6 +163,13 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
 		std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
 		std::vector<double> scat_src_avg_slope; //convert edge values to average and slope
+
+		//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
+		std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
+		double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
+		double x_right_el = x_left_el + element->getSpatialWidth();
+		std::vector<double> q_nodal_values_el(2);
+
 		FEMUtilities::convertEdgeValuesToAvgSlope1D(scat_src_nodal_values_el, scat_src_avg_slope); 
 		
 		//initialize values to isotropic external source moments (p/(sec str))

@@ -66,12 +66,12 @@ int main()
 	bc_moments = { {a+0.5*c, c/2.}, {a+b*width-0.5*c, c/2.} };
 
 	//Create a constant external source
-	MMSFixedSource q(sigma_a*a,b*sigma_a,(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
-	//ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
+	//MMSFixedSource q(sigma_a*a,b*sigma_a,(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
+	ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-	mesh_1D.setExternalSource(1.0);
+	mesh_1D.setExternalSource(ext_source);
 //	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
