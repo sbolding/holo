@@ -168,7 +168,7 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 		//initialize values to isotropic external source moments (p/(sec str))
 		for (int mom = 0; mom < scat_src_avg_slope.size(); mom++)
 		{
-			ext_src_ld_dof[mom] += scat_src_nodal_values_el[mom] * sigma_s_el/GlobalConstants::FOUR_PI; //phi*_sigma_s, we want 4pi here
+			ext_src_ld_dof[mom] += scat_src_avg_slope[mom] * sigma_s_el/GlobalConstants::FOUR_PI; //phi*_sigma_s/4pi
 		}
 	}
 	

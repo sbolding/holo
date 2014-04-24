@@ -31,7 +31,7 @@ int main()
 	int dimension = 1;
 	double width = 3.0; //cm
 	double sigma_a = 1.0;
-	double sigma_s = 0.001;
+	double sigma_s = 1.0;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 1.0;
 	double bc_right = 7.0;
@@ -49,12 +49,12 @@ int main()
 
 	//MMS factors
 	double a = 0.5;
-	double b = 0.0;
+	double b = 1.0;
 	double c = 0.0;
 
 	//for isotropic case
-	bc_left = a / 2.;
-	bc_right = a / 2. + b*width / 2.;
+//	bc_left = a / 2.;
+//	bc_right = a / 2. + b*width / 2.;
 
 	//Array for simple isotropic boundary conditions
 	double* bc_values = new double[2];
@@ -66,12 +66,12 @@ int main()
 	bc_moments = { {a+0.5*c, c/2.}, {a+b*width-0.5*c, c/2.} };
 
 	//Create a constant external source
-	//MMSFixedSource q(sigma_a*a*2.,2.*b*sigma_a,2.*(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
-	ConstFixedSource q(ext_source); //constant source
+	MMSFixedSource q(sigma_a*a,b*sigma_a,(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
+	//ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
 
 	//Create the mesh and elements;
-	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-	mesh_1D.setExternalSource(ext_source);
+	Mesh mesh_1D(dimension, num_elems, width, &mat);
+	mesh_1D.setExternalSource(q);
 	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
@@ -94,10 +94,12 @@ int main()
 		//solve lo order system
 		lo_solver->solveSystem();
 		lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
-		mesh_1D.getDiscScalarFluxVector(new_flux_vector); 
-
+		mesh_1D.getDiscScalarFluxVector(new_flux_vector);
+		
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(cout);
+		exit(1);
+
 		if (i_holo_solves == 0)
 		{
 			mesh_1D.printLDScalarFluxValues(out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution

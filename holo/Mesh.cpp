@@ -191,7 +191,14 @@ void Mesh::setExternalSource(FixedSourceFunctor & q)
 		(*it_el)->setExtSourceNodalValues(
 			q.getLoNodalValues( (*it_el)->getSpatialCoordinates(), 
 			(*it_el)->getElementDimensions())   );
+
+		std::cout.precision(5);
+		std::cout << "ID " << (*it_el)->getID();
+		std::cout << " Q_L  " << std::scientific << (*it_el)->getExtSourceNodalValues()[0]
+			<< " Q_R  " << std::scientific << (*it_el)->getExtSourceNodalValues()[1] << std::endl;
+
 	}
+//	system("pause");
 
 	//store the functor, going to need it
 	_ext_source_functor = &q;

@@ -8,9 +8,6 @@
 // just need to override the constructor for the spatial moments
 // class.
 //
-// This class can create Dirichlet boundary condition classes
-// based on function evaluations, if desired
-//
 //
 //  @ Project : Untitled
 //  @ File Name : FixedSourceFunctorFunctor.h
@@ -44,7 +41,8 @@ public:
 	std::vector<double> getHoMoments(const std::vector<double> & coors, const std::vector<double> & dimens) const;
 
 	//virtual function evalation
-	virtual double getValue(const std::vector<double> & coordinates) const = 0; //evaluate function at coordinates, e.g., x,mu, in domain
+	virtual double getValue(const std::vector<double> & coordinates) const = 0; //evaluate function at coordinates, e.g., x,mu, in domain. 
+	//NOTE: the value of the functor is in terms of PARTICLES/STERADIAN
 };
 
 

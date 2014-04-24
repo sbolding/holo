@@ -1,4 +1,5 @@
 #include "FixedSourceFunctor.h"
+#include "GlobalConstants.h"
 
 FixedSourceFunctor::FixedSourceFunctor()
 {
@@ -66,9 +67,9 @@ std::vector<double> FixedSourceFunctor::getLoNodalValues(const std::vector<doubl
 	std::vector<double> ho_moments(getHoMoments(coors, dimens));
 
 	//compute LO edge values.  The average in angle is equivalent to integral over 0,1 d\mu
-	std::vector<double> lo_moments(2);
-	lo_moments[0] = ho_moments[0] - ho_moments[1]; //Q_L
-	lo_moments[1] = ho_moments[0] + ho_moments[1]; //Q_R
-	return lo_moments;
+	std::vector<double> lo_nodal_vals(2);
+	lo_nodal_vals[0] = GlobalConstants::FOUR_PI*(ho_moments[0] - ho_moments[1]); //Q_L, 4pi is because currently it is an azimuthal average in lo equations
+	lo_nodal_vals[1] = GlobalConstants::FOUR_PI*(ho_moments[0] + ho_moments[1]); //Q_R
+	return lo_nodal_vals;
 }
 

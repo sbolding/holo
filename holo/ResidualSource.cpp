@@ -331,11 +331,11 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		}
 	}
 	//---
-	else if (r_left_plus*r_right_plus > 0.0) //no sign change on top
+	else if (r_left_plus*r_right_plus >= 0.0) //no sign change on top
 	{
 		if (r_left_minus*r_right_minus > 0.0) //no change on bottom
 		{
-			if (r_left_plus*r_left_minus > 0.0) //no change at all
+			if (r_left_plus*r_left_minus >= 0.0) //no change at all
 			{
 				res_mag = std::abs(res_LD_values_el[0]);
 			}
