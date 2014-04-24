@@ -62,7 +62,8 @@ void LoSolver1D::assembleSystem()
 	{
 		//Get local matrix and vector terms to add to LHS and RHS for this element
 		//This function also returns the corresponding equation numbers
-		(*it_el)->getElementMomentMatrix(local_moment_matrix, local_load_vector, global_eqn_indices);
+		(*it_el)->getElementMomentMatrix(local_moment_matrix, 
+			local_load_vector, global_eqn_indices, _mesh->_ext_source_functor);
 
 		//Add local matrix to global matrix //TODO this is probalby not going to work in multidimension
 		for (int i_row = 0; i_row < n_element_dof; i_row++)

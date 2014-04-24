@@ -13,7 +13,6 @@
 
 #include "Element.h"
 #include "Node.h"
-#include "FixedSourceFunctor.h"
 
 class DirichletBC1D
 {

@@ -52,7 +52,7 @@ public:
 	virtual void setElementDof(std::vector<double> elem_dofs);  //Set element DOF's based on solution vector TODO not verified yet
 	virtual std::vector<int> getEqnNumbers(void) const;		//Get the equation numbers corresponding to each DOF
 	virtual void getElementMomentMatrix(numMatrix* M, numVector* b, 
-		std::vector<int> &eqns) const;	//Returns the moment equations for an element, including upwinded terms.  
+		std::vector<int> &eqns, FixedSourceFunctor* q=NULL) const;	//Returns the moment equations for an element, including upwinded terms.  
 	virtual void addDirichletBC(numVector* b, std::vector<int> &eqns,
 		double value, Node* node) const;  //Will return values to modify global matrix and vector correctly
 	virtual void getPosUpwinding(std::vector<double> &pos_upwind_values, int &eqn, std::vector<int> &cols) const;		//Will return upwinding terms in + dir, which row, and which cols

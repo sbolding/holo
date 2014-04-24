@@ -90,7 +90,7 @@ std::vector<int> Element1D::getEqnNumbers(void) const
 	return eqn_numbers;
 }
 
-void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<int> &eqns) const
+void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<int> &eqns, FixedSourceFunctor* src_funct) const
 {
 	using EquationMaps1D::DOF_MAP;
 	using EquationMaps1D::EQN_MAP;
@@ -117,10 +117,37 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	//DOF_MAP[3] refers to < . >_R^- term
 	//
 	//EQN_MAP is used to add terms to appropriate row, same ordering as DOF_MAP
+
+	//source values may be anisotropic for the case of MMS
+	double source_value_left_plus;
+	double source_value_right_plus;
+	double source_value_left_minus;
+	double source_value_right_minus;
 	
-	//Same source term for + and - equations for each spatial moment eqn (_L and _R)
-	double source_value_left = _h/FOUR_PI * (2. / 3.*_ext_source_nodal_values[0] + 1. / 3.*_ext_source_nodal_values[1]);
-	double source_value_right = _h/FOUR_PI * (1. / 3.*_ext_source_nodal_values[0] + 2. / 3.*_ext_source_nodal_values[1]);
+	if (src_funct == NULL)
+	{
+		//If isotropic, same source term for + and - equations for each spatial moment eqn (_L and _R)
+		source_value_left_plus = _h / FOUR_PI * (2. / 3.*_ext_source_nodal_values[0] + 1. / 3.*_ext_source_nodal_values[1]);
+		source_value_right_plus = _h / FOUR_PI * (1. / 3.*_ext_source_nodal_values[0] + 2. / 3.*_ext_source_nodal_values[1]);
+		source_value_left_minus = source_value_left_plus;
+		source_value_right_minus = source_value_right_plus;
+	}
+	else
+	{
+	
+		//use functor to get nodal values of angular averaged source (p/(sec-cm^3-STR))
+		std::vector<double> q_plus_nodal_vals = src_funct->getLoNodalValues(
+			getSpatialCoordinates(), getElementDimensions(), 1.);
+		std::vector<double> q_minus_nodal_vals = src_funct->getLoNodalValues(
+			getSpatialCoordinates(), getElementDimensions(), -1.);
+
+		//evaluate left and right moments.  The factor of FOUR_PI is included in both locations
+		source_value_left_plus = _h * (2. / 3.*q_plus_nodal_vals[0] + 1. / 3.*q_plus_nodal_vals[1]);
+		source_value_right_plus = _h * (1. / 3.*q_plus_nodal_vals[0] + 2. / 3.*q_plus_nodal_vals[1]);
+		source_value_left_minus = _h  * (2. / 3.*q_minus_nodal_vals[0] + 1. / 3.*q_minus_nodal_vals[1]);
+		source_value_right_minus = _h * (1. / 3.*q_minus_nodal_vals[0] + 2. / 3.*q_minus_nodal_vals[1]);
+		
+	}
 
 	//Add in terms for < . >_L^+ equation
 	// The order is changed by eqn map, because we want this equation to always be first to limit band size of matrix
@@ -132,7 +159,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	value = -_h* (sigma_s / FOUR_PI);
 	M->addCoeff(EQN_MAP[0], DOF_MAP[2], value);
 	M->addCoeff(EQN_MAP[0], DOF_MAP[3], 0.0);
-	b->addCoeff(EQN_MAP[0], source_value_left);  
+	b->addCoeff(EQN_MAP[0], source_value_left_plus);  
 
 	//Add in terms for < . >_R^+ equation
 	//----------------------------------------------------------------------------------------------------
@@ -143,7 +170,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	M->addCoeff(EQN_MAP[1], DOF_MAP[2], 0.0);
 	value = -_h* (sigma_s / FOUR_PI);
 	M->addCoeff(EQN_MAP[1], DOF_MAP[3], value);
-	b->addCoeff(EQN_MAP[1], source_value_right); 
+	b->addCoeff(EQN_MAP[1], source_value_right_plus); 
 
 	//Add in terms for < . >_L^- equation
 	//----------------------------------------------------------------------------------------------------
@@ -154,7 +181,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	M->addCoeff(EQN_MAP[2], DOF_MAP[2], value);
 	value = -2.*surf_mu._mu_left_minus*(1. - alpha) + vol_mu._mu_right_minus;
 	M->addCoeff(EQN_MAP[2], DOF_MAP[3], value);
-	b->addCoeff(EQN_MAP[2], source_value_left);  
+	b->addCoeff(EQN_MAP[2], source_value_left_minus);  
 
 	//Add in terms for < . >_R^- equation
 	// The order is changed here, because we want this equation to always be last to limit band size of matrix
@@ -166,7 +193,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	M->addCoeff(EQN_MAP[3], DOF_MAP[2], value);
 	value = sigma_t*_h - (sigma_s*_h / FOUR_PI) - vol_mu._mu_right_minus;
 	M->addCoeff(EQN_MAP[3], DOF_MAP[3], value);
-	b->addCoeff(EQN_MAP[3], source_value_right);  //TODO need to make this not a constant
+	b->addCoeff(EQN_MAP[3], source_value_right_plus);  //TODO need to make this not a constant
 
 	eqns = getEqnNumbers(); //set the equation numbers correctly
 }

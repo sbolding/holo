@@ -182,25 +182,9 @@ void Mesh::setExternalSource(double ext_source_constant)
 
 void Mesh::setExternalSource(FixedSourceFunctor & q)
 {
-	//Have the elements do the setting
-	std::vector<Element*>::const_iterator it_el;  //element iterator
-	it_el = _elements.begin();				//initialize iterator
-
-	for (; it_el != _elements.end(); ++it_el)
-	{
-		(*it_el)->setExtSourceNodalValues(
-			q.getLoNodalValues( (*it_el)->getSpatialCoordinates(), 
-			(*it_el)->getElementDimensions())   );
-
-		std::cout.precision(5);
-		std::cout << "ID " << (*it_el)->getID();
-		std::cout << " Q_L  " << std::scientific << (*it_el)->getExtSourceNodalValues()[0]
-			<< " Q_R  " << std::scientific << (*it_el)->getExtSourceNodalValues()[1] << std::endl;
-
-	}
-//	system("pause");
-
-	//store the functor, going to need it
+	//store the functor.  You could set the edge valeus if functor is isotropic,
+	//but in general no need to do that because the functor case will be handled
+	//correctly.
 	_ext_source_functor = &q;
 }
 

@@ -19,6 +19,7 @@
 #include "MaterialConstant.h"
 #include "Dof.h"
 #include "numMatrix.h"
+#include "FixedSourceFunctor.h"
 
 class Element
 {
@@ -67,7 +68,7 @@ public:
 	//For constructing the system
 	virtual std::vector<int> getEqnNumbers(void) const = 0;		//Get the equation numbers corresponding to each DOF
 	virtual void getElementMomentMatrix(numMatrix* M, numVector* b,
-		std::vector<int> &eqns) const = 0;	//Returns the moment equations for an element, including upwinded terms.  
+		std::vector<int> &eqns, FixedSourceFunctor *q = NULL) const = 0;	//Returns the moment equations for an element, including upwinded terms.  
 	virtual void addDirichletBC(numVector* b, std::vector<int> &eqns,
 		double value, Node* node) const = 0;  //Will return values to modify global vector correctly, TODO bad coding
 	virtual void getPosUpwinding(std::vector<double> &values, int &eqn,

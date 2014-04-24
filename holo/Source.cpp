@@ -177,7 +177,18 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 	{
 		std::vector<double> q_nodal_values_spat_el(spatial_element->getExtSourceNodalValues()); //initialize to ext source values, this has units of particles/sec-cm
 		std::vector<double> q_moments_int; //integrated over angle
-		FEMUtilities::convertEdgeValuesToAvgSlope1D(q_nodal_values_spat_el, q_moments_int);
+
+		//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
+		std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
+		double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
+		double x_right_el = x_left_el + element->getSpatialWidth();
+		std::vector<double> q_nodal_values_el(2);
+		q_nodal_values_el[0] = evalLinDiscFunc1D(q_nodal_values_spat_el, spatial_x_coors, x_left_el);
+		q_nodal_values_el[1] = evalLinDiscFunc1D(q_nodal_values_spat_el, spatial_x_coors, x_right_el);
+
+		//convert ECMC element values
+		FEMUtilities::convertEdgeValuesToAvgSlope1D(q_nodal_values_el, q_moments_int);
+
 
 		//add the isotropic values to the totals
 		for (int mom = 0; mom < q_moments_int.size(); mom++)

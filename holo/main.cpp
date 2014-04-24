@@ -33,8 +33,8 @@ int main()
 	double sigma_a = 1.0;
 	double sigma_s = 1.0;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
-	double bc_left = 1.0;
-	double bc_right = 7.0;
+	double bc_left = 0.0;
+	double bc_right = 0.0;
 	int num_elems = 20;
 	int n_ang_elements = 2; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
@@ -70,7 +70,7 @@ int main()
 	//ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
 
 	//Create the mesh and elements;
-	Mesh mesh_1D(dimension, num_elems, width, &mat);
+	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
 	mesh_1D.setExternalSource(q);
 	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
@@ -87,7 +87,7 @@ int main()
 	std::vector<double> new_flux_vector(num_elems*(dimension+1));
 	double old_delta_phi_norm = 0.01;
 	double spectral_radius; //estimate of spectral radius estimated by change in scalar flux values
-//	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3); //just for debugging purposes
+	ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 3); //just for debugging purposes
 
 	while (true)
 	{
@@ -98,7 +98,7 @@ int main()
 		
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(cout);
-		exit(1);
+//		exit(1);
 
 		if (i_holo_solves == 0)
 		{
@@ -129,7 +129,7 @@ int main()
 			//		lo_solver->updateSystem();
 			mesh_1D.printLDScalarFluxValues(out_file);
 			mesh_1D.printLDScalarFluxValues(std::cout);
-	//		ho_solver->printProjectedScalarFlux(out_file);
+			ho_solver->printProjectedScalarFlux(out_file);
 			break;
 		}
 		else

@@ -57,19 +57,31 @@ std::vector<double> FixedSourceFunctor::getHoMoments(const std::vector<double> &
 	return ho_moments;
 }
 
-std::vector<double> FixedSourceFunctor::getLoNodalValues(const std::vector<double> & spatial_coors, const std::vector<double> & spatial_dimens) const
+std::vector<double> FixedSourceFunctor::getLoNodalValues(const std::vector<double> & spatial_coors, const std::vector<double> & spatial_dimens,
+	double angular_coordinate) const
 {
 	//Return Q_L and Q_R for 1D (edge values, not moments).  Easiest way to do it is by calling ho moments and adjusting
+	//Determine if on positive or negative halfrange element
+	double mu_center;
+	if (angular_coordinate < 0.0)
+	{
+		mu_center = -0.5;
+	}
+	else
+	{
+		mu_center = 0.5;
+	}
+
 	std::vector<double> coors(spatial_coors.begin(), spatial_coors.end());
-	coors.push_back(0.5);  //Add Half range coordinate
+	coors.push_back(mu_center);  //Add Half range coordinate
 	std::vector<double> dimens(spatial_dimens.begin(), spatial_dimens.end());
 	dimens.push_back(1.0); //Add Half range angular width
 	std::vector<double> ho_moments(getHoMoments(coors, dimens));
 
 	//compute LO edge values.  The average in angle is equivalent to integral over 0,1 d\mu
 	std::vector<double> lo_nodal_vals(2);
-	lo_nodal_vals[0] = GlobalConstants::FOUR_PI*(ho_moments[0] - ho_moments[1]); //Q_L, 4pi is because currently it is an azimuthal average in lo equations
-	lo_nodal_vals[1] = GlobalConstants::FOUR_PI*(ho_moments[0] + ho_moments[1]); //Q_R
+	lo_nodal_vals[0] = (ho_moments[0] - ho_moments[1]); //Q_L, 
+	lo_nodal_vals[1] = (ho_moments[0] + ho_moments[1]); //Q_R
 	return lo_nodal_vals;
 }
 
