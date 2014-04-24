@@ -32,10 +32,11 @@ protected:
 	double sampleLinDiscFunc1D(std::vector<double>, double left_node_coor, double right_node_coor); // method samples a coordinate between left and right coors, from linear fn.
 
 	//Useful tools for use with LD sources
-	void mapExtSrcToElement(std::vector<double> & tot_src_nodal_values_el, double & tot_src_strength,
-		Element* spatial_element, ECMCElement1D* element); //for computing tot src values on elements
+	void mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & tot_src_strength,
+		Element* spatial_element, ECMCElement1D* element); //for computing the ext source ld moments over an element (p/str-cm^3);
 	void convertNodalValuesToMoments(std::vector<double> & nodal_values, std::vector<double> 
 		& ld_moments, bool nodal_values_isotropic = false); //convert LD nodal values to LD avg and moments, nodal_values has units of p/str-cm^3
+	void convertMomentsToNodalValuesIsotropic(std::vector<double> & ld_moments, std::vector<double> & nodal_values); //converts moments for isotropic fluxes to nodal values
 	void initializeSamplingSource(); //will create the total source vector, as well as initilize sampling routines, is a unique function because source can be reset between cycles
 
 public:

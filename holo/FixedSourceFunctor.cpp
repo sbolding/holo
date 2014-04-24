@@ -34,6 +34,7 @@ std::vector<double> FixedSourceFunctor::getHoMoments(const std::vector<double> &
 
 	std::vector<double> ho_moments(dof_size,0.0); //output variable
 	std::vector<double> qp_coors(coors.size()); //coordinates of the qp
+	double Q_qp;
 	for (int i_qp = 0; i_qp < n_qps; ++i_qp) //x_qps
 	{
 		qp_coors[0] = x_pnts[i_qp]; //update x coordinate 
@@ -43,7 +44,7 @@ std::vector<double> FixedSourceFunctor::getHoMoments(const std::vector<double> &
 			qp_coors[1] = mu_pnts[j_qp]; //update mu coordinate
 
 			//1/(h_x*h_mu)*q(x,mu)), where hx and hmu are for the half range element
-			double Q_qp = x_wgts[i_qp] * mu_wgts[j_qp] / (dimens[0] * dimens[1])* getValue(qp_coors); //compute contribution to cell average
+			Q_qp = x_wgts[i_qp] * mu_wgts[j_qp] / (dimens[0] * dimens[1])* getValue(qp_coors); //compute contribution to cell average
 
 			//compute the integrals for each basis function
 			ho_moments[0] += Q_qp;

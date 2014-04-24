@@ -15,7 +15,7 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 	std::vector<ECMCElement1D*>::iterator it_el;          //element iterator
 	it_el = elements->begin();			            //initialize iterator
 	double ext_source_el;		             		//magnitude of external source of curren ECMC element, units of p/sec
-	std::vector<double> total_src_nodal_values_el;
+	std::vector<double> total_src_nodal_values_el, ext_source_LD_values;
 	bool only_one_spatial_element = true;
 
 	Element* spatial_element; //spatial element corresponding to the current element
@@ -37,7 +37,8 @@ LinDiscSource::LinDiscSource(Particle1D* particle) : Source(particle)
 			{
 				only_one_spatial_element = false;
 			}
-			mapExtSrcToElement(total_src_nodal_values_el, ext_source_el, spatial_element, *it_el); //determine external source nodal values over the element
+			mapExtSrcToElement(ext_source_LD_values, ext_source_el, spatial_element, *it_el); //determine external source LD values over each element (p/(s-str))
+			convertMomentsToNodalValuesIsotropic(ext_source_LD_values, total_src_nodal_values_el); //determine integrated external source edge values (p/s)
 
 			//Add element values to total array
 			_total_src_nodal_values.push_back(total_src_nodal_values_el); //have units of particles per steradian, not exactly right, but since normalized doesnt matter

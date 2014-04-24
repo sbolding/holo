@@ -2,6 +2,7 @@
 #include "Particle1D.h"
 #include "GlobalConstants.h"
 #include <iostream>
+#include "FEMUtilities.h"
 
 Source::Source()
 {
@@ -143,54 +144,59 @@ double Source::sampleLinDiscFunc1D(std::vector<double> nodal_values, double left
 	return coordinate;
 }
 
-void Source::mapExtSrcToElement(std::vector<double> & total_src_nodal_values_el, double & tot_src_strength,
+void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & tot_src_strength,
 	Element* spatial_element, ECMCElement1D* element)
 {
 	//Determine if the source is isotropic.
 	bool is_isotropic = false;
 	if (_ext_src_functor == NULL) is_isotropic = true;
-	if (is_isotropic)
-	{
-		double angular_probability = element->getAngularWidth() / GlobalConstants::FOUR_PI;
-	}
 	if (element->hasChildren())
 	{
 		std::cerr << "No abstract elements should reach this function, mapExtSrcToElement in Source.cpp\n";
 		exit(1);
 	}
-
-	//get the nodal values on the spatial element
-	std::vector<double> src_nodal_values_spat_el;
-
-	src_nodal_values_spat_el = spatial_element->getExtSourceNodalValues(); //initialize to ext source values, this has units of particles/sec-cm
+	
+	//initialize the LD moments of external source over the element to zero or scattering source (isotropic)
+	ext_src_ld_dof.assign(3, 0.0);
 	if (_particle->_method == HoMethods::HOLO_ECMC || _particle->_method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 	{
 		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
 		std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
-		if (scat_src_nodal_values_el.size() != src_nodal_values_spat_el.size())
+		std::vector<double> scat_src_avg_slope; //convert edge values to average and slope
+		FEMUtilities::convertEdgeValuesToAvgSlope1D(scat_src_nodal_values_el, scat_src_avg_slope); 
+		
+		//initialize values to isotropic external source moments (p/(sec str))
+		for (int mom = 0; mom < scat_src_avg_slope.size(); mom++)
 		{
-			std::cerr << "Scattering source and external source do not have the same number of nodal values" << std::endl;
-			exit(0);
-		}
-		for (int node = 0; node < scat_src_nodal_values_el.size(); node++)
-		{
-			src_nodal_values_spat_el[node] += scat_src_nodal_values_el[node] * sigma_s_el; //phi*_sigma_s, note there is no 1/(4pi) here, because we want (p/sec)
+			ext_src_ld_dof[mom] += scat_src_nodal_values_el[mom] * sigma_s_el/GlobalConstants::FOUR_PI; //phi*_sigma_s, we want 4pi here
 		}
 	}
-
-	//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
-	std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
-	double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
-	double x_right_el = x_left_el + element->getSpatialWidth();
-	total_src_nodal_values_el.resize(2);
-	total_src_nodal_values_el[0] = evalLinDiscFunc1D(src_nodal_values_spat_el, spatial_x_coors, x_left_el);
-	total_src_nodal_values_el[1] = evalLinDiscFunc1D(src_nodal_values_spat_el, spatial_x_coors, x_right_el);
-
-	tot_src_strength = getAreaLinDiscFunction(total_src_nodal_values_el, element->getSpatialWidth()* angular_probability); //fraction in this angular element, units of p / (sec-str)
-	for (int node = 0; node < total_src_nodal_values_el.size(); ++node) //convert to per steradian
+	
+	//handle isotropic case and functor case seperately
+	if (is_isotropic) //use LD angular integrated values
 	{
-		total_src_nodal_values_el[node] *= 0.5; //azimuthally integrated angular flux values
+		std::vector<double> q_nodal_values_spat_el(spatial_element->getExtSourceNodalValues()); //initialize to ext source values, this has units of particles/sec-cm
+		std::vector<double> q_moments_int; //integrated over angle
+		FEMUtilities::convertEdgeValuesToAvgSlope1D(q_nodal_values_spat_el, q_moments_int);
+
+		//add the isotropic values to the totals
+		for (int mom = 0; mom < q_moments_int.size(); mom++)
+		{
+			ext_src_ld_dof[mom] += q_moments_int[mom] / GlobalConstants::FOUR_PI; // (p/(sec-str))
+		}
 	}
+	else //use q functor
+	{
+		std::vector<double> q_moments = _ext_src_functor->getHoMoments(
+			element->getElementCoordinates(), element->getElementDimensions()); //moments in p/(sec-str)
+		for (int mom = 0; mom < q_moments.size(); mom++)
+		{
+			ext_src_ld_dof[mom] += q_moments[mom];
+		}
+	}
+
+	//compute total sorce strength \int_mu \int_x q(x,mu) dx dmu = h_x*h_mu*q_avg
+	tot_src_strength = ext_src_ld_dof[0]*element->getSpatialWidth()*element->getAngularWidth(); //fraction in this angular element, units of p / (sec)
 }
 
 void Source::convertNodalValuesToMoments(std::vector<double> & nodal_values,
@@ -219,4 +225,22 @@ void Source::convertNodalValuesToMoments(std::vector<double> & nodal_values,
 	{
 		//angular moment is zero because uniform value in angle, the nodal values have taken into account angular fraction already	
 	}
+}
+
+void Source::convertMomentsToNodalValuesIsotropic(std::vector<double> & ld_moments, std::vector<double> & nodal_values)
+{
+	if (nodal_values.size() != 2)
+	{
+		std::cerr << "This method is only implemented for 1D, in Source::convertMomentsToNodalValues\n";
+		exit(1);
+	}
+	//Set nodal_values to have one less DOF than moments
+	nodal_values.assign(ld_moments.size() - 1, 0.0);
+
+	//compute left and right edge values 
+	nodal_values[0] =2.*(ld_moments[0] - ld_moments[1]);
+	nodal_values[1] = 2.*(ld_moments[0] + ld_moments[1]);
+
+	std::cerr << "I have not checked this yet. in source.cpp\n";
+	exit(1);
 }

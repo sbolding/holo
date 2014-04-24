@@ -316,8 +316,6 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 			else
 			{
 				res_mag = (res_mu*res_mu + res_avg*res_avg) / std::abs(2.*res_mu);
-				std::cout << "This has never been called yet, should be correct in ResidualSource.cpp" << std::endl;
-				exit(1);
 			}
 		}
 	}
@@ -330,8 +328,6 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 		else //sign change in x
 		{
 			res_mag = (res_x*res_x + res_avg*res_avg) / std::abs(2.*res_x);
-			std::cout << "This has never been called yet, should be correct in ResidualSource.cpp" << std::endl;
-			exit(1);
 		}
 	}
 	//---

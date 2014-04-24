@@ -69,7 +69,7 @@ std::vector<double> GaussQuadrature::getQuadratureWeights(double center, double 
 	return wgts;
 }
 
-void FEMUtilities::convertMomentsToEdgeValues1D(std::vector<double> moment_dof, std::vector<double> & nodal_values) //convert moment dof to edge values
+void FEMUtilities::convertMomentsToEdgeValues1D(const std::vector<double> & moment_dof, std::vector<double> & nodal_values) //convert moment dof to edge values
 {
 	if (moment_dof.size() != 2)
 	{
@@ -81,7 +81,7 @@ void FEMUtilities::convertMomentsToEdgeValues1D(std::vector<double> moment_dof, 
 	nodal_values[1] = moment_dof[0] + moment_dof[1];
 }
 
-void FEMUtilities::convertAvgSlopeToBasisMoments1D(std::vector<double> const & moment_dof, std::vector<double> & left_right_moments)
+void FEMUtilities::convertAvgSlopeToBasisMoments1D(const std::vector<double> & moment_dof, std::vector<double> & left_right_moments)
 {
 	if (moment_dof.size() != 2)
 	{
@@ -93,3 +93,17 @@ void FEMUtilities::convertAvgSlopeToBasisMoments1D(std::vector<double> const & m
 	left_right_moments[0] = moment_dof[0] - moment_dof[1] / 3.; //left basis moment
 	left_right_moments[1] = moment_dof[0] + moment_dof[1] / 3.; //right basis moment
 }
+
+void FEMUtilities::convertEdgeValuesToAvgSlope1D(const std::vector<double> & nodal_values, std::vector<double> & moment_dof)
+{
+	if (nodal_values.size() != 2)
+	{
+		std::cerr << "Passed in incorrect length of moment vector to FEMUtilties\n";
+		std::cerr << "Length = " << moment_dof.size() << std::endl;
+		exit(1);
+	}
+	moment_dof.resize(2);
+	moment_dof[0] = 0.5*(nodal_values[0]+nodal_values[1]); //left basis moment
+	moment_dof[1] = 0.5*(nodal_values[1] - nodal_values[0]); //right basis moment
+}
+
