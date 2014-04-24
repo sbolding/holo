@@ -193,7 +193,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	M->addCoeff(EQN_MAP[3], DOF_MAP[2], value);
 	value = sigma_t*_h - (sigma_s*_h / FOUR_PI) - vol_mu._mu_right_minus;
 	M->addCoeff(EQN_MAP[3], DOF_MAP[3], value);
-	b->addCoeff(EQN_MAP[3], source_value_right_plus);  //TODO need to make this not a constant
+	b->addCoeff(EQN_MAP[3], source_value_right_minus);  //TODO need to make this not a constant
 
 	eqns = getEqnNumbers(); //set the equation numbers correctly
 }

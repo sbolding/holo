@@ -24,7 +24,7 @@ namespace HoController
 
 	//IF refinement level is not set, max refinement level is ignored
 	const bool MAX_REFINEMENT_LEVEL_SET = false;
-	const unsigned int MAX_REFINEMENT_LEVEL = 6;
+	const unsigned int MAX_REFINEMENT_LEVEL = 0;
 
 	//output
 	const bool PARTICLE_BALANCE = false;

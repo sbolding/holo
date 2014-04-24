@@ -333,7 +333,7 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	//---
 	else if (r_left_plus*r_right_plus >= 0.0) //no sign change on top
 	{
-		if (r_left_minus*r_right_minus > 0.0) //no change on bottom
+		if (r_left_minus*r_right_minus >= 0.0) //no change on bottom
 		{
 			if (r_left_plus*r_left_minus >= 0.0) //no change at all
 			{
@@ -376,13 +376,13 @@ void ResidualSource::computeElementResidual(ECMCElement1D* element,
 	}
 	else if (r_left_plus*r_right_plus < 0.0) //change on top (plus)
 	{
-		if (r_left_minus*r_right_minus>0.0) //no change on bottom
+		if (r_left_minus*r_right_minus>=0.0) //no change on bottom
 		{
-			if (r_right_plus*r_right_minus < 0.0) //change on top and right
+			if (r_right_plus*r_right_minus <= 0.0) //change on top and right
 			{
 				res_mag = std::abs(res_avg + pow(r_right_plus, 3) / (12.*res_x*res_mu));
 			}
-			else if (r_left_plus*r_left_minus < 0.0) //change on top and left
+			else if (r_left_plus*r_left_minus <= 0.0) //change on top and left
 			{
 				res_mag = std::abs(res_avg + pow(r_left_plus, 3) / (12.*res_x*res_mu));
 			}

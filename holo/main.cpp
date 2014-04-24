@@ -30,27 +30,27 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 3.0; //cm
-	double sigma_a = 1.0;
-	double sigma_s = 1.0;
+	double sigma_a = 0.15;
+	double sigma_s = 14.85;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 0.0;
 	double bc_right = 0.0;
-	int num_elems = 20;
-	int n_ang_elements = 2; //number angles in half ranges
+	int num_elems = 10;
+	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
-	double exp_convg_rate = 0.00;
-	double convergence_tolerance = 50.e-4;
+	double exp_convg_rate = 0.05;
+	double convergence_tolerance = 1.e-13;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
 	MaterialConstant mat(10, sigma_a, sigma_s);
 
 	//MMS factors
-	double a = 0.5;
-	double b = 1.0;
-	double c = 0.0;
+	double a = 4.0;
+	double b = 2.0;
+	double c = 3.0;
 
 	//for isotropic case
 //	bc_left = a / 2.;
@@ -71,8 +71,8 @@ int main()
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-	mesh_1D.setExternalSource(q);
-	mesh_1D.setBoundaryConditions(bc_moments);
+	mesh_1D.setExternalSource(1.0);
+//	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;
@@ -146,7 +146,7 @@ int main()
 		}
 
 		//Solve high order system
-		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 2);
+		ho_solver = new HoSolver(&mesh_1D, n_histories, n_ang_elements, solver_mode, sampling_method, exp_convg_rate, n_batches, 5);
 		ho_solver->solveSystem();
 		ho_solver->updateSystem();
 		ho_solver->printProjectedScalarFlux(std::cout);

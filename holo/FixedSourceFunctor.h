@@ -24,7 +24,6 @@
 
 #include <vector>
 #include "FEMUtilities.h"
-#include "DirichletBC1D.h"
 
 class FixedSourceFunctor
 {

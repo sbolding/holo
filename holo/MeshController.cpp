@@ -325,7 +325,7 @@ void MeshController::refineMesh()
 	_newly_refined_elements.clear(); //no need to keep this
 	
 	//reset convergence rate criteria
-	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end() - 1); //clear all but the last one
+	_batch_residual_norms.erase(_batch_residual_norms.begin(), _batch_residual_norms.end()); //clear all 
 }
 
 bool MeshController::meshNeedsRefinement()
