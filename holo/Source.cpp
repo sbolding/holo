@@ -161,16 +161,18 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 	if (_particle->_method == HoMethods::HOLO_ECMC || _particle->_method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 	{
 		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
-		std::vector<double> scat_src_nodal_values_el = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
-		std::vector<double> scat_src_avg_slope; //convert edge values to average and slope
-
+		std::vector<double> scat_src_nodal_values_spat = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
+		
 		//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
 		std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
 		double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
 		double x_right_el = x_left_el + element->getSpatialWidth();
-		std::vector<double> q_nodal_values_el(2);
+		std::vector<double> scat_nodal_values_el(2);
+		scat_nodal_values_el[0] = evalLinDiscFunc1D(scat_src_nodal_values_spat, spatial_x_coors, x_left_el);
+		scat_nodal_values_el[1] = evalLinDiscFunc1D(scat_src_nodal_values_spat, spatial_x_coors, x_right_el);
 
-		FEMUtilities::convertEdgeValuesToAvgSlope1D(scat_src_nodal_values_el, scat_src_avg_slope); 
+		std::vector<double> scat_src_avg_slope; //convert edge values to average and slope
+		FEMUtilities::convertEdgeValuesToAvgSlope1D(scat_nodal_values_el, scat_src_avg_slope); 
 		
 		//initialize values to isotropic external source moments (p/(sec str))
 		for (int mom = 0; mom < scat_src_avg_slope.size(); mom++)
