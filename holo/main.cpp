@@ -9,11 +9,16 @@
 #include <cmath>
 #include "ConstFixedSource.h"
 #include "MMSFixedSource.h"
+#include "numMatrixBanded.h"
 
 int main()
 {
 	using std::cout;
 	using std::endl;
+
+	numMatrixBanded bb(10, 5);
+
+	exit(1);
 
 	cout << "We're rolling..." << endl;
 	LoSolver* lo_solver;
@@ -30,18 +35,18 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 3.0; //cm
-	double sigma_a = 0.15;
-	double sigma_s = 14.85;
+	double sigma_a = 3.0;
+	double sigma_s = 0.5;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 0.0;
 	double bc_right = 0.0;
-	int num_elems = 50;
+	int num_elems = 25;
 	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.05;
-	double convergence_tolerance = 1.e-4;
+	double convergence_tolerance = 10.e-6;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -66,13 +71,13 @@ int main()
 	bc_moments = { {a+0.5*c, c/2.}, {a+b*width-0.5*c, c/2.} };
 
 	//Create a constant external source
-	//MMSFixedSource q(sigma_a*a,b*sigma_a,(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
-	ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
+	MMSFixedSource q(sigma_a*a,b*sigma_a,(b+c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
+//	ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
 
 	//Create the mesh and elements;
 	Mesh mesh_1D(dimension, num_elems, width, &mat, bc_values);
-	mesh_1D.setExternalSource(ext_source);
-//	mesh_1D.setBoundaryConditions(bc_moments);
+	mesh_1D.setExternalSource(q);
+	mesh_1D.setBoundaryConditions(bc_moments);
 	mesh_1D.print(cout);
 
 	size_t n_holo_solves = 100;
@@ -97,8 +102,9 @@ int main()
 		mesh_1D.getDiscScalarFluxVector(new_flux_vector);
 		
 		//Print LO scalar flux estimate
+		mesh_1D.printLDScalarFluxValues(out_file);
 		mesh_1D.printLDScalarFluxValues(cout);
-//		exit(1);
+		exit(1);
 
 		if (i_holo_solves == 0)
 		{

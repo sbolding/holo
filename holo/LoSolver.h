@@ -26,7 +26,7 @@ class LoSolver
 protected:
 
 	//Variables
-    numMatrixFull* _system_matrix;		//CURRENTLY FULL MATRIX
+    numMatrix* _system_matrix;			//banded system matrix typically
     int _n_dof = 0;						//Degrees of Freedom of the entire system
     numVector* _system_vec;				//The load vector on the right hand side
     numVector* _sol_vec;					//Solution vector, probably not necessary to have full vector

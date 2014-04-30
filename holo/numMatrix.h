@@ -10,11 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
 #include "numVector.h"
 
 class numMatrix{
   protected:
-    double **_coeff;		// Coefficients of matrix
+    std::vector<std::vector<double>> _coeff;		// Coefficients of matrix
     int _n_rows, _n_cols;        // Number of columns and rows
 	// Never to be used copy constructor
 	numMatrix(const numMatrix &matrix);
@@ -36,7 +37,7 @@ class numMatrix{
 	virtual void mult(numMatrix *b, numMatrix *c) = 0;
 	virtual void mult(numVector *b, numVector *c) = 0;
 	virtual void trans(numMatrix *a) = 0;
-	virtual void gauss(numVector *b, numVector *x) = 0;
+	virtual void solve(numVector *b, numVector *x) = 0;
 };
 
 #endif

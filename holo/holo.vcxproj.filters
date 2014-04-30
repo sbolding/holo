@@ -177,6 +177,18 @@
     <ClInclude Include="ExactSolution.h">
       <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="numMatrixBanded.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SparseMatrix.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vector2.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -308,5 +320,19 @@
     <ClCompile Include="ExactSolution.cpp">
       <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
+    <ClCompile Include="numMatrixBanded.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SparseMatrix.cc">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vector2.cc">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="holo.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

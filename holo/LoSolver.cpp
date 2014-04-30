@@ -19,7 +19,7 @@ using namespace std;
 void LoSolver::solveLinearSystem()
 {
 	//Currently just a really slow gaussian elimination solver
-	_system_matrix->gauss(_system_vec, _sol_vec); 
+	_system_matrix->solve(_system_vec, _sol_vec); 
 }
 
 LoSolver::LoSolver(int dim, Mesh* mesh) :

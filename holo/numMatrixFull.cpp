@@ -18,19 +18,11 @@ numMatrixFull::numMatrixFull(int nr, int nc)
 	_n_cols = nc;
 
     //allocate pointers to rows
-	_coeff = new double*[_n_rows];
-	if(_coeff == NULL) {
-		cout << "allocation failure in numMatrix";
-		exit(0);
-	}
-
+	_coeff.resize(_n_rows);
+	
 	// Allocate columns for each row
 	for(int i=0; i<_n_rows; i++) {
-		_coeff[i] = new double[_n_cols];
-		if(_coeff[i] == NULL) {
-			cout << "allocation failure numMatrix";
-			exit(0);
-		}
+		_coeff[i].resize(_n_cols);
 	}
 	zero();
 }
@@ -38,7 +30,6 @@ numMatrixFull::numMatrixFull(int nr, int nc)
 //Destructor
 numMatrixFull::~numMatrixFull()
 {
-	//TODO DESTRUCTOR
 }		
 
 //Default constructor should never be called
@@ -145,7 +136,7 @@ void numMatrixFull::trans(numMatrix *a)
 	}
 }
 
-void numMatrixFull::gauss(numVector *b, numVector *x)
+void numMatrixFull::solve(numVector *b, numVector *x)
 {
 /****************************************************************************
 **                                                                         **

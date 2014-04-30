@@ -16,16 +16,13 @@ numMatrix::numMatrix()
 {
 	_n_rows = 0;
 	_n_cols = 0;
-	_coeff = NULL;
+	_coeff.clear();
 }
 
 //Destructor
 numMatrix::~numMatrix()
 {
-	for(int i=0; i<_n_rows; i++) {
-		delete [] _coeff[i];
-	}
-	delete [] _coeff;
+	//no dynamic memory!
 }		
 
 // Functions

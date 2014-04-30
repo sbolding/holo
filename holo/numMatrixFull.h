@@ -28,7 +28,7 @@ class numMatrixFull: public numMatrix{
 	virtual void mult(numMatrix *b, numMatrix *c);
 	virtual void mult(numVector *b, numVector *c);
     virtual void trans(numMatrix *a);
-	virtual void gauss(numVector *b, numVector *x);
+	virtual void solve(numVector *b, numVector *x);
 };
 
 #endif
