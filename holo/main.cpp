@@ -32,8 +32,8 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 3.0; //cm
-	double sigma_a = 0.00000;
-	double sigma_s = 0.5;
+	double sigma_a = 1.0;
+	double sigma_s = 0.0;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 0.0;
 	double bc_right = 0.0;
@@ -43,7 +43,7 @@ int main()
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
 	int n_batches = 100;
 	double exp_convg_rate = 0.05;
-	double convergence_tolerance = 10.e-6;
+	double convergence_tolerance = 1.e-12;
 	string solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string sampling_method = "stratified";
 					  // ID, sig_a, sig_s
@@ -98,9 +98,6 @@ int main()
 		lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
 		mesh_1D.getDiscScalarFluxVector(new_flux_vector);
 		
-		//Print LO scalar flux estimate
-		mesh_1D.printLDScalarFluxValues(out_file);
-
 		if (i_holo_solves == 0)
 		{
 			mesh_1D.printLDScalarFluxValues(out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution
