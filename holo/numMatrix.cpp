@@ -58,7 +58,7 @@ int numMatrix::getNumCols() const
 void numMatrix::print(ostream &out){
 	for(int i=0; i<_n_rows; i++){
 		out << "Row " << i << endl;
-		for(int j=0; j<_n_cols; j++){
+		for (int n = _coeff[i].size(), j = 0; j<n; j++){
 			out.setf(ios::scientific);
 			out.precision(4);
 			out.width(13);
@@ -74,7 +74,7 @@ void numMatrix::print(ostream &out){
 
 void numMatrix::printCompact(ostream &out){
 	for(int i=0; i<_n_rows; i++){
-		for(int j=0; j<_n_cols; j++){
+		for(int n = _coeff[i].size(), j=0; j<n ; j++){
 			out.setf(ios::scientific);
 			out.precision(3);
 			out.width(12);

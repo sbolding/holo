@@ -10,15 +10,12 @@
 #include "ConstFixedSource.h"
 #include "MMSFixedSource.h"
 #include "numMatrixBanded.h"
+#include "numVector.h" 
 
 int main()
 {
 	using std::cout;
 	using std::endl;
-
-	numMatrixBanded bb(10, 5);
-
-	exit(1);
 
 	cout << "We're rolling..." << endl;
 	LoSolver* lo_solver;
@@ -35,12 +32,12 @@ int main()
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	int dimension = 1;
 	double width = 3.0; //cm
-	double sigma_a = 3.0;
+	double sigma_a = 0.00000;
 	double sigma_s = 0.5;
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 0.0;
 	double bc_right = 0.0;
-	int num_elems = 25;
+	int num_elems = 20;
 	int n_ang_elements = 5; //number angles in half ranges
 	//Temporarily hard coded monte carlo parameters
 	int n_histories = num_elems*2*n_ang_elements*100; //50000000
@@ -103,8 +100,6 @@ int main()
 		
 		//Print LO scalar flux estimate
 		mesh_1D.printLDScalarFluxValues(out_file);
-		mesh_1D.printLDScalarFluxValues(cout);
-		exit(1);
 
 		if (i_holo_solves == 0)
 		{

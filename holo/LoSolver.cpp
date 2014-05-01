@@ -11,7 +11,6 @@
 
 
 #include "LoSolver.h"
-#include "numMatrixFull.h"
 #include "Controller.h"
 
 using namespace std;

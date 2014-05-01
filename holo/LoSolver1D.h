@@ -14,6 +14,7 @@
 #define _LOSOLVER1D_H
 
 #include "LoSolver.h"
+#include "numMatrixBanded.h"
 
 class LoSolver1D : public LoSolver
 {

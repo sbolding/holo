@@ -14,6 +14,7 @@
 #include "GlobalConstants.h"
 #include "Controller.h"
 #include "LoSolver1D.h"
+#include "numMatrixFull.h" //used for building the local 4x4 system
 
 LoSolver1D::LoSolver1D(Mesh* mesh) : LoSolver(1, mesh)
 {
@@ -42,7 +43,7 @@ void LoSolver1D::assembleSystem()
 	dirichlet_bcs = _mesh->getDirichletBCs();
 
 	//Initialize matrix and load vector
-	_system_matrix = new numMatrixFull(_n_dof, _n_dof);
+	_system_matrix = new numMatrixBanded(_n_dof, 7);
 	_system_vec = new numVector(_n_dof);
 	_sol_vec = new numVector(_n_dof);
 

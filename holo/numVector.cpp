@@ -64,7 +64,7 @@ void numVector::addCoeff(int i, double value)
 	_coeff[i] += value;
 }
 
-double numVector::getCoeff(int i)
+double numVector::getCoeff(int i) const
 {
 	if((i<0) || (i>_n_rows)){
 		cout << "Error in GetCoeff";
@@ -73,7 +73,7 @@ double numVector::getCoeff(int i)
 	return _coeff[i];
 }
 
-void numVector::print(ostream &out)
+void numVector::print(ostream &out) const
 {
 	for(int i=0; i<_n_rows; i++){
 		out << "Row " << i << "  ";
@@ -83,4 +83,42 @@ void numVector::print(ostream &out)
 		out << _coeff[i] << endl;	
 	}
     out << endl;
+}
+
+double& numVector::operator[](int i) const
+{
+	if ((i<0) || (i>_n_rows)){
+		cout << "Error in [] vector";
+		exit(0);
+	}
+	return _coeff[i];
+}
+
+double&  numVector::operator[](int i) 
+{
+	if ((i<0) || (i>_n_rows)){
+		cout << "Error in [] vector";
+		exit(0);
+	}
+	return _coeff[i];
+}
+
+numVector& numVector::operator=(const numVector& rhs)
+{
+	_n_rows = rhs.getNumRows();
+
+	// Allocate pointer to rows
+	_coeff = new double[_n_rows];
+	if (_coeff == NULL) {
+		cout << "allocation failure in numVector";
+		exit(0);
+	}
+
+	//copy members
+	for (unsigned int i = 0; i < _n_rows; ++i)
+	{
+		_coeff[i] = rhs.getCoeff(i);
+	}
+	return *this;
+
 }

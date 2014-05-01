@@ -28,8 +28,8 @@ class numMatrix{
 	void zero();
 	int getNumRows() const;
 	int getNumCols() const;
-	void print(std::ostream &out);
-    void printCompact(std::ostream &out);
+	virtual void print(std::ostream &out);
+    virtual void printCompact(std::ostream &out);
     void scale(double value);
     virtual void setCoeff(int i, int j, double value) = 0;
 	virtual void addCoeff(int i, int j, double value) = 0;

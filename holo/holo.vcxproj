@@ -113,11 +113,9 @@
     <ClInclude Include="RNG.h" />
     <ClInclude Include="Source.h" />
     <ClInclude Include="SourceConstant.h" />
-    <ClInclude Include="SparseMatrix.h" />
     <ClInclude Include="StandardResidualSource.h" />
     <ClInclude Include="StratifiedResidualSource.h" />
     <ClInclude Include="Tally.h" />
-    <ClInclude Include="vector2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AliasSampler.cpp" />
@@ -161,11 +159,9 @@
     <ClCompile Include="ResidualSource.cpp" />
     <ClCompile Include="RNG.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="SparseMatrix.cc" />
     <ClCompile Include="StandardResidualSource.cpp" />
     <ClCompile Include="StratifiedResidualSource.cpp" />
     <ClCompile Include="Tally.cpp" />
-    <ClCompile Include="vector2.cc" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="holo.rc" />

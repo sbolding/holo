@@ -15,7 +15,7 @@
 #if !defined(_LOSOLVER_H)
 #define _LOSOLVER_H
 
-#include "numMatrixFull.h"
+#include "numMatrix.h"
 #include "Mesh.h"
 #include "LoData1D.h"
 #include <ostream>
