@@ -89,6 +89,7 @@
     <ClInclude Include="FluxElementTally.h" />
     <ClInclude Include="FluxFaceTally.h" />
     <ClInclude Include="GlobalConstants.h" />
+    <ClInclude Include="HoLoSolver.h" />
     <ClInclude Include="HoMesh.h" />
     <ClInclude Include="HoSolver.h" />
     <ClInclude Include="LinDiscSource.h" />
@@ -109,7 +110,6 @@
     <ClInclude Include="oneDMesh.h" />
     <ClInclude Include="Particle1D.h" />
     <ClInclude Include="ResidualSource.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="RNG.h" />
     <ClInclude Include="Source.h" />
     <ClInclude Include="SourceConstant.h" />
@@ -138,6 +138,7 @@
     <ClCompile Include="FixedSourceFunctor.cpp" />
     <ClCompile Include="FluxElementTally.cpp" />
     <ClCompile Include="FluxFaceTally.cpp" />
+    <ClCompile Include="HoLoSolver.cpp" />
     <ClCompile Include="HoMesh.cpp" />
     <ClCompile Include="HoSolver.cpp" />
     <ClCompile Include="LinDiscSource.cpp" />

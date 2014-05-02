@@ -18,12 +18,25 @@ MaterialConstant::MaterialConstant()
 	//Never call me
 }
 
-MaterialConstant::MaterialConstant(int id, double sigma_a, double sigma_s)
+MaterialConstant::MaterialConstant(int id, double sigma_a, double sigma_s):
+_id(id),
+_sigma_a(sigma_a),
+_sigma_s(sigma_s),
+_nu_sigma_f(0.0), //no fission
+_sigma_f(0.0)
 {
-	_id = id;
-	_sigma_a = sigma_a;
-	_sigma_s = sigma_s;
 	_sigma_t = _sigma_a + _sigma_s;
+}
+
+MaterialConstant::MaterialConstant(int id, double sigma_a, double sigma_s, double sigma_f, double nu) :
+_id(id),
+_sigma_a(sigma_a),
+_sigma_s(sigma_s),
+_nu(nu),
+_sigma_f(sigma_f),
+_nu_sigma_f(nu*sigma_f) //no fission
+{
+	_sigma_t = _sigma_a + _sigma_s + sigma_f;
 }
 
 double MaterialConstant::getSigmaA( void) const
@@ -34,6 +47,11 @@ double MaterialConstant::getSigmaA( void) const
 double MaterialConstant::getSigmaT( void) const
 {
 	return _sigma_t;
+}
+
+double MaterialConstant::getNuSigmaF(void) const
+{
+	return _nu_sigma_f;
 }
 
 double MaterialConstant::getSigmaS( void) const

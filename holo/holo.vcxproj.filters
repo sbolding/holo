@@ -177,11 +177,11 @@
     <ClInclude Include="ExactSolution.h">
       <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="numMatrixBanded.h">
       <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HoLoSolver.h">
+      <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -316,6 +316,9 @@
     </ClCompile>
     <ClCompile Include="numMatrixBanded.cpp">
       <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HoLoSolver.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

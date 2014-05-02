@@ -22,7 +22,7 @@ HoSolver::HoSolver()
 	exit(1);
 }
 
-HoSolver::HoSolver(Mesh* mesh, int n_histories,
+HoSolver::HoSolver(Mesh* mesh, unsigned int n_histories,
 	int n_ang_bins_half_range, string method, string sampling_method,
 	double exp_convg_constant, int n_batches, int n_batches_to_avg) :
 	_rng(), _source(), _psi_minus_dof(), _psi_plus_dof()

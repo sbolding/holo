@@ -343,14 +343,21 @@ void numMatrixBanded::print(std::ostream & out){
 
 	for (int i = 0; i<_n_rows; i++){
 		out << "Row " << i << endl;
-		for (int n = _coeff[i].size(), j = 0; j<n; j++){
+		for (int j = 0; j<_n_cols; j++){
 			out.setf(ios::scientific);
 			out.precision(4);
 			out.width(13);
-			out << _coeff[i][j];
-			if ((j + 1) % 6 == 0){
-				out << endl;
+			if (abs(j - i) > (_band_width / 2))
+			{
+				out << 0.0;
 			}
+			else
+			{
+				out << _coeff[i][getBandIdx(i, j)];
+			}
+			//if ((j + 1) % 6 == 0){
+			//	out << endl;
+			
 		}
 		out << endl;
 		out << endl;

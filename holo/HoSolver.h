@@ -39,7 +39,7 @@ protected:
 	Source* _source; //pointer to the source to be used for the problem, the source will get recomputed often
 
 	//other problem parameters
-	int _n_histories;	//number of histories
+	unsigned int _n_histories;	//number of histories
 	int _n_batches; //number of batches for ECMC simulations
 	std::string _solver_mode_str;  ////either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
 	int _solver_mode_int; //integer solver mode, use HoSolver map from GlobalConstant.h to map the string to int
@@ -68,7 +68,7 @@ public:
 
 	HoSolver(); //Default constructor, should probably never be called
 	~HoSolver();
-	HoSolver(Mesh* _mesh, int n_histories, int n_bins_half_range, string solver_mode, string sampling_method,
+	HoSolver(Mesh* _mesh, unsigned int n_histories, int n_bins_half_range, string solver_mode, string sampling_method,
 		double required_exp_convg_constant, int n_batches = 1, int n_batches_to_avg = 3); //How many angular cells to split each spatial mesh cell into initially, n_batches_to_keep is for convergence check
 	void solveSystem(std::ostream & out = std::cout); //run the high order problem, default output to screen
 	void updateSystem(); //compute the angular fluxes, currently unused

@@ -39,7 +39,7 @@ protected:
 public:
 
 	~StratifiedResidualSource();
-	StratifiedResidualSource(Particle1D* particle, FixedSourceFunctor & q,int & n_histories); //need to know n_histories to determine how many to put in each cell, will increase number histories to make even match
+	StratifiedResidualSource(Particle1D* particle, FixedSourceFunctor & q, unsigned int & n_histories); //need to know n_histories to determine how many to put in each cell, will increase number histories to make even match
 	virtual void sampleSourceParticle();
 };
 

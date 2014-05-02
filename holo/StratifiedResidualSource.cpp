@@ -3,8 +3,9 @@
 #include <cmath>
 #include "AliasSampler.h"
 
-StratifiedResidualSource::StratifiedResidualSource(Particle1D* particle, FixedSourceFunctor & q, int & n_histories) :
-	ResidualSource(particle, q)
+StratifiedResidualSource::StratifiedResidualSource(Particle1D* particle,
+  FixedSourceFunctor & q, unsigned int & n_histories) : 
+ResidualSource(particle, q)
 {
 	//determine how many particles to sample from each element
 	unsigned int n_active_elements = _particle->_mesh->getNumActiveElements();

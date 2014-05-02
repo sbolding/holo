@@ -22,14 +22,19 @@ protected:
     double _sigma_a;		//Absorption
     double _sigma_s;		//Scattering
     double _sigma_t;		//Total
+	double _sigma_f;		//Fission
+	double _nu_sigma_f;		//Mean number neutrons/fission times Fission CX
+	double _nu;				//Total number of neutrons/fission
     int _id;			//Material ID
 
 public:
 	MaterialConstant();	//Default Constructor, may be used
-	MaterialConstant(int id, double sigma_a, double sigma_s);
+	MaterialConstant(int id, double sigma_a, double sigma_s); //if no fission
+	MaterialConstant(int id, double sigma_a, double sigma_s, double sigma_fiss, double nu);
     double getSigmaS(void) const;
     double getSigmaT(void) const;
     double getSigmaA(void) const;
+	double getNuSigmaF(void) const;
     int getID(void) const;
 	void print(std::ostream &out) const;
 };
