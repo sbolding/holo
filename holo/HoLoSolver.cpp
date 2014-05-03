@@ -13,7 +13,7 @@ _out_file("Z:/TAMU_Research/HOLO/results_output_folder/results.txt", std::ofstre
 
 	//Temporarily hard coded dimensions until there is stuff for reading from input file
 	_dimension = 1;
-	_num_elems = 2;
+	_num_elems = 20;
 	_n_ang_elements = 5; //number angles in half ranges
 	//these variables are only local, no need to store them
 	double width = 3.0; //cm
@@ -22,13 +22,13 @@ _out_file("Z:/TAMU_Research/HOLO/results_output_folder/results.txt", std::ofstre
 	double ext_source = 1.0; //(p/(sec cm^3)), do not use non-zero values << 1, or some logic may be wrong currently
 	double bc_left = 0.0;
 	double bc_right = 0.0;
-	MaterialConstant _mat(10, sigma_a, sigma_s);
+	_mat = new MaterialConstant(10, sigma_a, sigma_s);
 
 	//Temporarily hard coded monte carlo parameters
 	_n_histories = _num_elems * 2 * _n_ang_elements * 100; //50000000
-	int n_batches = 100;
-	double exp_convg_rate = 0.05;
-	_lo_tol = 1.e-12;
+	_n_batches = 100;
+	_exp_convg_rate = 0.05;
+	_lo_tol = 10.e-4;
 	_solver_mode = "holo-ecmc"; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	_sampling_method = "stratified";
 
@@ -51,12 +51,12 @@ _out_file("Z:/TAMU_Research/HOLO/results_output_folder/results.txt", std::ofstre
 	bc_moments = { { a + 0.5*c, c / 2. }, { a + b*width - 0.5*c, c / 2. } };
 
 	//Create a MMS external source
-	MMSFixedSource q(sigma_a*a, b*sigma_a, (b + c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
+	_ext_source = new MMSFixedSource(sigma_a*a, b*sigma_a, (b + c*(sigma_a + sigma_s))); //bilinear function, average, x coeff, mu coeff, that gives matching bc's
 	//	ConstFixedSource q(ext_source/2.0); //constant source (p/(sec-cm^3-str))
 
 	//Create the mesh and elements;
-	_mesh = new Mesh(_dimension, _num_elems, width, &_mat, bc_values);
-	_mesh->setExternalSource(q);
+	_mesh = new Mesh(_dimension, _num_elems, width, _mat, bc_values);
+	_mesh->setExternalSource(*_ext_source);
 	_mesh->setBoundaryConditions(bc_moments);
 	_mesh->print(cout);
 
@@ -97,6 +97,7 @@ void HoLoSolver::solveProblem()
 		if (i_holo_solves == 0)
 		{
 			_mesh->printLDScalarFluxValues(_out_file); //TEMPORARY DEBUG print out Mark Diffusion Solution
+			_mesh->printLDScalarFluxValues(cout);
 		}
 
 		//Check convergence of solution 

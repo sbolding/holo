@@ -36,8 +36,9 @@ protected:
 	HoSolver* _ho_solver;
 	ofstream _out_file;
 	ifstream _input_file;
-	MaterialConstant _mat;
+	MaterialConstant* _mat;
 	Mesh* _mesh;
+	FixedSourceFunctor* _ext_source; //not always needed
 
 	//Data needed to reconstruct ho solver each time
 	unsigned int _n_histories;
@@ -52,11 +53,7 @@ protected:
 	int _n_ang_elements; //number angles in half ranges
 	double _lo_tol;
 	size_t _n_holo_solves;  //max number of outer sweeps
-
-
-
 	/* ************************************ */
-
 
 	//For constructor
 	void parseInputFile();
