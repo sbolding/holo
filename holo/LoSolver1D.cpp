@@ -121,7 +121,6 @@ void LoSolver1D::assembleSystem()
 		}
 	}
 
-
 }
 
 
@@ -162,8 +161,11 @@ void LoSolver1D::solveSystem()
 		printSystem(std::cout);
 	}
 
-	//Free up memory from matrix and load vector
+	//Free up memory from matrix and load vector, NOT system vector
 	deleteMatrixVector();
+
+	//Map solution vector onto element DOF
+	updateSystem();
 }
 
 void LoSolver1D::setNumDof()

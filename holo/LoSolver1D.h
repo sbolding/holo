@@ -30,7 +30,10 @@ public:
 	LoSolver1D(Mesh* mesh); //Constructor, needs a mesh object to work with
 	LoSolver1D();
 	virtual void printSolution(std::ostream& out);
-	virtual void solveSystem();
+	virtual void solveSystem(); //can be overridden by derived classes
+		//by default does a direct inversion of banded, fixed source
+		//system.  All derived classes modify the base system through this 
+		//function.
 };
 
 #endif  //_LOSOLVER1D_H

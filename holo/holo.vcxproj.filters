@@ -183,6 +183,9 @@
     <ClInclude Include="HoLoSolver.h">
       <Filter>Header Files\Shared Files</Filter>
     </ClInclude>
+    <ClInclude Include="LoSolver1DEigen.h">
+      <Filter>Header Files\Lo Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dof.cpp">
@@ -317,8 +320,11 @@
     <ClCompile Include="numMatrixBanded.cpp">
       <Filter>Source Files\Lo Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoSolver1DEigen.cpp">
+      <Filter>Source Files\Lo Files</Filter>
+    </ClCompile>
     <ClCompile Include="HoLoSolver.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shared Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

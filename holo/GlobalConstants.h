@@ -17,8 +17,7 @@ namespace GlobalConstants
 namespace HoConstants
 {
 	//Constants for facetallies, not used 
-
-	const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
+	static const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
 	const double COSINE_SUBSTITUTE_VALUE = 0.5*COSINE_CUTOFF; //half of the cutoff value by default
 
 	//exponential atenuation information
@@ -26,6 +25,9 @@ namespace HoConstants
 
 	//ECMC convergence constraints
 	const double ECMC_REL_ERR_TOL = 10.e-4; //convergence tolerance for ECMC error in angular flux, as estimated by inverting transport operator on residual
+	
+	//methods
+	void setCosineCutOff(double a); 
 }
 
 namespace HoMethods
@@ -43,6 +45,18 @@ namespace HoMethods
 		{ "standard-mc", STANDARD_MC } };
 
 	const std::map<std::string, unsigned int> sampling_map = { { "stratified", STRATIFIED_SAMPLING }, { "standard", STANDARD_SAMPLING } };
+}
+
+namespace LoMethods
+{
+	//Each member corresponds to different solver method
+	const enum EigenMethods { NKA=1, ARNOLDI, FIXED_POINT};
+}
+
+namespace GlobalMethods
+{
+	//Types of problem ("fixed-source", "eigenvalue", "radiative-transfer")
+	const enum ProblemType {FIXED_SOURCE=1, EIGEN_VALUE, RAD_TRANSFER};
 }
 
 namespace EquationMaps1D

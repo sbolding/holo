@@ -25,6 +25,7 @@
 #include "MMSFixedSource.h"
 #include "numMatrixBanded.h"
 #include "numVector.h" 
+#include "LoSolver1DEigen.h"
 
 class HoLoSolver
 {
@@ -46,6 +47,9 @@ protected:
 	double _exp_convg_rate;
 	string _solver_mode; //"standard-mc", "holo-ecmc", "holo-standard-mc"
 	string _sampling_method; //"stratified", "standard"
+
+	//Type of problem you are running (eigenvalue, fixed_source, etc.)
+	GlobalMethods::ProblemType _prob_type;
 
 	//Problem Data
 	int _dimension;

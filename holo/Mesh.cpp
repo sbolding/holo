@@ -163,7 +163,7 @@ int Mesh::getNumDirichletBC() const
 
 void Mesh::setExternalSource(double ext_source_constant) 
 {
-	//Have the elements do the printing
+	//Have the elements do the setting
 	std::vector<Element*>::const_iterator it_el;  //element iterator
 	it_el = _elements.begin();				//initialize iterator
 	int n_elem_nodes = (*it_el)->getNumNodes(); //Assuming one mesh type
@@ -179,6 +179,50 @@ void Mesh::setExternalSource(double ext_source_constant)
 		(*it_el)->setExtSourceNodalValues(ext_source_nodal_values);
 	}
 }
+
+void Mesh::setExternalSource(double factor, GlobalMethods::ProblemType p)
+{
+	using namespace GlobalMethods;
+	if (p == FIXED_SOURCE)
+	{
+		setExternalSource(factor); //set constant isotropic value over domain
+	}
+	else if (p == EIGEN_VALUE)
+	{
+		double k_eff = factor; //passed in factor is keff
+		std::vector<double> phi_nodal_values;
+
+		//Get the scalar flux nodal values
+		getDiscScalarFluxVector(phi_nodal_values);
+
+		//Loop over elements and set the external source values
+		std::vector<Element*>::const_iterator it_el;  //element iterator
+		it_el = _elements.begin();				//initialize iterator
+		int n_elem_nodes = (*it_el)->getNumNodes(); //Assuming one mesh type
+		std::vector<double> ext_source_nodal_values;
+		ext_source_nodal_values.resize(n_elem_nodes);
+		size_t node_idx=0; //which node you are on
+
+		for (; it_el != _elements.end(); ++it_el)
+		{
+			for (int i_node = 0; i_node < n_elem_nodes; ++i_node)
+			{
+				double nu_sig_f = (*it_el)->getMaterial().getNuSigmaF();
+				ext_source_nodal_values[i_node] = (nu_sig_f/k_eff)*phi_nodal_values[node_idx];
+				node_idx++;
+			}
+			(*it_el)->setExtSourceNodalValues(ext_source_nodal_values);
+		}
+
+	}
+	else
+	{
+		std::cerr << "Have not implemented this problem type in Mesh.cpp\n";
+		exit(1);
+	}
+}
+
+
 
 void Mesh::setExternalSource(FixedSourceFunctor & q)
 {
@@ -242,7 +286,7 @@ int Mesh::getSpatialDimension() const
 
 void Mesh::getDiscScalarFluxVector(std::vector<double> & v) const
 {
-	//Have the elements do the printing
+	//Have the elements do the getting
 	std::vector<Element*>::const_iterator it_el;  //element iterator
 	it_el = _elements.begin();				//initialize iterator
 	std::vector<double> flux_edge_values, dummy;
@@ -257,3 +301,4 @@ void Mesh::getDiscScalarFluxVector(std::vector<double> & v) const
 		}
 	}
 }
+

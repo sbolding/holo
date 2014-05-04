@@ -56,20 +56,31 @@ _out_file("Z:/TAMU_Research/HOLO/results_output_folder/results.txt", std::ofstre
 
 	//Create the mesh and elements;
 	_mesh = new Mesh(_dimension, _num_elems, width, _mat, bc_values);
-	_mesh->setExternalSource(*_ext_source);
+	//_mesh->setExternalSource(*_ext_source);
 	_mesh->setBoundaryConditions(bc_moments);
 	_mesh->print(cout);
 
 	_n_holo_solves = 100;
 
+	//For eigenvalue solver initialize external source to zero (this will be changed by solver)
+	_mesh->setExternalSource(0.0);
+	_prob_type = GlobalMethods::EIGEN_VALUE; //eigenvalue problem
+
 	//Assemble the LoSystem
-	_lo_solver = new LoSolver1D(_mesh); //uses default some estimated lo order parameters and LD
+	//switch (_prob_type) (use case switch here to build correct lo order solver type, currently fixed as eigenvalue
+		//
+	_lo_solver = new LoSolver1DEigen(_mesh, "fixed-point", _lo_tol); //uses default some estimated lo order parameters and LD
 	_ho_solver = new HoSolver(_mesh, _n_histories, _n_ang_elements, _solver_mode, _sampling_method, _exp_convg_rate, _n_batches, 3); //just for debugging purposes
 }
 
 
 HoLoSolver::~HoLoSolver()
 {
+	delete _lo_solver;
+	delete _ho_solver;
+	delete _mat;
+	delete _mesh;
+	delete _ext_source;
 }
 
 void HoLoSolver::solveProblem()
@@ -91,7 +102,6 @@ void HoLoSolver::solveProblem()
 	{
 		//solve lo order system
 		_lo_solver->solveSystem();
-		_lo_solver->updateSystem(); //Update lo order system scalar flux values to current solution
 		_mesh->getDiscScalarFluxVector(new_flux_vector);
 
 		if (i_holo_solves == 0)
@@ -141,6 +151,7 @@ void HoLoSolver::solveProblem()
 		}
 
 		//Solve high order system
+		delete _ho_solver; //release old ho_solver memory
 		_ho_solver = new HoSolver(_mesh, _n_histories, _n_ang_elements, _solver_mode, _sampling_method, _exp_convg_rate, _n_batches, 3);
 		_ho_solver->solveSystem();
 		_ho_solver->updateSystem();

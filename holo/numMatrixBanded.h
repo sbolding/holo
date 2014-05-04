@@ -16,6 +16,7 @@
 class numMatrixBanded: public numMatrix{
   protected:
 	int _band_width;
+	bool _is_LU_decomped; //For solve() method, if it is already inverted, don't want to redo the decomposition
 	int getBandIdx(int row, int col) const; //based on a row, column in full matrix, return index in the band for that row
 	int getColIdx(int row, int band_idx) const; //based on a row and location in band, return column in the full matrix
     numMatrixBanded(const numMatrixBanded *matrix);

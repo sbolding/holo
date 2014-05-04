@@ -22,6 +22,14 @@ HoSolver::HoSolver()
 	exit(1);
 }
 
+HoSolver::~HoSolver()
+{
+	//Free up components of HoSolver, but not anything passed in from general Lo and HoLo solvers
+	delete _ho_mesh;
+	delete _mesh_controller;
+	delete _source;
+}
+
 HoSolver::HoSolver(Mesh* mesh, unsigned int n_histories,
 	int n_ang_bins_half_range, string method, string sampling_method,
 	double exp_convg_constant, int n_batches, int n_batches_to_avg) :

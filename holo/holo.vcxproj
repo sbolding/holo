@@ -96,6 +96,7 @@
     <ClInclude Include="LoData1D.h" />
     <ClInclude Include="LoSolver.h" />
     <ClInclude Include="LoSolver1D.h" />
+    <ClInclude Include="LoSolver1DEigen.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialConstant.h" />
     <ClInclude Include="Mesh.h" />
@@ -145,6 +146,7 @@
     <ClCompile Include="LoData1D.cpp" />
     <ClCompile Include="LoSolver.cpp" />
     <ClCompile Include="LoSolver1D.cpp" />
+    <ClCompile Include="LoSolver1DEigen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MaterialConstant.cpp" />
     <ClCompile Include="Mesh.cpp" />

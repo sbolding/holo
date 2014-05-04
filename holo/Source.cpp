@@ -182,7 +182,7 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 	}
 	
 	//handle isotropic case and functor case seperately
-	if (is_isotropic) //use LD angular integrated values
+	if (is_isotropic) //use LD angular integrated values.  If eigenvalue problem, q_nodal_vals is actually \nu_sigma_f/k_eff*phi
 	{
 		std::vector<double> q_nodal_values_spat_el(spatial_element->getExtSourceNodalValues()); //initialize to ext source values, this has units of particles/sec-cm
 		std::vector<double> q_moments_int; //integrated over angle

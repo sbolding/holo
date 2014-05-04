@@ -27,6 +27,7 @@
 #include "MaterialConstant.h"
 #include "DirichletBC1D.h"
 #include "FixedSourceFunctor.h"
+#include "GlobalConstants.h"
 
 class Mesh
 {
@@ -73,8 +74,10 @@ public:
 	int getFaceIndex(int element_id, int face_id) const; //get a face index using the connectivity array for tallying, face_id is 0 for left 1 for right, etc.
 
 	//Setting functions. Currently easiest way to do non-isotropic BCs and external sources
-	void setExternalSource(double);
+	void setExternalSource(double const_src); //uniform isotropic source throughout
 	void setExternalSource(FixedSourceFunctor & q); //pass in a fixed source functor q, which will set LD nodal values (Q_L Q_R) as needed
+	void setExternalSource(double factor, GlobalMethods::ProblemType prob_type ); //set ext source based on factor and scalar flux values, factor has different 
+			//meaning for different problem types, check source code for meanings
 	void setBoundaryConditions(const std::vector<std::vector<double>> & ang_flux_moments); //ang_flux angular moments (avg, mu_slope, etc.) for each boundary of interest
 };
 

@@ -12,7 +12,8 @@ using std::cerr;
 using std::endl;
 
 // Constructors
-numMatrixBanded::numMatrixBanded(int nr, int band_width)
+numMatrixBanded::numMatrixBanded(int nr, int band_width) :
+_is_LU_decomped(false)
 {
 	using std::cout;
 	_n_rows = nr;
@@ -155,9 +156,16 @@ void numMatrixBanded::solve(numVector *b, numVector *x)
 **  Solves a banded system by an LU decomposition with partial pivoting
 **  then inverting the system.  x is teh solution, b is the source vector.
 **  although it is not const, b will not be changed here.
+**
+**  This will only do inversion first time, after that it will no longer invert
 ****************************************************************************/
-	LUDecomposition();
+	if (!_is_LU_decomped) //only invert if necessary
+	{
+		LUDecomposition();
+	}
 	invertLUDecomposition(*b, *x);
+	_is_LU_decomped = true; //save inverted system.  There are no risks with this
+		//since inversion destroys original matrix anyways
 }
 
 inline int numMatrixBanded::getBandIdx(int row, int col) const
