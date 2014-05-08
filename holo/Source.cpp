@@ -11,7 +11,7 @@ Source::Source()
 
 Source::~Source()
 {
-	//do nothing
+	//No dynamic memory
 }
 
 Source::Source(Particle1D* particle) :
@@ -158,15 +158,18 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 	
 	//initialize the LD moments of external source over the element to zero or scattering source (isotropic)
 	ext_src_ld_dof.assign(3, 0.0);
+	std::vector<double> spatial_x_coors;
+	double x_left_el;
+	double x_right_el;
 	if (_particle->_method == HoMethods::HOLO_ECMC || _particle->_method == HoMethods::HOLO_STANDARD_MC) //append scattering source
 	{
 		double sigma_s_el = spatial_element->getMaterial().getSigmaS();
 		std::vector<double> scat_src_nodal_values_spat = spatial_element->getScalarFluxNodalValues();//This should return 0 if LO system hasnt been solved yet
 		
 		//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
-		std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
-		double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
-		double x_right_el = x_left_el + element->getSpatialWidth();
+		spatial_x_coors = spatial_element->getNodalCoordinates();
+		x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
+		x_right_el = x_left_el + element->getSpatialWidth();
 		std::vector<double> scat_nodal_values_el(2);
 		scat_nodal_values_el[0] = evalLinDiscFunc1D(scat_src_nodal_values_spat, spatial_x_coors, x_left_el);
 		scat_nodal_values_el[1] = evalLinDiscFunc1D(scat_src_nodal_values_spat, spatial_x_coors, x_right_el);
@@ -188,16 +191,18 @@ void Source::mapExtSrcToElement(std::vector<double> & ext_src_ld_dof, double & t
 		std::vector<double> q_moments_int; //integrated over angle
 
 		//map the ext source strength nodal values on spatial element to nodal values on the current ECMCelement
-		std::vector<double> spatial_x_coors = spatial_element->getNodalCoordinates();
-		double x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
-		double x_right_el = x_left_el + element->getSpatialWidth();
+		if (_particle->_method != HoMethods::HOLO_ECMC && _particle->_method != HoMethods::HOLO_STANDARD_MC) //save time
+		{
+			spatial_x_coors = spatial_element->getNodalCoordinates();
+			x_left_el = element->getSpatialCoordinate() - 0.5*element->getSpatialWidth();
+			x_right_el = x_left_el + element->getSpatialWidth();
+		}
 		std::vector<double> q_nodal_values_el(2);
 		q_nodal_values_el[0] = evalLinDiscFunc1D(q_nodal_values_spat_el, spatial_x_coors, x_left_el);
 		q_nodal_values_el[1] = evalLinDiscFunc1D(q_nodal_values_spat_el, spatial_x_coors, x_right_el);
 
 		//convert ECMC element values
 		FEMUtilities::convertEdgeValuesToAvgSlope1D(q_nodal_values_el, q_moments_int);
-
 
 		//add the isotropic values to the totals
 		for (int mom = 0; mom < q_moments_int.size(); mom++)

@@ -41,7 +41,7 @@ protected:
 	friend class MeshController;
 public:
 	HoMesh(Mesh* mesh, int n_ang_cells_half_range); //how much to divide the angular cells into
-	//~HoMesh(); no dynamic memory to delete yet
+	~HoMesh(); //Need to delete elements from vectors
 	ECMCElement1D* getElement(int element_id) const; 
 	int getNumElems() const;
 	unsigned int getNumActiveElements() const; //get the number of elements that do not have children

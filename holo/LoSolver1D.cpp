@@ -42,7 +42,9 @@ void LoSolver1D::assembleSystem()
 	//Get BC from the matrix
 	dirichlet_bcs = _mesh->getDirichletBCs();
 
-	//Initialize matrix and load vector
+	//Initialize matrix and load vector, need to manually clear sol_vec
+	deleteMatrixVector();
+	delete _sol_vec; _sol_vec = NULL;
 	_system_matrix = new numMatrixBanded(_n_dof, 7);
 	_system_vec = new numVector(_n_dof);
 	_sol_vec = new numVector(_n_dof);
@@ -121,6 +123,9 @@ void LoSolver1D::assembleSystem()
 		}
 	}
 
+	//Clean up dynamic memory
+	delete local_load_vector;
+	delete local_moment_matrix;
 }
 
 

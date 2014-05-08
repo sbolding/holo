@@ -75,7 +75,7 @@ namespace EquationMaps1D
 	//_phi_right_minus = _elem_dofs[DOF_MAP[3]];
 	// --------------------------------------------
 
-	const unsigned int EQN_MAP[4] = { 0, 1, 2, 3 }; //Map for ordering of equations (the row in matrix they go in)
+	const unsigned int EQN_MAP[4] = { 0, 2, 1, 3 }; //Map for ordering of equations (the row in matrix they go in)
 	//Order of values is <.>_left_plus, <.>_right_plus, <.>_left_minus, <.>_right_minus, where each one represents
 	//how that moment equation was derived.
 

@@ -19,7 +19,7 @@
 class MaterialConstant
 {
 protected:
-    double _sigma_a;		//Absorption
+    double _sigma_a;		//Absorption (here it is really the capture cross section, not the fission cross section)
     double _sigma_s;		//Scattering
     double _sigma_t;		//Total
 	double _sigma_f;		//Fission

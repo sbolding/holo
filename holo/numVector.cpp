@@ -103,7 +103,15 @@ double&  numVector::operator[](int i)
 	return _coeff[i];
 }
 
-numVector& numVector::operator=(const numVector& rhs)
+void numVector::assign(double value)
+{
+	for (unsigned int i=0; i < _n_rows; ++i)
+	{
+		_coeff[i] = value;
+	}
+}
+
+numVector::numVector(const numVector& rhs)
 {
 	_n_rows = rhs.getNumRows();
 
@@ -119,6 +127,47 @@ numVector& numVector::operator=(const numVector& rhs)
 	{
 		_coeff[i] = rhs.getCoeff(i);
 	}
-	return *this;
+}
 
+numVector& numVector::operator=(const numVector& rhs)
+{
+	/*In the case of self assignment, this is necessary to ensure scenarios
+	such as (*numVector) = (*numVector)*5. are done correctly. This is exception
+	safe since _coeff initialization check done by hand*/
+	if (this == &rhs) return *this;
+
+	_n_rows = rhs.getNumRows();
+
+	// Allocate pointer to rows
+	delete [] _coeff;
+	_coeff = new double[_n_rows];
+	if (_coeff == NULL) {
+		cout << "allocation failure in numVector";
+		exit(0);
+	}
+
+	//copy members
+	for (unsigned int i = 0; i < _n_rows; ++i)
+	{
+		_coeff[i] = rhs.getCoeff(i);
+	}
+	return *this;
+}
+
+numVector& numVector::operator*(double scalar)
+{
+	for (unsigned int i = 0; i < _n_rows; ++i)
+	{
+		_coeff[i] *= scalar;
+	}
+	return *this;
+}
+
+numVector& numVector::operator*=(double scalar)
+{
+	for (unsigned int i = 0; i < _n_rows; ++i)
+	{
+		_coeff[i] *= scalar;
+	}
+	return *this;
 }

@@ -162,10 +162,10 @@ void numMatrixBanded::solve(numVector *b, numVector *x)
 	if (!_is_LU_decomped) //only invert if necessary
 	{
 		LUDecomposition();
+		_is_LU_decomped = true; //save inverted system.  There are no risks with this
+		//since inversion destroys original matrix anyways
 	}
 	invertLUDecomposition(*b, *x);
-	_is_LU_decomped = true; //save inverted system.  There are no risks with this
-		//since inversion destroys original matrix anyways
 }
 
 inline int numMatrixBanded::getBandIdx(int row, int col) const

@@ -11,6 +11,7 @@ namespace LoController
 	const bool WRITE_MATRIX = false;
 	const bool WRITE_LOAD_VECTOR = false;
 	const bool WRITE_SOLUTION = false;
+	const bool WRITE_ITERATIONS = true; //only applicable if the lo solver involves some inner iteration 
 }
 
 namespace HoController

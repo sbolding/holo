@@ -42,7 +42,7 @@ protected:
 public:
 	Source(Particle1D* particle);
 	Source(Particle1D* particle, FixedSourceFunctor *q); //if desired can pass in a functor that is needed for mapping to elements
-	~Source();
+	virtual ~Source();
 
 	virtual void sampleSourceParticle() = 0; //samples a source particle direction and location
 	virtual double getTotalSourceStrength() = 0; //return the total source strenght, virtual because this will be uniqe for residual sources

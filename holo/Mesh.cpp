@@ -203,6 +203,7 @@ void Mesh::setExternalSource(double factor, GlobalMethods::ProblemType p)
 		ext_source_nodal_values.resize(n_elem_nodes);
 		size_t node_idx=0; //which node you are on
 
+		//Set the nodal values of the fission source to nu_sig_f/k phi
 		for (; it_el != _elements.end(); ++it_el)
 		{
 			for (int i_node = 0; i_node < n_elem_nodes; ++i_node)
@@ -212,6 +213,7 @@ void Mesh::setExternalSource(double factor, GlobalMethods::ProblemType p)
 				node_idx++;
 			}
 			(*it_el)->setExtSourceNodalValues(ext_source_nodal_values);
+			std::fill(ext_source_nodal_values.begin(), ext_source_nodal_values.end(), 0.0); //reset
 		}
 
 	}

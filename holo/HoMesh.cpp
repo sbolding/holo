@@ -12,6 +12,8 @@
 
 #include "HoMesh.h"
 #include "GlobalConstants.h"
+#include <algorithm>
+#include <memory>
 
 HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
 	_boundary_cells(),
@@ -130,6 +132,11 @@ HoMesh::HoMesh(Mesh* lo_mesh, int n_ang_cells_half_range) :
 
 	_n_elems = _elements.size();
 	_n_active_elements = _elements.size();
+}
+
+HoMesh::~HoMesh()
+{
+	std::for_each(_elements.begin(), _elements.end(), std::default_delete<ECMCElement1D>());
 }
 
 ECMCElement1D* HoMesh::getElement(int element_id) const

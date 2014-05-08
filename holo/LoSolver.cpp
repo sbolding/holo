@@ -47,6 +47,10 @@ void LoSolver::deleteMatrixVector()
 {
 	delete _system_matrix;
 	delete _system_vec;
+
+	//Set pointers to NULL to fix deleting problems
+	_system_vec = NULL;
+	_system_matrix = NULL;
 }
 
 void LoSolver::printSystem(std::ostream & out)
@@ -54,7 +58,7 @@ void LoSolver::printSystem(std::ostream & out)
 	using namespace LoController; //Get all bools and debug output from here
 	if (WRITE_MATRIX)
 	{
-		_system_matrix->printCompact(out);
+		_system_matrix->print(out);
 	}
 	if (WRITE_LOAD_VECTOR)
 	{
@@ -77,7 +81,7 @@ void LoSolver::updateSystem(void) const
 	for (; it_el != elements->end(); ++it_el)
 	{
 		el_dof_values.clear();
-		eqns = (*it_el)->getEqnNumbers(); //Get equations for element
+		eqns = (*it_el)->getEqnNumbers(); //Get equations for this element
 		for (int i = 0; i < el_n_dof; ++i) 	//Get global solution DOF values
 			el_dof_values.push_back(_sol_vec->getCoeff(eqns[i]));
 

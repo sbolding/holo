@@ -74,12 +74,11 @@ void Element1D::setElementDof(std::vector<double> elem_dofs)
 {
 	if (elem_dofs.size() != _elem_dofs.size())
 	{
-		cout << "This function needs to be checked";
+		cout << "This function needs to be checked Element1D.cpp";
 		exit(1);
 	}
 	for (int i = 0; i < _n_elem_dof; ++i)
 		_elem_dofs[i].setValue(elem_dofs[i]);
-
 }
 
 std::vector<int> Element1D::getEqnNumbers(void) const
@@ -193,7 +192,7 @@ void Element1D::getElementMomentMatrix(numMatrix* M, numVector* b, std::vector<i
 	M->addCoeff(EQN_MAP[3], DOF_MAP[2], value);
 	value = sigma_t*_h - (sigma_s*_h / FOUR_PI) - vol_mu._mu_right_minus;
 	M->addCoeff(EQN_MAP[3], DOF_MAP[3], value);
-	b->addCoeff(EQN_MAP[3], source_value_right_minus);  //TODO need to make this not a constant
+	b->addCoeff(EQN_MAP[3], source_value_right_minus);  
 
 	eqns = getEqnNumbers(); //set the equation numbers correctly
 }

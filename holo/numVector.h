@@ -15,20 +15,22 @@ class numVector{
   protected:
     double *_coeff;		// Coefficients of matrix
     int _n_rows;       		// Number of rows
-	//never to be used copy constructor and equals operator
-	numVector(const numVector &vector);
 
   public:
 	// Constructors
 	numVector();
 	numVector(int nr);
 	//Shallow copy assignment (creates new memory, doesnt copy pointers)
+	numVector(const numVector &vector);
 	numVector& operator=(const numVector&);
+	numVector& operator*(double scalar); //overload multiply operator
+	numVector& operator*=(double scalar);
 
     //Destructor
     virtual ~numVector();
     // Functions
 	void zero();
+	void assign(double val); //set vector to constant value
 	int getNumRows() const;
 	void setCoeff(int i, double value);
 	void addCoeff(int i, double value);
