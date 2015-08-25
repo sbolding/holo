@@ -1,4 +1,5 @@
 #include "RNG.h"
+#include "Controller.h"
 
 RNG::RNG()
 {
@@ -7,7 +8,7 @@ RNG::RNG()
 	Q = 127773;
 	R = 2836;
 	Minv = (double)1. / M;
-	seed = INPUT_SEED;
+	seed = HoController::INPUT_SEED;
 }
 
 double RNG::rand_num()

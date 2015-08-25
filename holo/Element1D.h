@@ -61,7 +61,9 @@ public:
 		std::vector<double> &locations) const; //Returns scalar flux on faces using Linear Discontinuous approximation
 	virtual void getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 		std::vector<double> &locations) const; //This is for scalar flux based on alpha closure, shouldnt be used except verification
+	virtual std::vector<double> getScalarFluxNodalValues(void) const; //returns a vector of the scalar flux nodal values needed for HO solver
 	virtual void printLDScalarFluxValues(std::ostream &out) const; //Print out the LD scalar flux and nodes
+	virtual std::vector<double> getElementDimensions() const; //For 1D, return the width of the element
 };
 
 #endif  //_ELEMENT1D_H

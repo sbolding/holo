@@ -64,16 +64,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AliasSampler.h" />
     <ClInclude Include="AverageCosineData.h" />
     <ClInclude Include="Controller.h" />
+    <ClInclude Include="CurrentElementTally.h" />
+    <ClInclude Include="CurrentFaceTally.h" />
+    <ClInclude Include="DataTransfer.h" />
     <ClInclude Include="DirichletBC1D.h" />
     <ClInclude Include="Dof.h" />
     <ClInclude Include="Element.h" />
     <ClInclude Include="Element1D.h" />
     <ClInclude Include="ElementTally.h" />
     <ClInclude Include="FaceTally.h" />
+    <ClInclude Include="FluxElementTally.h" />
+    <ClInclude Include="FluxFaceTally.h" />
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="HoSolver.h" />
+    <ClInclude Include="LinDiscSource.h" />
     <ClInclude Include="LoData1D.h" />
     <ClInclude Include="LoSolver.h" />
     <ClInclude Include="LoSolver1D.h" />
@@ -87,19 +94,27 @@
     <ClInclude Include="numVector.h" />
     <ClInclude Include="oneDMesh.h" />
     <ClInclude Include="Particle1D.h" />
+    <ClInclude Include="ResidualSource.h" />
     <ClInclude Include="RNG.h" />
     <ClInclude Include="Source.h" />
     <ClInclude Include="SourceConstant.h" />
     <ClInclude Include="Tally.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AliasSampler.cpp" />
+    <ClCompile Include="CurrentElementTally.cpp" />
+    <ClCompile Include="CurrentFaceTally.cpp" />
+    <ClCompile Include="DataTransfer.cpp" />
     <ClCompile Include="DirichletBC1D.cpp" />
     <ClCompile Include="Dof.cpp" />
     <ClCompile Include="Element.cpp" />
     <ClCompile Include="Element1D.cpp" />
     <ClCompile Include="ElementTally.cpp" />
     <ClCompile Include="FaceTally.cpp" />
+    <ClCompile Include="FluxElementTally.cpp" />
+    <ClCompile Include="FluxFaceTally.cpp" />
     <ClCompile Include="HoSolver.cpp" />
+    <ClCompile Include="LinDiscSource.cpp" />
     <ClCompile Include="LoData1D.cpp" />
     <ClCompile Include="LoSolver.cpp" />
     <ClCompile Include="LoSolver1D.cpp" />
@@ -112,9 +127,9 @@
     <ClCompile Include="numMatrixFull.cpp" />
     <ClCompile Include="numVector.cpp" />
     <ClCompile Include="Particle1D.cpp" />
+    <ClCompile Include="ResidualSource.cpp" />
     <ClCompile Include="RNG.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="SourceConstant.cpp" />
     <ClCompile Include="Tally.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

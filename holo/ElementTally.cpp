@@ -12,8 +12,9 @@
 
 #include "ElementTally.h"
 
-void ElementTally::incrementScore()
+ElementTally::ElementTally(int n_angular_bins, int n_spatial_moments) : Tally(n_angular_bins, n_spatial_moments)
 {
 
 }
+
 

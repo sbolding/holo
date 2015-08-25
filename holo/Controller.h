@@ -13,4 +13,14 @@ namespace LoController
 	const bool WRITE_SOLUTION = true;
 }
 
+namespace HoController
+{
+	const bool PARTICLE_BALANCE = true;
+	const bool ADAPTIVE_REFINEMENT = true;
+	const double FRACTION_CELLS_TO_REFINE = 0.4;
+	const bool WRITE_ALL_ANGULAR_FLUXES = true; //print out angular fluxes after each batch
+	const int INPUT_SEED = 73907;
+	const unsigned int SAMPLING_METHOD = 1; //1 is for alias sampling, currently only one implemented
+}
+
 #endif

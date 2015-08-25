@@ -247,10 +247,9 @@ void Element1D::addDirichletBC(numVector* b, std::vector<int> &eqns, double diri
 	}
 }
 
-//TODO maybe get values in its own function, will depend on what high order method actually needs
+//Locations is the x coordinate of the nodes
 void Element1D::getScalarFluxValues(double alpha, 
-					std::vector<double> &scalar_flux_values, 
-					std::vector<double> &locations) const   //Return the flux and location of the nodes.  In 1D locations is just x coordinates
+	std::vector<double> &scalar_flux_values, std::vector<double> &locations) const   //Return the flux and location of the nodes.  In 1D locations is just x coordinates
 {
 
 	if (scalar_flux_values.size() != 2) //Resize
@@ -270,7 +269,7 @@ void Element1D::getScalarFluxValues(double alpha,
 	scalar_flux_values[1] = alpha*(_phi_right_minus_value + _phi_right_plus_value)
 		+ ((1. - alpha) * (_phi_left_minus_value + _phi_left_plus_value));
 
-	//Store left and right locations, the nodes are guaranteed to be in teh right order when they were created, but double check
+	//Store left and right locations of nodes, the nodes are guaranteed to be in teh right order when they were created, but double check
 	locations[0] = _nodes[0]->getX();
 	locations[1] = _nodes[1]->getX();
 
@@ -287,11 +286,26 @@ void Element1D::getScalarFluxLinDisc(std::vector<double> &scalar_flux_values, st
 	getScalarFluxValues(2.0, scalar_flux_values, locations);  //For lin dis. alpha = 2
 }
 
+std::vector<double> Element1D::getElementDimensions() const
+{
+	std::vector<double> dimensions;
+	dimensions.push_back(_h);
+	return dimensions;
+}
+
 void Element1D::getScalarFluxHOClosure(std::vector<double> &scalar_flux_values,
 	std::vector<double> &locations) const //This is for scalar flux based on alpha closure, shouldnt be used except verification
 {
-	std::cout << "HO scalar flux values should only be called for code verification, in Element1D.cpp" << endl;
 	getScalarFluxValues(_lo_data->getSpatialClosureFactor(), scalar_flux_values, locations);
+}
+
+//This function returns the source based on the LD closure
+std::vector<double> Element1D::getScalarFluxNodalValues() const
+{
+	std::vector<double> flux_values;
+	std::vector<double> dummy_vector; //locations is value of nodes, not needed here
+	getScalarFluxLinDisc(flux_values, dummy_vector);
+	return flux_values;
 }
 
 void Element1D::printLDScalarFluxValues(std::ostream &out) const

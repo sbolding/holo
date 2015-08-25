@@ -3,6 +3,7 @@
 #define _GLOBALCONSTANT_H
 
 #include <string>
+#include <map>
 
 namespace GlobalConstants
 {
@@ -11,11 +12,26 @@ namespace GlobalConstants
 	const long double FOUR_PI = 2.0L;
 }
 
+namespace HoConstants
+{
+	const double COSINE_CUTOFF = 0.01; //below this value, use fixup factor for cosine
+	const double COSINE_SUBSTITUTE_VALUE = 0.5*COSINE_CUTOFF; //half of the cutoff value by default
+}
+
 namespace HoMethods
 {
-	const unsigned int HOLO_ECMC = 0;
-	const unsigned int HOLO_STANDARD_MC = 1;
-	const unsigned int STANDARD_MC = 2;
+	const unsigned int HOLO_ECMC = 1;
+	const unsigned int HOLO_STANDARD_MC = 2;
+	const unsigned int STANDARD_MC = 3;
+	const unsigned int STRATIFIED_SAMPLING = 2; //2 for stratified, 1 for regular alias sampling
+	const unsigned int STANDARD_SAMPLING = 1;
+
+	//map these methods to their ints
+	//either "holo-ecmc", 'holo-standard-mc', or 'standard-mc'
+	const std::map<std::string, int> method_map = { { "holo-ecmc", HOLO_ECMC }, { "holo-standard-mc", HOLO_STANDARD_MC },
+		{ "standard-mc", STANDARD_MC } };
+
+	const std::map<std::string, unsigned int> sampling_map = { { "stratified", STRATIFIED_SAMPLING }, { "standard", STANDARD_SAMPLING } };
 }
 
 namespace EquationMaps1D
@@ -40,5 +56,4 @@ namespace EquationMaps1D
 	//EQN_MAP[2] refers to < . >_L^- term
 	//EQN_MAP[3] refers to < . >_R^- term
 }
-
 #endif

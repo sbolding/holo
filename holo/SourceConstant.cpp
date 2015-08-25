@@ -13,5 +13,6 @@ SourceConstant::SourceConstant(double value) : Source()
 
 void SourceConstant::sampleSource()
 {
-	//do nothing yet;
+	//For a constant source just need to sample which cell it is in
+	int cell;
 }

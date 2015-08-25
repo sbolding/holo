@@ -41,7 +41,7 @@ protected:
 	std::vector<Node *> _nodes; //Pointers to node objects
 	std::vector<DirichletBC1D *> _dirichlet_bcs; //Pointers to bc's;
     int _dim;					      //dimension of the problem
-    std::vector<std::vector<int>> _connectivity_array; 
+    std::vector<std::vector<int>> _connectivity_array; //first index is element, second is face of element
 	std::vector<MaterialConstant *> _mat_list;
 
 public:
@@ -50,7 +50,7 @@ public:
     Mesh(int dim, int number_elements, double width, MaterialConstant* material);   // pass in the number of elements as well as dimension
     Mesh(int dim, std::ifstream  input_file); //Constructor with a input file TODO not yet implemented
 
-	//Printing munctions
+	//Printing functions
 	void print(std::ostream &out) const;      //echo mesh parameters
 	void printLDScalarFluxValues(std::ostream &out) const; //print results of lo order flux LD values (phi_r and phi_l)
 
@@ -62,6 +62,7 @@ public:
 	std::vector<Element* >* getElements(void);		//WARNING returns a pointer to elements, you can change it outside of class
 	std::vector < DirichletBC1D *> getDirichletBCs(void);
 	Element* getElement(int element_id) const;
+	int getFaceIndex(int element_id, int face_id) const; //get a face index using the connectivity array for tallying, face_id is 0 for left 1 for right, etc.
 
 	//Setting functions
 	void setExternalSource(double) const;

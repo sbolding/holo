@@ -192,6 +192,12 @@ Element* Mesh::getElement(int element_id) const
 	//
 }
 
+int Mesh::getFaceIndex(int element_id, int face_id) const
+{
+	//use connectivity array to get the correct face index, used for tallying
+	return _connectivity_array[element_id][face_id];
+}
+
 void Mesh::printLDScalarFluxValues(std::ostream &out) const
 {
 	//Have the elements do the printing

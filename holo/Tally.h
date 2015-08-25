@@ -7,26 +7,40 @@
 //  @ Date : 1/27/2014
 //  @ Author : Simon R Bolding
 //
-//
+// For now tallies assume that they have equal sized bins in angle.  If this changes
+// then need to change that
+// 
+// Note that tallies are all normalized to per source particle, i.e., per history.
+
 #if !defined(_TALLY_H)
 #define _TALLY_H
 
-#include<vector>
-
+#include <vector>
+#include <iostream>
+#include <math.h>
 
 
 class Tally
 {
-
-
 protected:
-	std::vector<std::vector<double>> _bin_sums;
+	std::vector<std::vector<double>> _bin_sums;    //rows are angular bins, columns are spatial moments (if applicable)
 	std::vector<std::vector<double>> _bin_sums_sq;
+
 public:
-	double getScore(int _n_histories);
-	virtual void incrementScore() = 0;
-	Tally(int _n_angle_bins, int _n_spatial_moment_bins);
+	//constructors
+	Tally(int n_angle_bins, int n_spatial_moment_bins);
 	Tally();
+
+	//Get scores and variances, standard deviations are absolute
+	double getScore(int n_histories, int angular_bin, int spatial_moment) const;
+	double getScore(int n_histories, int angular_bin) const; //For use by tallies that do not have multiple spatila moments
+	double getScoreAngularIntegrated(int n_histories, int spatial_moment) const; //Gets the scalar flux score for certain spatial moment
+	double getScoreAngularIntegrated(int n_histories) const; //Gets the scalar flux score for certain  0th spatial moment (face tallies)
+	std::vector<std::vector<double>> getScores(int n_histories) const;	//return all the scores
+	double getStdDev(int n_histories, int angular_bin, int spatial_moment) const; //return the absolute stnadard deviation
+	double getStdDev(int n_histories, int angular_bin) const; //return the absolute standard deviation
+	std::vector<std::vector<double>> getStdDevs(int n_histories) const;
+	
 };
 
 #endif  //_TALLY_H
